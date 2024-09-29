@@ -20,7 +20,7 @@ class Fretboard {
      * Coordinates/Finger positions of fretboard
      * (0, 0) at F on low E string
      */
-    struct fretboard_location {
+    struct fretboard_location_t {
         fret_t x;
         string_e y;
     };
@@ -44,14 +44,14 @@ public:
      * @param radius radius of circle to be written
      * @param color color of circle to be written
      */
-    void draw_note(fretboard_location fretboard_location, int radius, color color);
+    void draw_note(fretboard_location_t fretboard_location, int radius, color_t color);
 
     /**
      * @brief draws indicator to play open string  TODO: determine what kind of indicator
      * @param string string to play
      * @param color color of indicator
      */
-    void draw_string(string_e string, color color);
+    void draw_string(string_e string, color_t color);
 
     /*----------------------BACKDOOR FUNCTIONS-------------------------- */
     /**
@@ -59,14 +59,14 @@ public:
      * @param pixel_location coordinates of pixel to be written to screen
      * @param color color of pixel to be written
      */
-    void draw_pixel(pixel_location pixel_location, color color);
+    void draw_pixel(pixel_location_t pixel_location, color_t color);
 
     /**
      * @brief converts fretboard location to pixel location
      * @param fretboard_location fretboard location to be converted
      * @return pixel coordinate of fret
      */
-    auto convert_fret_to_pixels(fretboard_location fretboard_location) -> pixel_location;
+    auto convert_fret_to_pixels(fretboard_location_t fretboard_location) -> pixel_location_t;
 
     /**
      * @brief Clears the fretboard LCDs
