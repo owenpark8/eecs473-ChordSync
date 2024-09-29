@@ -1,30 +1,18 @@
 #pragma once
 
-#include "hardware.hpp"
+#include <array>
 #include <cstdint>
 
+#include "lcd.hpp"
+
 /**
- * Class for controlling the entire fretboard of the guitar, which spans multiple LCD screens
- * Treat both "fretboard grid" and "pixel grid" as continous grids across LCD screens
+ * Class for controlling the entire fretboard of the guitar, which spans multiple LCD screens.
+ * Interfaced with coordinates on both "fretboard grid" or "pixel grid" as continous grids across LCD screens
  */
 
+constexpr size_t num_lcds = 5;
+
 class Fretboard {
-
-    SPI_HandleTypeDef* hspi; // SPI handler
-    Pin LCD_RS;              // LCD register select (command/data)
-    Pin LCD_CS;              // LCD chip select
-    Pin LCD_RST;             // LCD reset
-
-
-    /**
-     * 3 bits for 8 different colors
-     */
-    struct color {
-        unsigned int r : 1;
-        unsigned int g : 1;
-        unsigned int b : 1;
-    };
-
     enum class string_e { LOW_E, A, D, G, B, HIGH_E }; // guitar string
     using fret_t = uint8_t;                            // guitar fret number
 
@@ -35,14 +23,6 @@ class Fretboard {
     struct fretboard_location {
         fret_t x;
         string_e y;
-    };
-    /**
-     * Coordinates of Pixels on LCD array
-     * (0, 0) at corner pixel closest to (0, 0) fretboard location
-     */
-    struct pixel_location {
-        uint16_t x;
-        uint16_t y;
     };
 
 public:
@@ -67,7 +47,7 @@ public:
     void draw_note(fretboard_location fretboard_location, int radius, color color);
 
     /**
-     * @brief draws indicator to play open string TODO: determine what kind of indicator
+     * @brief draws indicator to play open string  TODO: determine what kind of indicator
      * @param string string to play
      * @param color color of indicator
      */
@@ -92,4 +72,7 @@ public:
      * @brief Clears the fretboard LCDs
      */
     void clear_fretboard();
+
+private:
+    std::array<LCD, num_lcds> m_lcds;
 };

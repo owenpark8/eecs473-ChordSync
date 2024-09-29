@@ -1,5 +1,9 @@
 #pragma once
 
+#include <cstdint>
+
+#include "main.h"
+
 class Pin {
 public:
     Pin() = default;
@@ -13,4 +17,15 @@ public:
 private:
     GPIO_TypeDef* m_port{};
     std::uint16_t m_pin{};
+};
+
+class SPI {
+public:
+    void spi_write(uint8_t const* data, uint16_t size);
+
+    void spi_read(uint8_t* data, uint16_t size);
+
+private:
+    SPI_TypeDef* m_hpi{};
+    Pin m_csx{};
 };
