@@ -65,6 +65,16 @@ void Error_Handler(void);
 #define T_VCP_TX_GPIO_Port GPIOA
 #define USER_LED_Pin GPIO_PIN_5
 #define USER_LED_GPIO_Port GPIOA
+#define CSX_A_Pin GPIO_PIN_5
+#define CSX_A_GPIO_Port GPIOC
+#define CSX_B_Pin GPIO_PIN_0
+#define CSX_B_GPIO_Port GPIOB
+#define CSX_C_Pin GPIO_PIN_1
+#define CSX_C_GPIO_Port GPIOB
+#define CSX_D_Pin GPIO_PIN_2
+#define CSX_D_GPIO_Port GPIOB
+#define CSX_E_Pin GPIO_PIN_10
+#define CSX_E_GPIO_Port GPIOB
 
 /* USER CODE BEGIN Private defines */
 
