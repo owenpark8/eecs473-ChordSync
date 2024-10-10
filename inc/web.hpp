@@ -8,7 +8,11 @@
 #define DEBUG
 
 namespace web {
-    enum class source_files_e;
+    enum class source_files_e {
+#define MAKE_SOURCE_FILES_ENUM(enum_name, ...) enum_name,
+        SOURCE_FILES_ITER(MAKE_SOURCE_FILES_ENUM)
+#undef MAKE_SOURCE_FILES_ENUM
+    };
 
     extern std::unordered_set<std::string> const allowed_image_upload_types;
 
@@ -19,11 +23,7 @@ namespace web {
 #endif
 
     auto get_source_file(source_files_e file) -> std::string;
+    auto server() -> void;
 
-    enum class source_files_e {
-#define MAKE_SOURCE_FILES_ENUM(enum_name, ...) enum_name,
-        SOURCE_FILES_ITER(MAKE_SOURCE_FILES_ENUM)
-#undef MAKE_SOURCE_FILES_ENUM
-    };
 
 } // namespace web
