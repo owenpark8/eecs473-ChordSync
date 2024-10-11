@@ -1,1 +1,1 @@
-../../../../lib/src/fretboard.cpp
+../../../lib/src/fretboard.cpp

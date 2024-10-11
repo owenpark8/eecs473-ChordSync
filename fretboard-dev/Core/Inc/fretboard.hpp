@@ -1,1 +1,1 @@
-../../../../lib/inc/fretboard.hpp
+../../../lib/inc/fretboard.hpp

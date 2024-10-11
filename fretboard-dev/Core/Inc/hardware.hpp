@@ -1,1 +1,1 @@
-../../../../lib/inc/hardware.hpp
+../../../lib/inc/hardware.hpp
