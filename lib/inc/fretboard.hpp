@@ -1,16 +1,25 @@
 #pragma once
 
 #include <array>
-#include <cstdint>
+#ifdef __cplusplus
+extern "C" {
+#endif
 
+#include <cstdint>
 #include "lcd.hpp"
+
+#ifdef __cplusplus
+}
+#endif
 
 /**
  * Class for controlling the entire fretboard of the guitar, which spans multiple LCD screens.
  * Interfaced with coordinates on both "fretboard grid" or "pixel grid" as continous grids across LCD screens
  */
 
-constexpr size_t num_lcds = 5;
+constexpr std::size_t num_lcds = 5;
+constexpr std::size_t num_frets = 24; // TODO: Check this number
+constexpr std::size_t num_strings = 6;
 
 class Fretboard {
     enum class string_e { LOW_E, A, D, G, B, HIGH_E }; // guitar string
@@ -75,4 +84,9 @@ public:
 
 private:
     std::array<LCD, num_lcds> m_lcds;
+    // TODO: replace these numbers with actual pixels after measuring with guitar
+    const std::array<uint16_t, num_frets> fret_pixel_array = { // keeps track of fret to pixel_location.x
+        0, 100, 200, 300, 400, 500, 600, 700, 800, 900, 1000, 1100, 
+        1200, 1300, 1400, 1500, 1600, 1700, 1800, 1900, 2000, 2100, 2200, 2300
+    };
 };

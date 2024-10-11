@@ -1,6 +1,14 @@
 #pragma once
 
-#include <cstdint>
+#ifdef __cplusplus
+extern "C" {
+#endif
+    #include <cstdint>
+#ifdef __cplusplus
+}
+#endif
+
+#include <openssl/x509v3.h>
 
 #include "main.h"
 
@@ -21,6 +29,8 @@ private:
 
 class SPI {
 public:
+    SPI(SPI_TypeDef* hpi, Pin csx) : m_hpi(hpi), m_csx(csx) {}
+
     void spi_write(uint8_t const* data, uint16_t size);
 
     void spi_read(uint8_t* data, uint16_t size);
