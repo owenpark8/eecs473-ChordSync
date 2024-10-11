@@ -11,4 +11,4 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
 set(BUILD_SHARED_LIBS OFF) # STATIC
 
 add_subdirectory(extern) # THIRD PARTY LIBRARIES
-add_subdirectory(src/web-server)
+add_subdirectory(web-server)
