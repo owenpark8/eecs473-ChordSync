@@ -1,16 +1,9 @@
 #pragma once
 
 #include <array>
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 #include <cstdint>
-#include "lcd.hpp"
 
-#ifdef __cplusplus
-}
-#endif
+#include "lcd.hpp"
 
 /**
  * Class for controlling the entire fretboard of the guitar, which spans multiple LCD screens.

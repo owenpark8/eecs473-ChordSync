@@ -1,9 +1,4 @@
-#ifdef __cplusplus
-extern "C" {
-#endif
-    #include "lcd.hpp"
-}
-
+#include "lcd.hpp"
 
 void LCD::init() {
     CS_D();

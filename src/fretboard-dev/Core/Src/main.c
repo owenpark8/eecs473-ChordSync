@@ -21,6 +21,7 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+#include "new_main.h"
 
 /* USER CODE END Includes */
 
@@ -102,6 +103,9 @@ int main(void)
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
+  new_main();
+
+  // THIS WHILE LOOP NEVER HAPPENS. NEW WHILE LOOP IN new_main()
   while (1)
   {
     /* USER CODE END WHILE */

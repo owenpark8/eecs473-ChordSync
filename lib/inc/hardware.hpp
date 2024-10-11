@@ -1,14 +1,6 @@
 #pragma once
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-    #include <cstdint>
-#ifdef __cplusplus
-}
-#endif
-
-#include <openssl/x509v3.h>
+#include <cstdint>
 
 #include "main.h"
 
