@@ -1,13 +1,9 @@
 #pragma once
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-#include "hardware.hpp"
 #include <cstdint>
-#ifdef __cplusplus
-}
-#endif
+
+#include "hardware.hpp"
+
 
 /*--------------TODO: Update pins with correct numbers------------------------*/
 // #define TFT_CS_Pin GPIO_PIN_0
