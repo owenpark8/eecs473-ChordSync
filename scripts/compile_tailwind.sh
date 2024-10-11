@@ -1,6 +1,6 @@
 #!/bin/bash
 
-cd ../src/web-server
+cd ../web-server
 INPUT_FILE="public/style.css"
 OUTPUT_FILE="public/compiled.css"
 

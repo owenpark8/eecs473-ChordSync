@@ -1,8 +1,8 @@
 #!/bin/bash
 
-SOURCES_DIR="../src/web-server/public"
+SOURCES_DIR="../web-server/public"
 
-OUTPUT_FILE="../inc/web_sources.hpp"
+OUTPUT_FILE="../web-server/include/web_sources.hpp"
 
 generate_content_constexpr() {
     local path=$1
