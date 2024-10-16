@@ -7,7 +7,7 @@ extern "C" {
 
 #include "main.h"
 
-void new_main(void);
+void new_main(SPI_HandleTypeDef* hspi1);
 
 #ifdef __cplusplus
 }

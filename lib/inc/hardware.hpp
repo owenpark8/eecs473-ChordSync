@@ -14,20 +14,22 @@ public:
 
     auto write(GPIO_PinState val) const -> void { HAL_GPIO_WritePin(m_port, m_pin, val); }
 
-private:
+    // private:
     GPIO_TypeDef* m_port{};
     std::uint16_t m_pin{};
 };
 
 class SPI {
 public:
-    SPI(SPI_TypeDef* hpi, Pin csx) : m_hpi(hpi), m_csx(csx) {}
+    SPI() = default;
+
+    SPI(SPI_HandleTypeDef* hpi, Pin csx) : m_hpi(hpi), m_csx(csx) {}
 
     void spi_write(uint8_t const* data, uint16_t size);
 
     void spi_read(uint8_t* data, uint16_t size);
 
-private:
-    SPI_TypeDef* m_hpi{};
+    // private:
+    SPI_HandleTypeDef* m_hpi{};
     Pin m_csx{};
 };

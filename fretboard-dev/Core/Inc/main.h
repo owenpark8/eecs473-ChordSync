@@ -65,6 +65,10 @@ void Error_Handler(void);
 #define T_VCP_TX_GPIO_Port GPIOA
 #define USER_LED_Pin GPIO_PIN_5
 #define USER_LED_GPIO_Port GPIOA
+#define LCD_RS_Pin GPIO_PIN_7
+#define LCD_RS_GPIO_Port GPIOA
+#define LCD_RST_Pin GPIO_PIN_4
+#define LCD_RST_GPIO_Port GPIOC
 #define CSX_A_Pin GPIO_PIN_5
 #define CSX_A_GPIO_Port GPIOC
 #define CSX_B_Pin GPIO_PIN_0
