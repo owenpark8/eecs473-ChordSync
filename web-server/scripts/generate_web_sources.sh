@@ -1,8 +1,13 @@
 #!/bin/bash
 
-SOURCES_DIR="../web-server/public"
+# Argument parsing
+if [ "$#" -ne 2 ]; then
+    echo "Usage: $0 <source-directory> <output-file>"
+    exit 1
+fi
 
-OUTPUT_FILE="../web-server/include/web_sources.hpp"
+SOURCES_DIR="$1"
+OUTPUT_FILE="$2"
 
 generate_content_constexpr() {
     local path=$1
@@ -54,3 +59,5 @@ generate_iter_macro() {
     echo ""
     echo "} // namespace web"
 } >> "$OUTPUT_FILE"
+
+echo "Web sources generated into $OUTPUT_FILE"
