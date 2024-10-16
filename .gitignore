@@ -40,7 +40,7 @@ __pycache__/
 # Common IDE's
 .vscode/
 .idea/
-/cmake-build*/
+cmake-build*/
 
 # clangd
 .cache/
