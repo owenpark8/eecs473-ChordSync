@@ -54,28 +54,28 @@ struct pixel_location_t {
  */
 class LCD {
 public:
-    LCD(SPI spi, Pin reg_sel, Pin reset)
+    LCD(SPI const &spi, Pin const &reg_sel, Pin const &reset)
         : m_spi(spi), m_reg_sel(reg_sel), m_reset(reset) {}
 
-    void init();
+    auto init() const -> void;
 
     /**
      * @brief Draws a single pixel
      * @param pos position of pixel
      * @param color pixel color
      */
-    void draw_pixel(pixel_location_t pos, color_t color);
+    auto draw_pixel(pixel_location_t pos, color_t color) const -> void;
 
     /**
      * @brief Fills the entire screen with a color
      * @param color fill color of screen
      */
-    void fill_screen(/*color_t color*/ uint16_t color); // TODO: Consider changing this back to color_t
+    auto fill_screen(/*color_t color*/ uint16_t color) const -> void; // TODO: Consider changing this back to color_t
 
     /**
      * @brief Clears the screen to be all white
      */
-    void clear_screen();
+    auto clear_screen() const -> void;
 
     /**
      * @brief Draws a vertical line
@@ -83,7 +83,7 @@ public:
      * @param h height of the line in pixels
      * @param color fill color of rectangle
      */
-    void draw_vertical_line(pixel_location_t pos, uint16_t h, uint16_t color);
+    auto draw_vertical_line(pixel_location_t pos, uint16_t h, uint16_t color) const -> void;
 
     /**
      * @brief Draws a horizontal line
@@ -91,7 +91,7 @@ public:
      * @param w width of the line in pixels
      * @param color fill color of rectangle
      */
-    void draw_horizontal_line(pixel_location_t pos, uint16_t w, uint16_t color);
+    auto draw_horizontal_line(pixel_location_t pos, uint16_t w, uint16_t color) const -> void;
 
     /**
      * @brief Draws a filled color rectangle
@@ -100,19 +100,18 @@ public:
      * @param h vertical height of rectangle in pixels
      * @param color fill color of rectangle
      */
-    void draw_rectangle(pixel_location_t pos, uint16_t w, uint16_t h, uint16_t color);
+    auto draw_rectangle(pixel_location_t pos, uint16_t w, uint16_t h, uint16_t color) const -> void;
 
     /*------------BACKDOOR FUNCTIONS---------------*/
-    void send_data(uint8_t data);
-    void send_command(uint8_t com);
-    void send_data_multi(uint8_t *buff, std::size_t buff_size);
-    void setAddrWindow(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1);
-    void CS_A();
-    void CS_D();
-    void RST_A();
-    void RST_D();
-    void DC_COMMAND();
-    void DC_DATA();
+    auto send_command(uint8_t command) const -> void;
+    auto send_data(uint8_t data) const -> void;
+    auto send_data_long(uint8_t const *data, std::size_t size) const -> void;
+    auto set_addr_window(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1) const -> void;
+
+    auto start_reset() const -> void;
+    auto end_reset() const -> void;
+    auto set_command() const -> void;
+    auto set_data() const -> void;
 
 private:
     SPI m_spi{};

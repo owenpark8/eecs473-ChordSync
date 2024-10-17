@@ -103,7 +103,7 @@ int main(void)
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-  new_main(&hspi);
+  new_main();
 
   // THIS WHILE LOOP NEVER HAPPENS. NEW WHILE LOOP IN new_main()
   while (1)
