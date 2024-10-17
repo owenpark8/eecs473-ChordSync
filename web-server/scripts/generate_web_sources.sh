@@ -13,7 +13,7 @@ generate_content_constexpr() {
     local path=$1
     local lc_name=$2
 
-    local content=$(tr -d '\n' < "$path")
+    local content=$(tr -d '[:space:]' < "$path")
     local content_name=${lc_name}_content
 
     echo "constexpr char $content_name[] = R\"RAW($content)RAW\";"
