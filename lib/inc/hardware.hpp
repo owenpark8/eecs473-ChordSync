@@ -29,24 +29,24 @@ public:
     SPI() = default;
 
     SPI(SPI_HandleTypeDef* hspi, Pin csx) : m_hspi(hspi), m_csx(csx) {
-        m_csx.reset();
+        m_csx.set(); // CS is active low
     }
 
     auto spi_write(uint8_t const* data, uint16_t const size) const -> void {
-        m_csx.set();
-        HAL_SPI_Transmit(m_hspi, data, size, m_timeout);
         m_csx.reset();
+        HAL_SPI_Transmit(m_hspi, data, size, m_timeout);
+        m_csx.set();
     }
 
     auto spi_write_long(uint8_t const* data, std::size_t size) const -> void {
-        m_csx.set();
+        m_csx.reset();
         while (size > 0) {
             const uint16_t chunk_size = size > 32768 ? 32768 : size;
             HAL_SPI_Transmit(m_hspi, data, chunk_size, m_timeout);
             data += chunk_size;
             size -= chunk_size;
         }
-        m_csx.reset();
+        m_csx.set();
     }
 
     auto spi_read(uint8_t* data, uint16_t const size) const -> void {
