@@ -14,10 +14,10 @@
 #define TFT_DC_GPIO_Port GPIOD
 
 /*---------------Various other control signals---------------------*/
-#define ILI9486_SLPOUT 0x11 // checked
-#define ILI9486_DISPON 0x29 // checked
-#define ILI9486_CASET 0x2A 
-#define ILI9486_PASET 0x2B
+#define ILI9486_SLPOUT 0x11 // Sleep mode off
+#define ILI9486_DISPON 0x29 // Turn display on
+#define ILI9486_CASET 0x2A  // Coloumn Address Set
+#define ILI9486_PASET 0x2B  // 
 #define ILI9486_RAMWR 0x2C
 
 /*------------------LCD Screen pixel dimensions--------------------*/
@@ -26,11 +26,11 @@
 #define ILI9488_PIXEL_COUNT	ILI9488_TFTWIDTH * ILI9488_TFTHEIGHT
 
 /*----------------------Color Definitions--------------------------*/
-#define WHITE 0xFFFF
-#define BLACK 0x0000
-#define RED   0xF800
-#define YELLOW 0xFFE0
-#define GREEN 0x07E0
+constexpr color_t WHITE = {1, 1, 1};
+constexpr color_t BLACK = {0, 0, 0};
+constexpr color_t RED = {1, 0, 0};
+constexpr color_t YELLOW = {1, 1, 0};
+constexpr color_t GREEN = {0, 1, 0};
 
 /**
  * 3 bits for 8 different colors
@@ -106,6 +106,7 @@ public:
     auto send_command(uint8_t command) const -> void;
     auto send_data(uint8_t data) const -> void;
     auto send_data_long(uint8_t const *data, std::size_t size) const -> void;
+    // set_addr_window requires that no other non image SPI data is sent after this, until transaction is over
     auto set_addr_window(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1) const -> void;
 
     auto start_reset() const -> void;
