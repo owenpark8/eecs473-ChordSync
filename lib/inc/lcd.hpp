@@ -14,11 +14,11 @@
 #define TFT_DC_GPIO_Port GPIOD
 
 /*---------------Various other control signals---------------------*/
-#define ILI9488_SLPOUT 0x11
-#define ILI9488_DISPON 0x29
-#define ILI9488_CASET 0x2A
-#define ILI9488_PASET 0x2B
-#define ILI9488_RAMWR 0x2C
+#define ILI9486_SLPOUT 0x11 // checked
+#define ILI9486_DISPON 0x29 // checked
+#define ILI9486_CASET 0x2A 
+#define ILI9486_PASET 0x2B
+#define ILI9486_RAMWR 0x2C
 
 /*------------------LCD Screen pixel dimensions--------------------*/
 #define ILI9488_TFTWIDTH  320
