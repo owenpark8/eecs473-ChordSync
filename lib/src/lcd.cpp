@@ -97,10 +97,10 @@ auto LCD::draw_rectangle(pixel_location_t pos, uint16_t w, uint16_t h, color_t c
     set_addr_window(pos.x, pos.y, pos.x + w - 1, pos.y + h - 1);
 
     n = w * h;
-    uint8_t rgb_buf = 0x0;
-    rgb |= ((color.r << 5) | (color.r << 2)) & 0xFF; // set bit 2 and 5 to r
-    rgb |= ((color.g << 4) | (color.g << 1)) & 0xFF; // set bit 1 and 4 to g
-    rgb |= ((color.b << 3) | (color.b)) & 0xFF; // set bit 0 and 3 to b
+    uint8_t rgb_buf = 0;
+    rgb_buf |= ((color.r << 5) | (color.r << 2)) & 0xFF; // set bit 2 and 5 to r
+    rgb_buf |= ((color.g << 4) | (color.g << 1)) & 0xFF; // set bit 1 and 4 to g
+    rgb_buf |= ((color.b << 3) | (color.b)) & 0xFF; // set bit 0 and 3 to b
 
     while (n > 1) {
         send_command(rgb_buf);
@@ -130,7 +130,7 @@ auto LCD::send_data_long(uint8_t const* data, std::size_t const size) const -> v
 }
 
 auto LCD::set_addr_window(uint16_t const x0, uint16_t const y0, uint16_t const x1, uint16_t const y1) const -> void {
-    send_command(ILI9488_CASET); // Column addr set
+    send_command(ILI9486_CASET); // Column addr set
     {
         uint8_t const data[] = {static_cast<uint8_t>((x0 >> 8) & 0xFF),
                                 static_cast<uint8_t>(x0 & 0xFF),
@@ -138,7 +138,7 @@ auto LCD::set_addr_window(uint16_t const x0, uint16_t const y0, uint16_t const x
                                 static_cast<uint8_t>(x1 & 0xFF)};
         send_data_long(data, sizeof(data));
     }
-    send_command(ILI9488_PASET);
+    send_command(ILI9486_PASET);
     {
         uint8_t const data[] = {static_cast<uint8_t>((y0 >> 8) & 0xFF),
                                 static_cast<uint8_t>(y0 & 0xFF),
@@ -146,7 +146,7 @@ auto LCD::set_addr_window(uint16_t const x0, uint16_t const y0, uint16_t const x
                                 static_cast<uint8_t>(y1 & 0xFF)};
         send_data_long(data, sizeof(data));
     }
-    send_command(ILI9488_RAMWR); // write to RAM
+    send_command(ILI9486_RAMWR); // write to RAM
 }
 
 auto LCD::start_reset() const -> void { m_reset.reset(); }

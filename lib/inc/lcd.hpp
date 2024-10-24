@@ -21,17 +21,11 @@
 #define ILI9486_RAMWR 0x2C
 
 /*------------------LCD Screen pixel dimensions--------------------*/
-#define ILI9488_TFTWIDTH  320
-#define ILI9488_TFTHEIGHT 480
-#define ILI9488_PIXEL_COUNT	ILI9488_TFTWIDTH * ILI9488_TFTHEIGHT
+#define ILI9486_TFTWIDTH  320
+#define ILI9486_TFTHEIGHT 480
+#define ILI9486_PIXEL_COUNT	ILI9486_TFTWIDTH * ILI9486_TFTHEIGHT
 
 /*----------------------Color Definitions--------------------------*/
-constexpr color_t WHITE = {1, 1, 1};
-constexpr color_t BLACK = {0, 0, 0};
-constexpr color_t RED = {1, 0, 0};
-constexpr color_t YELLOW = {1, 1, 0};
-constexpr color_t GREEN = {0, 1, 0};
-
 /**
  * 3 bits for 8 different colors
  */
@@ -40,6 +34,11 @@ struct color_t {
     unsigned int g : 1;
     unsigned int b : 1;
 };
+constexpr color_t WHITE = {1, 1, 1};
+constexpr color_t BLACK = {0, 0, 0};
+constexpr color_t RED = {1, 0, 0};
+constexpr color_t YELLOW = {1, 1, 0};
+constexpr color_t GREEN = {0, 1, 0};
 
 /**
  * Coordinates of pixels on LCD array
@@ -70,7 +69,7 @@ public:
      * @brief Fills the entire screen with a color
      * @param color fill color of screen
      */
-    auto fill_screen(/*color_t color*/ uint16_t color) const -> void; // TODO: Consider changing this back to color_t
+    auto fill_screen(color_t color) const -> void; // TODO: Consider changing this back to color_t
 
     /**
      * @brief Clears the screen to be all white
@@ -83,7 +82,7 @@ public:
      * @param h height of the line in pixels
      * @param color fill color of rectangle
      */
-    auto draw_vertical_line(pixel_location_t pos, uint16_t h, uint16_t color) const -> void;
+    auto draw_vertical_line(pixel_location_t pos, uint16_t h, color_t color) const -> void;
 
     /**
      * @brief Draws a horizontal line
@@ -91,7 +90,7 @@ public:
      * @param w width of the line in pixels
      * @param color fill color of rectangle
      */
-    auto draw_horizontal_line(pixel_location_t pos, uint16_t w, uint16_t color) const -> void;
+    auto draw_horizontal_line(pixel_location_t pos, uint16_t w, color_t color) const -> void;
 
     /**
      * @brief Draws a filled color rectangle
@@ -100,7 +99,7 @@ public:
      * @param h vertical height of rectangle in pixels
      * @param color fill color of rectangle
      */
-    auto draw_rectangle(pixel_location_t pos, uint16_t w, uint16_t h, uint16_t color) const -> void;
+    auto draw_rectangle(pixel_location_t pos, uint16_t w, uint16_t h, color_t color) const -> void;
 
     /*------------BACKDOOR FUNCTIONS---------------*/
     auto send_command(uint8_t command) const -> void;
@@ -118,6 +117,6 @@ private:
     SPI m_spi{};
     Pin m_reg_sel{}; // LCD register select (command/data)
     Pin m_reset{};   // LCD reset
-    const uint16_t width = ILI9488_TFTWIDTH;  // width in pixels of LCD screen
-    const uint16_t height = ILI9488_TFTHEIGHT; // height in pixels of LCD screen
+    const uint16_t width = ILI9486_TFTWIDTH;  // width in pixels of LCD screen
+    const uint16_t height = ILI9486_TFTHEIGHT; // height in pixels of LCD screen
 };
