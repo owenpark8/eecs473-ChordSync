@@ -14,8 +14,11 @@ void new_main(SPI_HandleTypeDef* hspi1){
 	// lcd_1.fill_screen(GREEN);
 
   while(1){
-	  lcd_1.draw_rectangle({0, 0}, 50, 50, GREEN);
+	  lcd_1.fill_screen(GREEN);
 	  HAL_Delay(20);
+	  lcd_1.fill_screen(RED);
+	  HAL_Delay(20);
+	  lcd_1.draw_rectangle({100, 100}, 300, 300, BLACK);
 	//   lcd_1.fill_screen(0x07E0);
 	//   HAL_Delay(20);
 	//   lcd_1.fill_screen(0xFFFF);

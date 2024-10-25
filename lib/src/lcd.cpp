@@ -47,7 +47,7 @@ auto LCD::init() const -> void {
     send_command(0XC0); //Power Control 1
     send_data(0x17); // Vreg1out (sets positive gamma voltage)
     send_data(0x15); // Verg2out (sets negative gamma voltage)
-    /*send_command(0xC1); //Power Control 2
+    send_command(0xC1); //Power Control 2
     send_data(0x41); //VGH,VGL 
     // missing configuration for VCI1 regulator output voltage, default 0b110 = 5
     send_command(0xC5); //VCOM Control this is not correct
@@ -57,8 +57,10 @@ auto LCD::init() const -> void {
 
     // ------END QUALITY SETTINGS
 
+    // send_command(0x13); // Normal Mode on
+
     send_command(0x36); // Memory Access Control, determines orientation of how LCD is updated
-    send_data(0x48);
+    send_data(0x58);
 
     send_command(0x3A); // Interface Pixel Control
     send_data(0x55); // 16 bit
@@ -84,32 +86,32 @@ auto LCD::init() const -> void {
 }
 
 auto LCD::fill_screen(color_t color) const -> void {
-    draw_rectangle({0, 0}, width - 1, height - 1, color);
+    draw_rectangle({0, 0}, width, height, color);
 }
 
 auto LCD::clear_screen() const -> void { fill_screen(WHITE); }
 
 auto LCD::draw_rectangle(pixel_location_t pos, uint16_t w, uint16_t h, color_t color) const -> void {
-    uint32_t i, n, cnt, buf_size;
     if ((pos.x >= width) || (pos.y >= height)) return;
     if ((pos.x + w - 1) >= width) w = width - pos.x; // if our rectangle extends past the horizontal dimensions of the screen
     if ((pos.y + h - 1) >= height) h = height - pos.y;
     set_addr_window(pos.x, pos.y, pos.x + w - 1, pos.y + h - 1);
 
-    n = w * h;
+    uint32_t n = w * h;
     uint8_t rgb_buf = 0;
     rgb_buf |= ((color.r << 5) | (color.r << 2)) & 0xFF; // set bit 2 and 5 to r
     rgb_buf |= ((color.g << 4) | (color.g << 1)) & 0xFF; // set bit 1 and 4 to g
     rgb_buf |= ((color.b << 3) | (color.b)) & 0xFF; // set bit 0 and 3 to b
 
     while (n > 1) {
-        send_command(rgb_buf);
+        send_data(rgb_buf);
         n -= 2; // 2 pixels per 8 bit buffer
     }
     if (n == 1) {
         rgb_buf &= 0b111; // send the last pixel
-        send_command(rgb_buf);
+        send_data(rgb_buf);
     }
+    send_command(0x00); // NOOP
 }
 
 auto LCD::send_command(uint8_t const command) const -> void {
@@ -130,22 +132,17 @@ auto LCD::send_data_long(uint8_t const* data, std::size_t const size) const -> v
 }
 
 auto LCD::set_addr_window(uint16_t const x0, uint16_t const y0, uint16_t const x1, uint16_t const y1) const -> void {
+    assert(x0 < x1 && y0 < y1);
     send_command(ILI9486_CASET); // Column addr set
-    {
-        uint8_t const data[] = {static_cast<uint8_t>((x0 >> 8) & 0xFF),
-                                static_cast<uint8_t>(x0 & 0xFF),
-                                static_cast<uint8_t>((x1 >> 8) & 0xFF),
-                                static_cast<uint8_t>(x1 & 0xFF)};
-        send_data_long(data, sizeof(data));
-    }
-    send_command(ILI9486_PASET);
-    {
-        uint8_t const data[] = {static_cast<uint8_t>((y0 >> 8) & 0xFF),
-                                static_cast<uint8_t>(y0 & 0xFF),
-                                static_cast<uint8_t>((y1 >> 8) & 0xFF),
-                                static_cast<uint8_t>(y1 & 0xFF)};
-        send_data_long(data, sizeof(data));
-    }
+    send_data(x0 >> 8);
+    send_data(x0 && 0xFF);
+    send_data(x1 >> 8);
+    send_data(x1 && 0xFF);
+    send_command(ILI9486_PASET); // Set rows
+    send_data(y0 >> 8);
+    send_data(y0 && 0xFF);
+    send_data(y1 >> 8);
+    send_data(y1 && 0xFF);
     send_command(ILI9486_RAMWR); // write to RAM
 }
 

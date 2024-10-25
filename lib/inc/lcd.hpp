@@ -21,8 +21,8 @@
 #define ILI9486_RAMWR 0x2C
 
 /*------------------LCD Screen pixel dimensions--------------------*/
-#define ILI9486_TFTWIDTH  320
-#define ILI9486_TFTHEIGHT 480
+#define ILI9486_TFTWIDTH  480
+#define ILI9486_TFTHEIGHT 320
 #define ILI9486_PIXEL_COUNT	ILI9486_TFTWIDTH * ILI9486_TFTHEIGHT
 
 /*----------------------Color Definitions--------------------------*/
