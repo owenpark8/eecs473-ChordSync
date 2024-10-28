@@ -21,8 +21,8 @@
 #define ILI9486_RAMWR 0x2C
 
 /*------------------LCD Screen pixel dimensions--------------------*/
-#define ILI9486_TFTWIDTH  480
-#define ILI9486_TFTHEIGHT 320
+#define ILI9486_TFTWIDTH  320
+#define ILI9486_TFTHEIGHT 480
 #define ILI9486_PIXEL_COUNT	ILI9486_TFTWIDTH * ILI9486_TFTHEIGHT
 
 /*----------------------Color Definitions--------------------------*/
@@ -34,11 +34,19 @@ struct color_t {
     unsigned int g : 1;
     unsigned int b : 1;
 };
-constexpr color_t WHITE = {1, 1, 1};
-constexpr color_t BLACK = {0, 0, 0};
-constexpr color_t RED = {1, 0, 0};
-constexpr color_t YELLOW = {1, 1, 0};
-constexpr color_t GREEN = {0, 1, 0};
+// constexpr color_t WHITE = {1, 1, 1};
+// constexpr color_t BLACK = {0, 0, 0};
+// constexpr color_t RED = {1, 0, 0};
+// constexpr color_t GREEN = {0, 1, 0};
+// constexpr color_t BLUE = {0, 0, 1};
+// constexpr color_t YELLOW = {1, 1, 0};
+
+constexpr uint16_t WHITE = 0xFFFF;
+constexpr uint16_t BLACK = 0x0000;
+constexpr uint16_t RED = 0xF800;
+constexpr uint16_t GREEN = 0x07E0;
+constexpr uint16_t BLUE = 0x001F;
+constexpr uint16_t YELLOW = 0xFFE0;
 
 /**
  * Coordinates of pixels on LCD array
@@ -57,6 +65,7 @@ public:
         : m_spi(spi), m_reg_sel(reg_sel), m_reset(reset) {}
 
     auto init() const -> void;
+    auto LCD_InitReg() const -> void;
 
     /**
      * @brief Draws a single pixel
@@ -69,7 +78,7 @@ public:
      * @brief Fills the entire screen with a color
      * @param color fill color of screen
      */
-    auto fill_screen(color_t color) const -> void; // TODO: Consider changing this back to color_t
+    auto fill_screen(uint16_t color) const -> void; // TODO: Consider changing this back to color_t
 
     /**
      * @brief Clears the screen to be all white
@@ -99,7 +108,7 @@ public:
      * @param h vertical height of rectangle in pixels
      * @param color fill color of rectangle
      */
-    auto draw_rectangle(pixel_location_t pos, uint16_t w, uint16_t h, color_t color) const -> void;
+    auto draw_rectangle(pixel_location_t pos, uint16_t w, uint16_t h, uint16_t color) const -> void;
 
     /*------------BACKDOOR FUNCTIONS---------------*/
     auto send_command(uint8_t command) const -> void;
@@ -117,6 +126,6 @@ private:
     SPI m_spi{};
     Pin m_reg_sel{}; // LCD register select (command/data)
     Pin m_reset{};   // LCD reset
-    const uint16_t width = ILI9486_TFTWIDTH;  // width in pixels of LCD screen
-    const uint16_t height = ILI9486_TFTHEIGHT; // height in pixels of LCD screen
+    const uint16_t width = ILI9486_TFTHEIGHT;  // width in pixels of LCD screen
+    const uint16_t height = ILI9486_TFTWIDTH; // height in pixels of LCD screen
 };

@@ -38,6 +38,11 @@ public:
         m_csx.set();
     }
 
+    auto spi_write_stay_selected(uint8_t const* data, uint16_t const size) const -> void {
+        m_csx.reset();
+        HAL_SPI_Transmit(m_hspi, data, size, m_timeout);
+    }
+
     auto spi_write_long(uint8_t const* data, std::size_t size) const -> void {
         m_csx.reset();
         while (size > 0) {
