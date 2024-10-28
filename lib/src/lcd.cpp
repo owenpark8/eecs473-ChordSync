@@ -114,9 +114,9 @@ auto LCD::draw_rectangle(pixel_location_t pos, uint16_t w, uint16_t h, uint16_t 
     b = (b * 255) / 31;
     set_data();
     for (int i = 0; i < w * h; ++i) {
-        spi_write_stay_selected(&r, 1);
-        spi_write_stay_selected(&g, 1);
-        spi_write_stay_selected(&b, 1);
+        m_spi.spi_write_stay_selected(&r, 1);
+        m_spi.spi_write_stay_selected(&g, 1);
+        m_spi.spi_write_stay_selected(&b, 1);
     }
 
     send_command(0x00); // NOOP, reset csx, and end data stream
