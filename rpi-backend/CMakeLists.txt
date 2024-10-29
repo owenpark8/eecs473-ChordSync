@@ -23,8 +23,8 @@ add_subdirectory(extern)
 target_link_libraries(${RPI_BACKEND_TARGET} PRIVATE extern)
 
 target_compile_definitions(${RPI_BACKEND_TARGET} PRIVATE
-    WEB_SRC_DIR="${CMAKE_CURRENT_SOURCE_DIR}/public"
-    USER_HOME_DIR="$ENV{HOME}"
+    WEB_SRC_DIR="${CMAKE_CURRENT_SOURCE_DIR}/public/"
+    USER_HOME_DIR="$ENV{HOME}/"
 )
 
 add_custom_target(run_web_server_scripts ALL

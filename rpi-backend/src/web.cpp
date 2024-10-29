@@ -11,7 +11,7 @@ namespace web {
     std::string const web_source_directory = WEB_SRC_DIR;
 
     auto read_file_into_string(std::string const& filename) -> std::string {
-        std::string const filepath = web_source_directory + "/" + filename;
+        std::string const filepath = web_source_directory + filename;
         std::ifstream ifs(filepath, std::ios_base::in | std::ios_base::binary);
         if (!ifs) return std::string{};
         return {(std::istreambuf_iterator<char>(ifs)), (std::istreambuf_iterator<char>())};

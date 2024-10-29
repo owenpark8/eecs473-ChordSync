@@ -3,10 +3,13 @@
 #include <filesystem>
 #include <format>
 #include <iostream>
+#include <ratio>
 #include <thread>
 
+#include <SQLiteCpp/SQLiteCpp.h>
 #include <httplib.h>
 
+#include "SQLiteCpp/Database.h"
 #include "data.hpp"
 #include "web.hpp"
 
@@ -52,9 +55,12 @@ void web_server() {
 
     svr.Get("/song-select-form", [](httplib::Request const& req, httplib::Response& res) {
         std::string options;
-        for (auto const& [id, song_info]: data::songs::m_song_id_to_info) {
-            options += std::format("<option value=\"{}\">{}</option>", id, song_info.title);
+
+        SQLite::Database db(data::db_filename);
+        for (auto const& song_info: data::songs::get_all_songs(db)) {
+            options += std::format("<option value=\"{}\">{}</option>", song_info.id, song_info.title);
         }
+
         std::string song_select_form = std::format(web::get_source_file(web::source_files_e::SONGSELECTFORM_HTML), options);
 
         res.set_content(song_select_form, web::html_type);
@@ -80,38 +86,60 @@ void web_server() {
 #endif
 }
 
-
-auto main(int argc, char* args[]) -> int {
+auto init_data() -> bool {
 #ifdef DEBUG
     std::cout << "Initializing app data...\n";
-    std::cout << "Checking if song directory \"" << data::songs::song_directory << "\" exists...\n";
+    std::cout << "Checking if data directory \"" << data::data_directory << "\" exists...\n";
 #endif
-    if (!fs::exists(data::songs::song_directory)) {
+    if (!fs::exists(data::data_directory)) {
 #ifdef DEBUG
-        std::cout << "Song directory does not exist! Creating directory...\n";
+        std::cout << "Data directory does not exist! Creating directory...\n";
 #endif
-        if (!data::create_directory_if_not_exists(data::songs::song_directory)) {
+        if (!data::create_directory_if_not_exists(data::data_directory)) {
 #ifdef DEBUG
             std::cerr << "Critical error: Data directory could not be created. Exiting.\n";
 #endif
-            return 1;
+            return false;
         }
     }
 #ifdef DEBUG
     else {
-        std::cout << "Song directory found!\n";
+        std::cout << "Data directory found!\n";
     }
 #endif
 
+    try {
+        SQLite::Database db(data::db_filename, SQLite::OPEN_READWRITE | SQLite::OPEN_CREATE);
+        data::songs::create_table_if_not_exists(db);
+    } catch (std::exception& e) {
+#ifdef DEBUG
+        std::cerr << "SQLite exception: " << e.what() << std::endl;
+#endif
+        return false;
+    }
 
-    data::songs::SongInfo new_song = {
-            .title = "Wow nice song",
-            .artist = "Owen Bark",
-            .length = std::chrono::milliseconds(1000),
+    return true;
+}
+
+
+auto main(int argc, char* args[]) -> int {
+    if (!init_data()) {
+        return 1;
+    }
+
+    data::songs::SongInfo song = {
+            .title = "baby shark",
+            .artist = "doodoodoo",
+            .length = std::chrono::milliseconds(88),
     };
-
-    data::songs::write_song_info_to_file("123", new_song);
-
+    try {
+        SQLite::Database db(data::db_filename, SQLite::OPEN_READWRITE | SQLite::OPEN_CREATE);
+        data::songs::insert_new_song(db, song);
+    } catch (std::exception& e) {
+#ifdef DEBUG
+        std::cerr << "SQLite exception: " << e.what() << std::endl;
+#endif
+    }
 
 #ifdef DEBUG
     std::cout << "Starting web server thread...\n";
