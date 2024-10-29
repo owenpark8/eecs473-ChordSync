@@ -13,10 +13,10 @@ generate_content_constexpr() {
     local path=$1
     local lc_name=$2
 
-    local content=$(tr -d '[:space:]' < "$path")
+    local content=$(tr -d '\n' < "$path")
     local content_name=${lc_name}_content
 
-    echo "constexpr char $content_name[] = R\"RAW($content)RAW\";"
+    echo "constexpr char const $content_name[] = R\"RAW($content)RAW\";"
 }
 
 generate_iter_macro() {
@@ -31,29 +31,35 @@ generate_iter_macro() {
 # Clear the output file
 > "$OUTPUT_FILE"
 
+echo "Getting source files..."
+file_paths=$(find "$SOURCES_DIR" -type f)
+
+for file_path in $(find "$SOURCES_DIR" -type f); do
+    file_name=$(basename "$file_path")
+
+    echo "$file_path"
+done
+
 {
     echo "#pragma once"
     echo ""
     echo "namespace web {"
 
-    for file_path in "$SOURCES_DIR"/*; do
-        if [ -f "$file_path" ]; then
-            file_name=$(basename "$file_path")
-            # Replace non-alphanumeric characters with underscores to form a valid variable name
-            formatted_name=$(echo "$file_name" | sed -e 's/[^a-zA-Z0-9]/_/g')
+    for file_path in $(find "$SOURCES_DIR" -type f); do
+        file_name=$(basename "$file_path")
+        # Replace non-alphanumeric characters with underscores to form a valid variable name
+        formatted_name=$(echo "$file_name" | sed -e 's/[^a-zA-Z0-9]/_/g')
 
-            generate_content_constexpr "$file_path" "$formatted_name"
-        fi
+        generate_content_constexpr "$file_path" "$formatted_name"
     done
 
     echo "#define SOURCE_FILES_ITER(_F, ...)\\"
 
-    for file_path in "$SOURCES_DIR"/*; do
-        if [ -f "$file_path" ]; then
-            file_name=$(basename "$file_path")
-            formatted_name=$(echo "$file_name" | sed -e 's/[^a-zA-Z0-9]/_/g')
-            generate_iter_macro "$formatted_name"
-        fi
+    for file_path in $(find "$SOURCES_DIR" -type f); do
+        file_name=$(basename "$file_path")
+        formatted_name=$(echo "$file_name" | sed -e 's/[^a-zA-Z0-9]/_/g')
+
+        generate_iter_macro "$formatted_name"
     done
 
     echo ""

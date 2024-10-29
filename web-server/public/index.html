@@ -5,18 +5,39 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>473 Guitar</title>
+    <title>VSGuitar</title>
     <link rel="stylesheet" href="compiled.css">
 </head>
 
 <body>
     <script src="htmx.min.js"></script>
-    <div class="maxwidthcontainer">
+    <div class="maxwidthcontainer min-h-screen">
         <div class="mt-6 mx-auto flex flex-col text-center items-center">
-            <h1 class="text-3xl font-bold">473 Guitar</h1>
+            <h1 class="text-3xl font-bold mb-8">VSGuitar</h1>
+            <div>
+                <h2 class="text-xl font-semibold">Guitar Information</h2>
+                <p class="font-medium">No song playing!</p>
+
+                <div id="song-form-container" hx-get="/song-select-form" hx-trigger="load" class="mt-4">
+                </div>
+
+            </div>
+
 
         </div>
     </div>
 </body>
+
+<footer class="rounded-lg shadow m-4 sticky bottom-2">
+    <div class="w-full mx-auto max-w-screen-xl p-4 md:flex md:items-center md:justify-between">
+        <p class="text-sm text-gray-500 sm:text-center">An EECS 473 project by Hudson Hall, Zawad
+            Munshi, Owen Park, Akshaya Ramesh, and Neel Vora</p>
+        <ul class="flex flex-wrap items-center mt-3 text-sm font-medium text-gray-500 dark:text-gray-400 sm:mt-0">
+            <li>
+                <p><a href="https://github.com/owenpark8/eecs473-VSGuitar" target="_blank">Github</a></p>
+            </li>
+        </ul>
+    </div>
+</footer>
 
 </html>

@@ -6,11 +6,11 @@
 #include "web_sources.hpp"
 
 namespace web {
-    constexpr char png_type[] = "image/png";
-    constexpr char jpeg_type[] = "image/jpeg";
-    constexpr char html_type[] = "text/html";
-    constexpr char css_type[] = "text/css";
-    constexpr char js_type[] = "application/javascript";
+    constexpr char const png_type[] = "image/png";
+    constexpr char const jpeg_type[] = "image/jpeg";
+    constexpr char const html_type[] = "text/html";
+    constexpr char const css_type[] = "text/css";
+    constexpr char const js_type[] = "application/javascript";
 
     enum class source_files_e {
 #define MAKE_SOURCE_FILES_ENUM(enum_name, ...) enum_name,
@@ -26,6 +26,17 @@ namespace web {
     auto get_source_file(std::string const& filename) -> std::string;
 #endif
 
-    auto get_source_file(source_files_e file) -> std::string;
+    constexpr auto get_source_file(source_files_e file) -> char const* {
+#define MAKE_SOURCE_FILES_CASES(enum_name, content, ...)                                                                                             \
+    case source_files_e::enum_name:                                                                                                                  \
+        return content;
 
+        switch (file) {
+            SOURCE_FILES_ITER(MAKE_SOURCE_FILES_CASES)
+
+            default:
+                return nullptr;
+        }
+#undef MAKE_SOURCE_FILES_CASES
+    }
 } // namespace web
