@@ -34,12 +34,6 @@ struct color_t {
     unsigned int g : 1;
     unsigned int b : 1;
 };
-// constexpr color_t WHITE = {1, 1, 1};
-// constexpr color_t BLACK = {0, 0, 0};
-// constexpr color_t RED = {1, 0, 0};
-// constexpr color_t GREEN = {0, 1, 0};
-// constexpr color_t BLUE = {0, 0, 1};
-// constexpr color_t YELLOW = {1, 1, 0};
 
 constexpr uint16_t WHITE = 0xFFFF;
 constexpr uint16_t BLACK = 0x0000;
@@ -108,7 +102,7 @@ public:
      * @param h vertical height of rectangle in pixels
      * @param color fill color of rectangle
      */
-    auto draw_rectangle(pixel_location_t pos, uint16_t w, uint16_t h, uint16_t color) const -> void;
+    auto draw_rectangle(pixel_location_t pos, int16_t w, int16_t h, uint16_t color) const -> void;
 
     /*------------BACKDOOR FUNCTIONS---------------*/
     auto send_command(uint8_t command) const -> void;

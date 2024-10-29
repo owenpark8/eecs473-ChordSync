@@ -57,8 +57,8 @@ auto LCD::init() const -> void {
 
     // ------END QUALITY SETTINGS
 
-    send_command(0x36); // Memory Access Control, determines orientation of how LCD is updated
-    send_data(0x28);
+    // send_command(0x36); // Memory Access Control, determines orientation of how LCD is updated
+    // send_data(0x28);
 
     send_command(0x3A); // Interface Pixel Control
     send_data(0x66); // 16 bit DIFFERENT
@@ -91,6 +91,9 @@ auto LCD::init() const -> void {
     HAL_Delay(120);
 
     send_command(ILI9486_DISPON); // Turn Display on
+
+    send_command(0x36); // Memory Access Control, determines orientation of how LCD is updated
+    send_data(0x28);
 }
 
 auto LCD::fill_screen(uint16_t color) const -> void {
@@ -99,7 +102,7 @@ auto LCD::fill_screen(uint16_t color) const -> void {
 
 auto LCD::clear_screen() const -> void { fill_screen(WHITE); }
 
-auto LCD::draw_rectangle(pixel_location_t pos, uint16_t w, uint16_t h, uint16_t color) const -> void {
+auto LCD::draw_rectangle(pixel_location_t pos, int16_t w, int16_t h, uint16_t color) const -> void {
     if ((pos.x >= width) || (pos.y >= height)) return;
     if ((pos.x + w - 1) >= width) w = width - pos.x; // if our rectangle extends past the horizontal dimensions of the screen
     if ((pos.y + h - 1) >= height) h = height - pos.y;
@@ -140,17 +143,17 @@ auto LCD::send_data_long(uint8_t const* data, std::size_t const size) const -> v
 }
 
 auto LCD::set_addr_window(uint16_t const x0, uint16_t const y0, uint16_t const x1, uint16_t const y1) const -> void {
-    assert(x0 < x1 && y0 < y1);
+    assert(x0 <= x1 && y0 <= y1);
     send_command(ILI9486_CASET); // Column addr set
     send_data(x0 >> 8);
-    send_data(x0 && 0xFF);
+    send_data(x0 & 0xFF);
     send_data(x1 >> 8);
-    send_data(x1 && 0xFF);
+    send_data(x1 & 0xFF);
     send_command(ILI9486_PASET); // Set rows
     send_data(y0 >> 8);
-    send_data(y0 && 0xFF);
+    send_data(y0 & 0xFF);
     send_data(y1 >> 8);
-    send_data(y1 && 0xFF);
+    send_data(y1 & 0xFF);
     send_command(ILI9486_RAMWR); // write to RAM
 }
 
