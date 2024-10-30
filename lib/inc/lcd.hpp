@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cstdint>
+#include <vector>
 
 #include "hardware.hpp"
 
@@ -26,15 +27,7 @@
 #define ILI9486_PIXEL_COUNT	ILI9486_TFTWIDTH * ILI9486_TFTHEIGHT
 
 /*----------------------Color Definitions--------------------------*/
-/**
- * 3 bits for 8 different colors
- */
-struct color_t {
-    unsigned int r : 1;
-    unsigned int g : 1;
-    unsigned int b : 1;
-};
-
+// 16 Bits for Color
 constexpr uint16_t WHITE = 0xFFFF;
 constexpr uint16_t BLACK = 0x0000;
 constexpr uint16_t RED = 0xF800;
@@ -59,20 +52,19 @@ public:
         : m_spi(spi), m_reg_sel(reg_sel), m_reset(reset) {}
 
     auto init() const -> void;
-    auto LCD_InitReg() const -> void;
 
     /**
      * @brief Draws a single pixel
      * @param pos position of pixel
      * @param color pixel color
      */
-    auto draw_pixel(pixel_location_t pos, color_t color) const -> void;
+    auto draw_pixel(pixel_location_t pos, uint16_t color) const -> void;
 
     /**
      * @brief Fills the entire screen with a color
      * @param color fill color of screen
      */
-    auto fill_screen(uint16_t color) const -> void; // TODO: Consider changing this back to color_t
+    auto fill_screen(uint16_t color) const -> void;
 
     /**
      * @brief Clears the screen to be all white
@@ -85,7 +77,7 @@ public:
      * @param h height of the line in pixels
      * @param color fill color of rectangle
      */
-    auto draw_vertical_line(pixel_location_t pos, uint16_t h, color_t color) const -> void;
+    auto draw_vertical_line(pixel_location_t pos, uint16_t h, uint16_t color) const -> void;
 
     /**
      * @brief Draws a horizontal line
@@ -93,7 +85,7 @@ public:
      * @param w width of the line in pixels
      * @param color fill color of rectangle
      */
-    auto draw_horizontal_line(pixel_location_t pos, uint16_t w, color_t color) const -> void;
+    auto draw_horizontal_line(pixel_location_t pos, uint16_t w, uint16_t color) const -> void;
 
     /**
      * @brief Draws a filled color rectangle
@@ -103,6 +95,14 @@ public:
      * @param color fill color of rectangle
      */
     auto draw_rectangle(pixel_location_t pos, int16_t w, int16_t h, uint16_t color) const -> void;
+    
+    /**
+     * @brief Draws a filled color rectangle
+     * @param pos top left position of bitmap
+     * @param w horizontal width of bitmap in pixels
+     * @param h vertical height of bitmap in pixels
+     */
+    auto draw_bitmap(pixel_location_t pos, int16_t w, int16_t h, const std::vector<uint8_t> &bitmap) const -> void;
 
     /*------------BACKDOOR FUNCTIONS---------------*/
     auto send_command(uint8_t command) const -> void;
@@ -115,6 +115,7 @@ public:
     auto end_reset() const -> void;
     auto set_command() const -> void;
     auto set_data() const -> void;
+    auto noop() const -> void;
 
 private:
     SPI m_spi{};

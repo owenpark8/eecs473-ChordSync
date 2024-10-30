@@ -46,14 +46,14 @@ public:
      * @param radius radius of circle to be written
      * @param color color of circle to be written
      */
-    void draw_note(fretboard_location_t fretboard_location, int radius, color_t color);
+    void draw_note(fretboard_location_t fretboard_location, int radius, uint16_t color);
 
     /**
      * @brief draws indicator to play open string  TODO: determine what kind of indicator
      * @param string string to play
      * @param color color of indicator
      */
-    void draw_string(string_e string, color_t color);
+    void draw_string(string_e string, uint16_t color);
 
     /*----------------------BACKDOOR FUNCTIONS-------------------------- */
     /**
@@ -61,7 +61,7 @@ public:
      * @param pixel_location coordinates of pixel to be written to screen
      * @param color color of pixel to be written
      */
-    void draw_pixel(pixel_location_t pixel_location, color_t color);
+    void draw_pixel(pixel_location_t pixel_location, uint16_t color);
 
     /**
      * @brief converts fretboard location to pixel location

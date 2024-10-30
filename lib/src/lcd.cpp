@@ -121,8 +121,20 @@ auto LCD::draw_rectangle(pixel_location_t pos, int16_t w, int16_t h, uint16_t co
         m_spi.spi_write_stay_selected(&g, 1);
         m_spi.spi_write_stay_selected(&b, 1);
     }
+    noop(); // NOOP, reset csx, and end data stream
+}
 
-    send_command(0x00); // NOOP, reset csx, and end data stream
+auto LCD::draw_bitmap(pixel_location_t pos, int16_t w, int16_t h, const std::vector<uint8_t> &bitmap) const -> void {
+    if ((pos.x >= width) || (pos.y >= height)) return;
+    if ((pos.x + w - 1) >= width) w = width - pos.x; // if our rectangle extends past the horizontal dimensions of the screen
+    if ((pos.y + h - 1) >= height) h = height - pos.y;
+    set_addr_window(pos.x, pos.y, pos.x + w - 1, pos.y + h - 1);
+    
+    set_data();
+    for(auto &elm : bitmap) {
+        m_spi.spi_write_stay_selected(&elm, 1);
+    }
+    noop(); // NOOP, reset csx, and end data stream
 }
 
 auto LCD::send_command(uint8_t const command) const -> void {
@@ -161,3 +173,7 @@ auto LCD::start_reset() const -> void { m_reset.reset(); }
 auto LCD::end_reset() const -> void { m_reset.set(); }
 auto LCD::set_command() const -> void { m_reg_sel.reset(); }
 auto LCD::set_data() const -> void { m_reg_sel.set(); }
+auto LCD::noop() const -> void {send_command(0x00); }
+
+/*---------------------BITMAPS-----------------------------*/
+

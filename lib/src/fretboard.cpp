@@ -8,9 +8,9 @@ void Fretboard::fretboard_init() {
     clear_fretboard();
 }
 
-void Fretboard::draw_note(fretboard_location_t fretboard_location, int radius, color_t color) {}
-void Fretboard::draw_string(string_e string, color_t color) {}
-// void Fretboard::draw_pixel(pixel_location_t pixel_location, color_t color) {}
+void Fretboard::draw_note(fretboard_location_t fretboard_location, int radius, uint16_t color) {}
+void Fretboard::draw_string(string_e string, uint16_t color) {}
+// void Fretboard::draw_pixel(pixel_location_t pixel_location, uint16_t color) {}
 auto Fretboard::convert_fret_to_pixels(fretboard_location_t fretboard_location) -> pixel_location_t {
     uint16_t pixel_x = fret_pixel_array[fretboard_location.x];
     uint16_t pixel_y = 0;
