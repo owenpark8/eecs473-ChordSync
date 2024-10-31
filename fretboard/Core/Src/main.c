@@ -315,20 +315,33 @@ static void MX_GPIO_Init(void)
   __HAL_RCC_GPIOB_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(CSX_A_GPIO_Port, CSX_A_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOA, LCD_RS_Pin|LCD_RST_Pin|AMP_PWR_Pin|AMP_RVB_Pin
+                          |AMP_DLY_Pin|AMP_MOD_Pin|AMP_AMP_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOB, CSX_B_Pin|CSX_C_Pin|CSX_D_Pin|CSX_E_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOC, CSX_A_Pin|CSX_B_Pin|DEBUG_LED_Pin, GPIO_PIN_RESET);
 
-  /*Configure GPIO pin : CSX_A_Pin */
-  GPIO_InitStruct.Pin = CSX_A_Pin;
+  /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(GPIOB, CSX_C_Pin|CSX_D_Pin|CSX_E_Pin|CSX_F_Pin, GPIO_PIN_RESET);
+
+  /*Configure GPIO pins : LCD_RS_Pin LCD_RST_Pin AMP_PWR_Pin AMP_RVB_Pin
+                           AMP_DLY_Pin AMP_MOD_Pin AMP_AMP_Pin */
+  GPIO_InitStruct.Pin = LCD_RS_Pin|LCD_RST_Pin|AMP_PWR_Pin|AMP_RVB_Pin
+                          |AMP_DLY_Pin|AMP_MOD_Pin|AMP_AMP_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(CSX_A_GPIO_Port, &GPIO_InitStruct);
+  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : CSX_B_Pin CSX_C_Pin CSX_D_Pin CSX_E_Pin */
-  GPIO_InitStruct.Pin = CSX_B_Pin|CSX_C_Pin|CSX_D_Pin|CSX_E_Pin;
+  /*Configure GPIO pins : CSX_A_Pin CSX_B_Pin DEBUG_LED_Pin */
+  GPIO_InitStruct.Pin = CSX_A_Pin|CSX_B_Pin|DEBUG_LED_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
+
+  /*Configure GPIO pins : CSX_C_Pin CSX_D_Pin CSX_E_Pin CSX_F_Pin */
+  GPIO_InitStruct.Pin = CSX_C_Pin|CSX_D_Pin|CSX_E_Pin|CSX_F_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
