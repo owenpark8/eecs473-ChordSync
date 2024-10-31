@@ -1,3 +1,6 @@
 [submodule "extern/httplib"]
-	path = extern/httplib
+	path = rpi-backend/extern/httplib
 	url = https://github.com/yhirose/cpp-httplib.git
+[submodule "rpi-backend/extern/SQLiteCpp"]
+	path = rpi-backend/extern/SQLiteCpp
+	url = git@github.com:SRombauts/SQLiteCpp.git

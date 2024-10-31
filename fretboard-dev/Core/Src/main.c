@@ -103,7 +103,7 @@ int main(void)
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-  new_main();
+  new_main(&hspi1);
 
   // THIS WHILE LOOP NEVER HAPPENS. NEW WHILE LOOP IN new_main()
   while (1)
@@ -141,7 +141,7 @@ void SystemClock_Config(void)
   RCC_OscInitStruct.PLL.PLLM = 1;
   RCC_OscInitStruct.PLL.PLLN = 125;
   RCC_OscInitStruct.PLL.PLLP = 2;
-  RCC_OscInitStruct.PLL.PLLQ = 2;
+  RCC_OscInitStruct.PLL.PLLQ = 5;
   RCC_OscInitStruct.PLL.PLLR = 2;
   RCC_OscInitStruct.PLL.PLLRGE = RCC_PLL1_VCIRANGE_2;
   RCC_OscInitStruct.PLL.PLLVCOSEL = RCC_PLL1_VCORANGE_WIDE;
@@ -223,7 +223,7 @@ static void MX_SPI1_Init(void)
   hspi1.Instance = SPI1;
   hspi1.Init.Mode = SPI_MODE_MASTER;
   hspi1.Init.Direction = SPI_DIRECTION_2LINES_TXONLY;
-  hspi1.Init.DataSize = SPI_DATASIZE_4BIT;
+  hspi1.Init.DataSize = SPI_DATASIZE_8BIT;
   hspi1.Init.CLKPolarity = SPI_POLARITY_LOW;
   hspi1.Init.CLKPhase = SPI_PHASE_1EDGE;
   hspi1.Init.NSS = SPI_NSS_SOFT;
@@ -320,10 +320,10 @@ static void MX_GPIO_Init(void)
   HAL_GPIO_WritePin(GPIOA, USER_LED_Pin|LCD_RS_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOC, LCD_RST_Pin|CSX_A_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOC, LCD_RST_Pin|CSX_A_Pin, GPIO_PIN_SET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOB, CSX_B_Pin|CSX_C_Pin|CSX_D_Pin|CSX_E_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOB, CSX_B_Pin|CSX_C_Pin|CSX_D_Pin|CSX_E_Pin, GPIO_PIN_SET);
 
   /*Configure GPIO pin : B1_BLUE_USER_BUTTON_Pin */
   GPIO_InitStruct.Pin = B1_BLUE_USER_BUTTON_Pin;
