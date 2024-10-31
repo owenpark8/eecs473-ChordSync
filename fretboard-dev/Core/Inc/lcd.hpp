@@ -334,12 +334,12 @@ public:
     auto draw_vertical_line(pixel_location_t pos, uint16_t h, uint16_t color) const -> void;
 
     /**
-     * @brief Draws a horizontal line
+     * @brief Draws a horizontal line that spans across the full width of the screen
      * @param pos starting position of line (left)
-     * @param w width of the line in pixels
+     * @param h height of the line in pixels
      * @param color fill color of rectangle
      */
-    auto draw_horizontal_line(pixel_location_t pos, uint16_t w, uint16_t color) const -> void;
+    auto draw_horizontal_line(pixel_location_t pos, uint16_t h, uint16_t color) const -> void;
 
     /**
      * @brief Draws a filled color rectangle
@@ -348,7 +348,7 @@ public:
      * @param h vertical height of rectangle in pixels
      * @param color fill color of rectangle
      */
-    auto draw_rectangle(pixel_location_t pos, int16_t w, int16_t h, uint16_t color) const -> void;
+    auto draw_rectangle(pixel_location_t pos, uint16_t w, uint16_t h, uint16_t color) const -> void;
 
     /**
      * @brief Draws a filled color rectangle
@@ -356,10 +356,10 @@ public:
      * @param w horizontal width of bitmap in pixels
      * @param h vertical height of bitmap in pixels
      */
-    auto draw_bitmap(pixel_location_t pos, int16_t w, int16_t h, const std::vector<uint8_t> &bitmap) const -> void;
+    auto draw_bitmap(pixel_location_t pos, uint16_t w, uint16_t h, const std::vector<uint8_t> &bitmap) const -> void;
 
     void drawCharTest(pixel_location_t pos, unsigned char c, uint16_t color, uint16_t bg, uint8_t size);
-    
+
     void drawPixel(pixel_location_t pos, uint16_t color);
 
     void drawPixelSize(pixel_location_t pos, uint16_t color, uint16_t size);

@@ -103,7 +103,11 @@ auto LCD::fill_screen(uint16_t color) const -> void {
 
 auto LCD::clear_screen() const -> void { fill_screen(WHITE); }
 
-auto LCD::draw_rectangle(pixel_location_t pos, int16_t w, int16_t h, uint16_t color) const -> void {
+auto LCD::draw_horizontal_line(pixel_location_t pos, uint16_t h, uint16_t color) const -> void {
+    draw_rectangle(pos, width, h, color);
+}
+
+auto LCD::draw_rectangle(pixel_location_t pos, uint16_t w, uint16_t h, uint16_t color) const -> void {
     if ((pos.x >= width) || (pos.y >= height)) return;
     if ((pos.x + w - 1) >= width) w = width - pos.x; // if our rectangle extends past the horizontal dimensions of the screen
     if ((pos.y + h - 1) >= height) h = height - pos.y;
@@ -125,7 +129,7 @@ auto LCD::draw_rectangle(pixel_location_t pos, int16_t w, int16_t h, uint16_t co
     noop(); // NOOP, reset csx, and end data stream
 }
 
-auto LCD::draw_bitmap(pixel_location_t pos, int16_t w, int16_t h, const std::vector<uint8_t> &bitmap) const -> void {
+auto LCD::draw_bitmap(pixel_location_t pos, uint16_t w, uint16_t h, const std::vector<uint8_t> &bitmap) const -> void {
     if ((pos.x >= width) || (pos.y >= height)) return;
     if ((pos.x + w - 1) >= width) w = width - pos.x; // if our rectangle extends past the horizontal dimensions of the screen
     if ((pos.y + h - 1) >= height) h = height - pos.y;

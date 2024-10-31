@@ -35,11 +35,11 @@ void new_main(SPI_HandleTypeDef* hspi1){
 	lcd_4.init();
 	lcd_5.init();
 
-	lcd_1.fill_screen(WHITE);
-	lcd_2.fill_screen(WHITE);
-	lcd_3.fill_screen(WHITE);
-	lcd_4.fill_screen(WHITE);
-	lcd_5.fill_screen(WHITE);
+	lcd_1.clear_screen();
+	lcd_2.clear_screen();
+	lcd_3.clear_screen();
+	lcd_4.clear_screen();
+	lcd_5.clear_screen();
 
 	lcd_1.drawCharTest({50, 100}, 'h', BLACK, WHITE, 10);
 	lcd_2.drawCharTest({50, 100}, 'e', BLACK, WHITE, 10);
