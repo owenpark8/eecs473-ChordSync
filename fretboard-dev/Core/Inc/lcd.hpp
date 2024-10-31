@@ -264,14 +264,6 @@ static const unsigned char font1[] = {
     	0x00, 0x00, 0x00, 0x00, 0x00
     };
 
-/*--------------TODO: Update pins with correct numbers------------------------*/
-// #define TFT_CS_Pin GPIO_PIN_0
-// #define TFT_CS_GPIO_Port GPIOD
-#define TFT_RST_Pin GPIO_PIN_7
-#define TFT_RST_GPIO_Port GPIOD
-#define TFT_DC_Pin GPIO_PIN_6
-#define TFT_DC_GPIO_Port GPIOD
-
 /*---------------Various other control signals---------------------*/
 #define ILI9486_SLPOUT 0x11 // Sleep mode off
 #define ILI9486_DISPON 0x29 // Turn display on
@@ -367,18 +359,18 @@ public:
     auto draw_bitmap(pixel_location_t pos, int16_t w, int16_t h, const std::vector<uint8_t> &bitmap) const -> void;
 
     void drawCharTest(pixel_location_t pos, unsigned char c, uint16_t color, uint16_t bg, uint8_t size);
+    
     void drawPixel(pixel_location_t pos, uint16_t color);
-
 
     void drawPixelSize(pixel_location_t pos, uint16_t color, uint16_t size);
 
-    void write16BitColor(uint16_t color);
 
     /*------------BACKDOOR FUNCTIONS---------------*/
     auto send_command(uint8_t command) const -> void;
     auto send_data(uint8_t data) const -> void;
     auto send_data_long(uint8_t const *data, std::size_t size) const -> void;
     // set_addr_window requires that no other non image SPI data is sent after this, until transaction is over
+    // Bounds of coloumn and row are inclusive
     auto set_addr_window(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1) const -> void;
 
     auto start_reset() const -> void;

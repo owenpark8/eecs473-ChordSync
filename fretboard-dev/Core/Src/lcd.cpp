@@ -223,36 +223,12 @@ void LCD::drawCharTest(pixel_location_t pos, unsigned char c, uint16_t color, ui
 
 void LCD::drawPixel(pixel_location_t pos, uint16_t color)
 {
-	if ((pos.x < 0) || (pos.x >= width) || (pos.y < 0) || (pos.y >= height))
-		return;
-
-	set_addr_window(pos.x, pos.y, pos.x + 1, pos.y + 1);
-	set_data();
-	write16BitColor(color);
+    draw_rectangle(pos, 1, 1, color);
 }
 
 void LCD::drawPixelSize(pixel_location_t pos, uint16_t color, uint16_t size)
 {
-	if ((pos.x < 0) || (pos.x >= width) || (pos.y < 0) || (pos.y >= height))
-		return;
-
-	set_addr_window(pos.x, pos.y, pos.x + size, pos.y + size);
-	set_data();
-	write16BitColor(color);
-}
-
-void LCD::write16BitColor(uint16_t color)
-{
-
-	  uint8_t r = (color & 0xF800) >> 11;
-	  uint8_t g = (color & 0x07E0) >> 5;
-	  uint8_t b = color & 0x001F;
-
-	  r = (r * 255) / 31;
-	  g = (g * 255) / 63;
-	  b = (b * 255) / 31;
-	  uint8_t data[3] = {r, g, b};
-	  send_data_long(data, 3);
+    draw_rectangle(pos, size, size, color);
 }
 
 auto LCD::start_reset() const -> void { m_reset.reset(); }
