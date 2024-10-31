@@ -2,10 +2,6 @@
 
 
 auto LCD::init() const -> void {
-    start_reset();
-    HAL_Delay(10);
-    end_reset();
-
     // Send initialization commands
     // send_command(0x01);  // Software reset TODO: Is this necessary?
     // HAL_Delay(50);       // Necessary to wait at least 5 ms after software reset
@@ -95,6 +91,12 @@ auto LCD::init() const -> void {
 
     send_command(0x36); // Memory Access Control, determines orientation of how LCD is updated
     send_data(0x28);
+}
+
+auto LCD::reset_lcd() const -> void {
+    start_reset();
+    HAL_Delay(10);
+    end_reset();
 }
 
 auto LCD::fill_screen(uint16_t color) const -> void {

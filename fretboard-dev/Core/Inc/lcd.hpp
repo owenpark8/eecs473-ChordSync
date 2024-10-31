@@ -307,6 +307,8 @@ public:
 
     auto init() const -> void;
 
+    auto reset_lcd() const -> void;
+
     /**
      * @brief Draws a single pixel
      * @param pos position of pixel
