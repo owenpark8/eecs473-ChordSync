@@ -1,0 +1,40 @@
+Change Component Footprint: Designator=C1 Old Footprint=CAP-1206 New Footprint=CAP-1210
+Change Component Footprint: Designator=C2 Old Footprint=CAP-1206 New Footprint=CAP-1210
+Added Component: Designator=J5(CONN_B10B-ZRLFSN_JST)
+Add component (AddParameter): Name = "Mfr_Name"; Value = "JST"; VariantName = "[No Variations]"
+Add component (AddParameter): Name = "RefDes"; Value = "RefDes"; VariantName = "[No Variations]"
+Add component (AddParameter): Name = "Type"; Value = "Type"; VariantName = "[No Variations]"
+Added Component: Designator=U7(EECS473_SWITCH_03211B)
+Add component (AddParameter): Name = "Mfr_Name"; Value = "CW Industries"; VariantName = "[No Variations]"
+Add component (AddParameter): Name = "RefDes"; Value = "RefDes"; VariantName = "[No Variations]"
+Add component (AddParameter): Name = "Type"; Value = "Type"; VariantName = "[No Variations]"
+Added Pin To Net: NetName=GND Pin=J5-1
+Added Pin To Net: NetName=GND Pin=J5-3
+Added Pin To Net: NetName=GND Pin=J5-5
+Added Pin To Net: NetName=GND Pin=J5-7
+Added Pin To Net: NetName=GND Pin=J5-9
+Added Pin To Net: NetName=NetC3_2 Pin=U7-1
+Added Pin To Net: NetName=GND Pin=U7-6
+Change Net Name : Old Net Name=GND New Net Name=AMP_EM
+Added Pin To Net: NetName=AMP_COL Pin=J5-4
+Added Pin To Net: NetName=AMP_COL Pin=U2-2
+Added Pin To Net: NetName=AMP_COL Pin=U2-4
+Added Net: Name=AMP_COL
+Added Pin To Net: NetName=DLY_COL Pin=J5-6
+Added Pin To Net: NetName=DLY_COL Pin=U3-2
+Added Pin To Net: NetName=DLY_COL Pin=U3-4
+Added Net: Name=DLY_COL
+Added Pin To Net: NetName=MOD_COL Pin=J5-10
+Added Pin To Net: NetName=MOD_COL Pin=U5-2
+Added Pin To Net: NetName=MOD_COL Pin=U5-4
+Added Net: Name=MOD_COL
+Added Pin To Net: NetName=PWR_COL Pin=J5-2
+Added Pin To Net: NetName=PWR_COL Pin=U1-2
+Added Pin To Net: NetName=PWR_COL Pin=U1-4
+Added Net: Name=PWR_COL
+Added Pin To Net: NetName=RVB_COL Pin=J5-8
+Added Pin To Net: NetName=RVB_COL Pin=U4-2
+Added Pin To Net: NetName=RVB_COL Pin=U4-4
+Added Net: Name=RVB_COL
+Added Member To Class: ClassName=Power_FETS Member=Component J5 B10B-ZRLFSN
+Added Member To Class: ClassName=MCU_Conn Member=Component U7 EECS473_Switch

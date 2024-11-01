@@ -1,0 +1,6 @@
+Removed Pin From Net: NetName=LCD_DCRS Pin=J3-7
+Removed Pin From Net: NetName=LCD_RST Pin=J3-8
+Removed Member From Class: ClassName=MCU_Conn Member=J
+Added Pin To Net: NetName=LCD_RST Pin=J3-7
+Added Pin To Net: NetName=LCD_DCRS Pin=J3-8
+Added Member To Class: ClassName=MCU_Conn Member=Component J1 61300311121

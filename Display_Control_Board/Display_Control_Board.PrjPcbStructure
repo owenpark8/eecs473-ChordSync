@@ -1,2 +1,2 @@
-Record=TopLevelDocument|FileName=Buck_LDOs.SchDoc|SheetNumber=1
-Record=NoMainPathDocument|SourceDocument=Buck_LDOs.SchDoc|FileName=MCU_Conn.SchDoc|SheetNumber=2
+Record=TopLevelDocument|FileName=MCU_Conn.SchDoc|SheetNumber=2
+Record=NoMainPathDocument|SourceDocument=MCU_Conn.SchDoc|FileName=Power_FETS.SchDoc|SheetNumber=1
