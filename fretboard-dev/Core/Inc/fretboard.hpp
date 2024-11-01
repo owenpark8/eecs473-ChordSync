@@ -10,9 +10,10 @@
  * Interfaced with coordinates on both "fretboard grid" or "pixel grid" as continous grids across LCD screens
  */
 
-constexpr std::size_t num_lcds = 5;
+constexpr std::size_t num_lcds = 6;
 constexpr std::size_t num_frets = 24; // TODO: Check this number
 constexpr std::size_t num_strings = 6;
+constexpr uint16_t total_pixel_width = num_lcds*480;
 
 class Fretboard {
     enum class string_e { LOW_E, A, D, G, B, HIGH_E }; // guitar string
@@ -20,13 +21,21 @@ class Fretboard {
 
     /**
      * Coordinates/Finger positions of fretboard
-     * (0, 0) at F on low E string
+     * (0, 0) at F on high E string
      */
     struct fretboard_location_t {
         fret_t x;
         string_e y;
     };
 
+    /**
+     * 
+     */
+    struct fret_loc_pixel_dim_t {
+        pixel_location_t pixel_loc;
+        uint16_t w;
+        uint16_t h;
+    };
 public:
     /**
      * @brief Default constructor for Fretboard
@@ -35,45 +44,53 @@ public:
     Fretboard() = default;
 
     /**
+     * @brief Constructor for Fretboard with 6 LCDs
+     *
+     */
+    Fretboard(LCD const &lcd_1, LCD const &lcd_2, LCD const &lcd_3, LCD const &lcd_4, LCD const &lcd_5, LCD const &lcd_6)
+        : m_lcds{lcd_1, lcd_2, lcd_3, lcd_4, lcd_5, lcd_6} {}
+
+    /**
      * @brief Initializes LCD screens on the fretboard
      *
      */
-    void fretboard_init();
+    auto fretboard_init() -> void;
 
     /**
      * @brief Writes a circle to a specific location on the fretboard
      * @param fretboard_location coordinates of note on fretboard grid
-     * @param radius radius of circle to be written
      * @param color color of circle to be written
      */
-    void draw_note(fretboard_location_t fretboard_location, int radius, uint16_t color);
+    auto draw_note(fretboard_location_t fretboard_location, uint16_t color) -> void;
 
     /**
      * @brief draws indicator to play open string  TODO: determine what kind of indicator
      * @param string string to play
      * @param color color of indicator
      */
-    void draw_string(string_e string, uint16_t color);
+    auto draw_string(string_e string, uint16_t color) -> void;
 
     /*----------------------BACKDOOR FUNCTIONS-------------------------- */
-    /**
-     * @brief Writes a pixel to a specific location on an LCD screen
-     * @param pixel_location coordinates of pixel to be written to screen
-     * @param color color of pixel to be written
-     */
-    void draw_pixel(pixel_location_t pixel_location, uint16_t color);
 
     /**
      * @brief converts fretboard location to pixel location
      * @param fretboard_location fretboard location to be converted
      * @return pixel coordinate of fret
      */
-    auto convert_fret_to_pixels(fretboard_location_t fretboard_location) -> pixel_location_t;
+    auto convert_fret_to_pixels(fretboard_location_t fretboard_location) -> fret_loc_pixel_dim_t;
 
     /**
      * @brief Clears the fretboard LCDs
      */
-    void clear_fretboard();
+    auto clear_fretboard() -> void;
+
+    /*
+     * @brief converts string to height and pixel_location.y
+     * @param y string to be converted
+     * @param pixel_y changes in this function, starting pixel location y
+     * @param height changes in this function, height to next pixel
+     */
+    auto convert_fret_y(string_e y, uint16_t &pixel_y, uint16_t &height) -> void;
 
 private:
     std::array<LCD, num_lcds> m_lcds;

@@ -2,10 +2,6 @@
 
 
 auto LCD::init() const -> void {
-    start_reset();
-    HAL_Delay(10);
-    end_reset();
-
     // Send initialization commands
     // send_command(0x01);  // Software reset TODO: Is this necessary?
     // HAL_Delay(50);       // Necessary to wait at least 5 ms after software reset
@@ -97,13 +93,23 @@ auto LCD::init() const -> void {
     send_data(0x28);
 }
 
+auto LCD::reset_lcd() const -> void {
+    start_reset();
+    HAL_Delay(10);
+    end_reset();
+}
+
 auto LCD::fill_screen(uint16_t color) const -> void {
     draw_rectangle({0, 0}, width, height, color);
 }
 
 auto LCD::clear_screen() const -> void { fill_screen(WHITE); }
 
-auto LCD::draw_rectangle(pixel_location_t pos, int16_t w, int16_t h, uint16_t color) const -> void {
+auto LCD::draw_horizontal_line(pixel_location_t pos, uint16_t h, uint16_t color) const -> void {
+    draw_rectangle(pos, width, h, color);
+}
+
+auto LCD::draw_rectangle(pixel_location_t pos, uint16_t w, uint16_t h, uint16_t color) const -> void {
     if ((pos.x >= width) || (pos.y >= height)) return;
     if ((pos.x + w - 1) >= width) w = width - pos.x; // if our rectangle extends past the horizontal dimensions of the screen
     if ((pos.y + h - 1) >= height) h = height - pos.y;
@@ -125,7 +131,7 @@ auto LCD::draw_rectangle(pixel_location_t pos, int16_t w, int16_t h, uint16_t co
     noop(); // NOOP, reset csx, and end data stream
 }
 
-auto LCD::draw_bitmap(pixel_location_t pos, int16_t w, int16_t h, const std::vector<uint8_t> &bitmap) const -> void {
+auto LCD::draw_bitmap(pixel_location_t pos, uint16_t w, uint16_t h, const std::vector<uint8_t> &bitmap) const -> void {
     if ((pos.x >= width) || (pos.y >= height)) return;
     if ((pos.x + w - 1) >= width) w = width - pos.x; // if our rectangle extends past the horizontal dimensions of the screen
     if ((pos.y + h - 1) >= height) h = height - pos.y;
@@ -223,36 +229,12 @@ void LCD::drawCharTest(pixel_location_t pos, unsigned char c, uint16_t color, ui
 
 void LCD::drawPixel(pixel_location_t pos, uint16_t color)
 {
-	if ((pos.x < 0) || (pos.x >= width) || (pos.y < 0) || (pos.y >= height))
-		return;
-
-	set_addr_window(pos.x, pos.y, pos.x + 1, pos.y + 1);
-	set_data();
-	write16BitColor(color);
+    draw_rectangle(pos, 1, 1, color);
 }
 
 void LCD::drawPixelSize(pixel_location_t pos, uint16_t color, uint16_t size)
 {
-	if ((pos.x < 0) || (pos.x >= width) || (pos.y < 0) || (pos.y >= height))
-		return;
-
-	set_addr_window(pos.x, pos.y, pos.x + size, pos.y + size);
-	set_data();
-	write16BitColor(color);
-}
-
-void LCD::write16BitColor(uint16_t color)
-{
-
-	  uint8_t r = (color & 0xF800) >> 11;
-	  uint8_t g = (color & 0x07E0) >> 5;
-	  uint8_t b = color & 0x001F;
-
-	  r = (r * 255) / 31;
-	  g = (g * 255) / 63;
-	  b = (b * 255) / 31;
-	  uint8_t data[3] = {r, g, b};
-	  send_data_long(data, 3);
+    draw_rectangle(pos, size, size, color);
 }
 
 auto LCD::start_reset() const -> void { m_reset.reset(); }
