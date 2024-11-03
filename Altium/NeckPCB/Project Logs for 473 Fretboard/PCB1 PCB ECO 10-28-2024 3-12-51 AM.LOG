@@ -1,0 +1,4 @@
+Removed Pin From Net: NetName=LCD_CS_6 Pin=X1-P$7
+Removed Pin From Net: NetName=LCD_CS_5 Pin=X1-P$8
+Added Pin To Net: NetName=LCD_CS_5 Pin=X1-P$7
+Added Pin To Net: NetName=LCD_CS_6 Pin=X1-P$8

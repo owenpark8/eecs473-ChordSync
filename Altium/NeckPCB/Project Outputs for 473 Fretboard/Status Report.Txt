@@ -1,0 +1,28 @@
+Output: Gerber Files
+Type  : Gerber
+From  : Variant [[No Variations]] of Project [473 Fretboard.PrjPcb]
+   Generated File[PCB2.GTO]
+   Generated File[PCB2.GTP]
+   Generated File[PCB2.GTS]
+   Generated File[PCB2.GTL]
+   Generated File[PCB2.GBL]
+   Generated File[PCB2.GBS]
+   Generated File[PCB2.GBP]
+   Generated File[PCB2.GBO]
+   Generated File[PCB2.GM1]
+   Generated File[PCB2.GM13]
+   Generated File[PCB2.GM15]
+   Generated File[PCB2.GKO]
+   Generated File[PCB2.1]
+   Generated File[PCB2.GML]
+   Generated File[PCB2.GD1]
+   Generated File[PCB2.GG1]
+   Generated File[PCB2.GM]
+   Generated File[PCB2.EXTREP]
+   Generated File[PCB2.REP]
+
+
+Files Generated   : 19
+Documents Printed : 0
+
+Finished Output Generation At 11:16:06 PM On 11/1/2024
