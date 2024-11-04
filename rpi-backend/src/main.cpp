@@ -1,19 +1,15 @@
-#include <chrono>
 #include <cstddef>
-#include <filesystem>
 #include <format>
 #include <iostream>
-#include <ratio>
 #include <thread>
 
 #include <SQLiteCpp/SQLiteCpp.h>
 #include <httplib.h>
 
-#include "SQLiteCpp/Database.h"
 #include "data.hpp"
+#include "serial.hpp"
 #include "web.hpp"
 
-namespace fs = std::filesystem;
 
 void web_server() {
     httplib::Server svr;
@@ -86,60 +82,30 @@ void web_server() {
 #endif
 }
 
-auto init_data() -> bool {
-#ifdef DEBUG
-    std::cout << "Initializing app data...\n";
-    std::cout << "Checking if data directory \"" << data::data_directory << "\" exists...\n";
-#endif
-    if (!fs::exists(data::data_directory)) {
-#ifdef DEBUG
-        std::cout << "Data directory does not exist! Creating directory...\n";
-#endif
-        if (!data::create_directory_if_not_exists(data::data_directory)) {
-#ifdef DEBUG
-            std::cerr << "Critical error: Data directory could not be created. Exiting.\n";
-#endif
-            return false;
-        }
-    }
-#ifdef DEBUG
-    else {
-        std::cout << "Data directory found!\n";
-    }
-#endif
-
-    try {
-        SQLite::Database db(data::db_filename, SQLite::OPEN_READWRITE | SQLite::OPEN_CREATE);
-        data::songs::create_table_if_not_exists(db);
-    } catch (std::exception& e) {
-#ifdef DEBUG
-        std::cerr << "SQLite exception: " << e.what() << std::endl;
-#endif
-        return false;
-    }
-
-    return true;
-}
-
 
 auto main(int argc, char* args[]) -> int {
-    if (!init_data()) {
+    if (!data::init()) {
         return 1;
     }
 
-    data::songs::SongInfo song = {
-            .title = "baby shark",
-            .artist = "doodoodoo",
-            .length = std::chrono::milliseconds(88),
-    };
-    try {
-        SQLite::Database db(data::db_filename, SQLite::OPEN_READWRITE | SQLite::OPEN_CREATE);
-        data::songs::insert_new_song(db, song);
-    } catch (std::exception& e) {
-#ifdef DEBUG
-        std::cerr << "SQLite exception: " << e.what() << std::endl;
-#endif
+    if (!serial::init()) {
+        return 1;
     }
+
+    //     data::songs::SongInfo song = {
+    //             .title = "baby shark",
+    //             .artist = "doodoodoo",
+    //             .length = std::chrono::milliseconds(88),
+    //     };
+    //     try {
+    //         SQLite::Database db(data::db_filename, SQLite::OPEN_READWRITE | SQLite::OPEN_CREATE);
+    //         data::songs::insert_new_song(db, song);
+    //     } catch (std::exception& e) {
+    // #ifdef DEBUG
+    //         std::cerr << "SQLite exception: " << e.what() << std::endl;
+    // #endif
+    //     }
+
 
 #ifdef DEBUG
     std::cout << "Starting web server thread...\n";
