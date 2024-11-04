@@ -15,6 +15,7 @@ target_sources(${RPI_BACKEND_TARGET} PRIVATE
     src/main.cpp
     src/web.cpp
     src/data.cpp
+    src/serial.cpp
 )
 
 target_include_directories(${RPI_BACKEND_TARGET} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
