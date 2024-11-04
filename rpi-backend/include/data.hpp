@@ -8,6 +8,8 @@ namespace data {
     extern std::string const data_directory;
     extern std::string const db_filename;
 
+    auto init() -> bool;
+
     /**
      * @brief Checks if a directory exists and creates it if it does not exist
      *

@@ -9,6 +9,43 @@ namespace data {
     std::string const data_directory = std::string(USER_HOME_DIR) + ".local/share/vsguitar/";
     std::string const db_filename = data_directory + "vsguitar.db";
 
+
+    auto init() -> bool {
+        namespace fs = std::filesystem;
+#ifdef DEBUG
+        std::cout << "Initializing app data...\n";
+        std::cout << "Checking if data directory \"" << data::data_directory << "\" exists...\n";
+#endif
+        if (!fs::exists(data::data_directory)) {
+#ifdef DEBUG
+            std::cout << "Data directory does not exist! Creating directory...\n";
+#endif
+            if (!data::create_directory_if_not_exists(data::data_directory)) {
+#ifdef DEBUG
+                std::cerr << "Critical error: Data directory could not be created. Exiting.\n";
+#endif
+                return false;
+            }
+        }
+#ifdef DEBUG
+        else {
+            std::cout << "Data directory found!\n";
+        }
+#endif
+
+        try {
+            SQLite::Database db(data::db_filename, SQLite::OPEN_READWRITE | SQLite::OPEN_CREATE);
+            data::songs::create_table_if_not_exists(db);
+        } catch (std::exception& e) {
+#ifdef DEBUG
+            std::cerr << "SQLite exception: " << e.what() << std::endl;
+#endif
+            return false;
+        }
+
+        return true;
+    }
+
     auto create_directory_if_not_exists(std::string const& directory) -> bool {
         namespace fs = std::filesystem;
         if (!fs::exists(directory)) {
