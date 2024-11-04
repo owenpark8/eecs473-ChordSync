@@ -1,5 +1,0 @@
-Removed Pin From Net: NetName=LCD_CS_5 Pin=J?-3
-Removed Pin From Net: NetName=LCD_CS_6 Pin=J?-4
-Added Pin To Net: NetName=LCD_CS_6 Pin=J?-3
-Added Pin To Net: NetName=LCD_CS_5 Pin=J?-4
-Added Member To Class: ClassName=Sheet1 Member=Component J? B8B-XH-A
