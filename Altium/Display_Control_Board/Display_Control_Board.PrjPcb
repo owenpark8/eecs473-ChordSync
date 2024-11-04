@@ -99,6 +99,10 @@ DItemRevisionGUID=
 GenerateClassCluster=0
 DocumentUniqueId=KHCGIBGT
 
+[GeneratedDocument1]
+DocumentPath=..\windat.v2\Desktop\Git\eecs473-VSGuitar\Display_Control_Board\Project Outputs for Display_Control_Board\Design Rule Check - Display_Control_Board.html
+DItemRevisionGUID=
+
 [Configuration1]
 Name=Sources
 ParameterCount=0
