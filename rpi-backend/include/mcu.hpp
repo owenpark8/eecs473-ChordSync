@@ -14,10 +14,9 @@ namespace mcu {
     using song_id_t = std::uint8_t;
 
     auto update_loaded_song_id() -> bool;
+    auto play_loaded_song() -> bool;
 
-    auto get_current_song_id() -> song_id_t;
-
-    extern std::mutex song_mut;
+    extern std::mutex mut;
     extern song_id_t current_song_id;
     extern song_status_e current_song_status;
 } // namespace mcu

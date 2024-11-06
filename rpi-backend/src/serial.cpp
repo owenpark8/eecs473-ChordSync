@@ -32,11 +32,7 @@ namespace serial {
         return true;
     }
 
-    auto send(std::uint8_t const* buffer, std::size_t size) -> void {
-        for (std::size_t i = 0; i < size; ++i) {
-            serialPutchar(fd, *(buffer + i));
-        }
-    }
+    auto send(std::uint8_t const* buffer, std::size_t size) -> bool { return serialPutbuffer(fd, reinterpret_cast<char const*>(buffer), size); }
 
     auto receive(std::uint8_t* buffer, std::size_t size) -> void {
         // this is sus

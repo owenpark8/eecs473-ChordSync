@@ -4,22 +4,25 @@
 #include "mcu.hpp"
 
 namespace mcu {
-    auto update_loaded_song_id() -> bool {
-        constexpr Message msg = create_request_song_id_message();
+    auto send_message(Message const& msg) -> bool {
         std::size_t buf_size = msg.size();
         std::uint8_t buf[buf_size];
         msg.encode(buf);
 
-        serial::send(buf, buf_size);
-
-        return true;
+        return serial::send(buf, buf_size);
     }
 
-    auto get_current_song_id() -> song_id_t {
-        return current_song_id;
+    auto update_loaded_song_id() -> bool {
+        constexpr Message msg = create_request_song_id_message();
+        return send_message(msg);
     }
 
-    std::mutex song_mut{};
+    auto play_loaded_song() -> bool {
+        constexpr Message msg = create_start_loaded_song_message();
+        return send_message(msg);
+    }
+
+    std::mutex mut{};
     std::uint8_t current_song_id = 0x00;
     song_status_e current_song_status = song_status_e::UNKNOWN;
 } // namespace mcu

@@ -181,13 +181,27 @@ void serialClose(int const fd) { close(fd); }
  *********************************************************************************
  */
 
-void serialPutchar(int const fd, unsigned char const c) {
+auto serialPutchar(int const fd, unsigned char const c) -> bool {
     ssize_t bytes_written = write(fd, &c, 1);
     if (bytes_written != 1) {
-        perror("Error writing to file descriptor");
+        return false;
     }
+    return true;
 }
 
+/*
+ * serialPutbuffer:
+ *	Send a specified sized buffer to the serial port
+ *********************************************************************************
+ */
+
+auto serialPutbuffer(int const fd, char const* buffer, size_t length) -> bool {
+    ssize_t bytes_written = write(fd, buffer, length);
+    if (bytes_written != static_cast<ssize_t>(length)) {
+        return false;
+    }
+    return true;
+}
 
 /*
  * serialPuts:
@@ -195,12 +209,13 @@ void serialPutchar(int const fd, unsigned char const c) {
  *********************************************************************************
  */
 
-void serialPuts(int const fd, char const* s) {
-    size_t len = strlen(s);
-    ssize_t bytes_written = write(fd, s, len);
-    if (bytes_written != (ssize_t) len) {
-        perror("Error writing to file descriptor");
+auto serialPuts(int const fd, char const* c_str) -> bool {
+    size_t length = strlen(c_str);
+    ssize_t bytes_written = write(fd, c_str, length);
+    if (bytes_written != static_cast<ssize_t>(length)) {
+        return false;
     }
+    return true;
 }
 
 /*

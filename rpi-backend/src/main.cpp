@@ -75,6 +75,14 @@ void web_server() {
     //     });
     // });
 
+    svr.Post("/play-song", [&](auto const& req, auto& res) {
+        std::unique_lock<std::mutex> lock(mcu::mut);
+        bool status = mcu::play_loaded_song();
+        if (!status) {
+            res.status = httplib::StatusCode::InternalServerError_500;
+        }
+    });
+
     svr.Get("/song-select-form", [](httplib::Request const& req, httplib::Response& res) {
         std::string options;
 
@@ -114,9 +122,9 @@ auto main(int argc, char* args[]) -> int {
         return 1;
     }
 
-    if (!serial::init()) {
-        return 1;
-    }
+    //  if (!serial::init()) {
+    //      return 1;
+    //  }
 
     //     data::songs::SongInfo song = {
     //             .title = "baby shark",
