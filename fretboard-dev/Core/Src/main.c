@@ -47,6 +47,7 @@ SPI_HandleTypeDef hspi1;
 UART_HandleTypeDef huart1;
 
 /* USER CODE BEGIN PV */
+uint8_t buf[4] = {0};
 
 /* USER CODE END PV */
 
@@ -103,7 +104,9 @@ int main(void)
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-  new_main(&hspi1);
+
+//  HAL_UART_Receive_IT(&huart1, buf, 4);
+   new_main(&hspi1);
 
   // THIS WHILE LOOP NEVER HAPPENS. NEW WHILE LOOP IN new_main()
   while (1)
@@ -365,6 +368,14 @@ static void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
+
+//void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
+//{
+//    // Handle UART RX Interrupt Here!
+//    if (huart == &huart1) {
+//    	HAL_UART_Receive_IT(&huart1, buf, 4);
+//    }
+//}
 
 /* USER CODE END 4 */
 

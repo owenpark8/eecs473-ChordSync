@@ -162,7 +162,7 @@ auto LCD::send_data_long(uint8_t const* data, std::size_t const size) const -> v
 }
 
 auto LCD::set_addr_window(uint16_t const x0, uint16_t const y0, uint16_t const x1, uint16_t const y1) const -> void {
-    assert(x0 <= x1 && y0 <= y1);
+    // assert(x0 <= x1 && y0 <= y1);
     send_command(ILI9486_CASET); // Column addr set
     send_data(x0 >> 8);
     send_data(x0 & 0xFF);
