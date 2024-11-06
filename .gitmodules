@@ -3,4 +3,7 @@
 	url = https://github.com/yhirose/cpp-httplib.git
 [submodule "rpi-backend/extern/SQLiteCpp"]
 	path = rpi-backend/extern/SQLiteCpp
-	url = git@github.com:SRombauts/SQLiteCpp.git
+	url = https://github.com/SRombauts/SQLiteCpp.git
+[submodule "rpi-backend/extern/fmt"]
+	path = rpi-backend/extern/fmt
+	url = https://github.com/fmtlib/fmt.git

@@ -1,10 +1,10 @@
 #include <cstddef>
-#include <format>
 #include <iostream>
 #include <string>
 #include <thread>
 
 #include <SQLiteCpp/SQLiteCpp.h>
+#include <fmt/format.h>
 #include <httplib.h>
 
 #include "data.hpp"
@@ -80,10 +80,10 @@ void web_server() {
 
         SQLite::Database db(data::db_filename);
         for (auto const& song_info: data::songs::get_all_songs(db)) {
-            options += std::format("<option value=\"{}\">{}</option>", song_info.id, song_info.title);
+            options += fmt::format("<option value=\"{}\">{}</option>", song_info.id, song_info.title);
         }
 
-        std::string song_select_form = std::format(web::get_source_file(web::source_files_e::SONGSELECTFORM_HTML), options);
+        std::string song_select_form = fmt::format(web::get_source_file(web::source_files_e::SONGSELECTFORM_HTML), options);
 
         res.set_content(song_select_form, web::html_type);
     });
