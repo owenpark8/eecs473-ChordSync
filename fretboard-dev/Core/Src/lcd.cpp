@@ -43,9 +43,9 @@ auto LCD::init() const -> void {
     send_command(0XC0); //Power Control 1
     send_data(0x17); // Vreg1out (sets positive gamma voltage)
     send_data(0x15); // Verg2out (sets negative gamma voltage)
-    
+
     send_command(0xC1); //Power Control 2
-    send_data(0x41); //VGH,VGL 
+    send_data(0x41); //VGH,VGL
     // missing configuration for VCI1 regulator output voltage, default 0b110 = 5
     send_command(0xC5); //VCOM Control this is not correct
     send_data(0x00);

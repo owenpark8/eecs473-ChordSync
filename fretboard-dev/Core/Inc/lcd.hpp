@@ -278,7 +278,6 @@ static const unsigned char font1[] = {
 /*------------------LCD Screen pixel dimensions--------------------*/
 #define ILI9486_TFTWIDTH  320
 #define ILI9486_TFTHEIGHT 480
-#define ILI9486_PIXEL_COUNT	ILI9486_TFTWIDTH * ILI9486_TFTHEIGHT
 
 /*----------------------Color Definitions--------------------------*/
 // 16 Bits for Color
@@ -302,6 +301,8 @@ struct pixel_location_t {
  */
 class LCD {
 public:
+	LCD() = default;
+
     LCD(SPI const &spi, Pin const &reg_sel, Pin const &reset)
         : m_spi(spi), m_reg_sel(reg_sel), m_reset(reset) {}
 
@@ -386,7 +387,7 @@ private:
     SPI m_spi{};
     Pin m_reg_sel{}; // LCD register select (command/data)
     Pin m_reset{};   // LCD reset
-    const uint16_t width = ILI9486_TFTHEIGHT;  // width in pixels of LCD screen
-    const uint16_t height = ILI9486_TFTWIDTH; // height in pixels of LCD screen
+    static constexpr uint16_t width = ILI9486_TFTHEIGHT;  // width in pixels of LCD screen
+    static constexpr uint16_t height = ILI9486_TFTWIDTH; // height in pixels of LCD screen
 
 };

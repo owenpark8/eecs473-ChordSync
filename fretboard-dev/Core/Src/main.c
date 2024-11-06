@@ -21,7 +21,6 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-#include "new_main.h"
 
 /* USER CODE END Includes */
 
@@ -106,7 +105,7 @@ int main(void)
   /* USER CODE BEGIN WHILE */
 
 //  HAL_UART_Receive_IT(&huart1, buf, 4);
-   new_main(&hspi1);
+  HAL_Post_Init();
 
   // THIS WHILE LOOP NEVER HAPPENS. NEW WHILE LOOP IN new_main()
   while (1)
