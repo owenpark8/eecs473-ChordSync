@@ -1,17 +1,20 @@
 #include <cstddef>
 #include <format>
 #include <iostream>
+#include <string>
 #include <thread>
 
 #include <SQLiteCpp/SQLiteCpp.h>
 #include <httplib.h>
 
 #include "data.hpp"
+#include "mcu.hpp"
 #include "serial.hpp"
 #include "web.hpp"
 
-
 void web_server() {
+    using httplib::Request, httplib::Response;
+
     httplib::Server svr;
 
     if (!svr.is_valid()) {
@@ -19,7 +22,7 @@ void web_server() {
         return;
     }
 
-    svr.Get("/", [](httplib::Request const& req, httplib::Response& res) {
+    svr.Get("/", [](Request const& req, Response& res) {
 #ifdef DEBUG
         std::string index_html = web::get_source_file("index.html");
         if (index_html.empty()) index_html = "<p>Error: index.html not found</p>";
@@ -48,6 +51,29 @@ void web_server() {
         res.set_content(style_css, web::css_type);
     });
 #endif
+
+    // svr.Get("/song-info", [&](Request const& /*req*/, Response& res) {
+    //     res.set_chunked_content_provider("text/event-stream", [&](size_t /*offset*/, httplib::DataSink& sink) {
+    //         std::unique_lock<std::mutex> lock(mcu::song_mut);
+    //
+    //         while (true) {
+    //             uint8_t current_song_id = mcu::get_current_song_id();
+    //
+    //             // Send the current song_id to the client
+    //             std::string message = "data: " + std::to_string(current_song_id) + "\n\n";
+    //             if (!sink.is_writable() || !sink.write(message.data(), message.size())) {
+    //                 // If write fails or client disconnects, exit the loop
+    //                 break;
+    //             }
+    //
+    //             // Wait until song_id changes
+    //             song_cv.wait(lock, [&] { return song_id.load() != current_song_id; });
+    //         }
+    //
+    //         // Return false to indicate the connection should be closed
+    //         return false;
+    //     });
+    // });
 
     svr.Get("/song-select-form", [](httplib::Request const& req, httplib::Response& res) {
         std::string options;
@@ -111,6 +137,7 @@ auto main(int argc, char* args[]) -> int {
     std::cout << "Starting web server thread...\n";
 #endif
     std::thread t(web_server);
+
 
     t.join();
 }

@@ -20,5 +20,4 @@ namespace web {
     auto get_source_file(std::string const& filename) -> std::string { return read_file_into_string(filename); }
 #endif
 
-
 } // namespace web

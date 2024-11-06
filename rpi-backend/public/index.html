@@ -7,16 +7,24 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>VSGuitar</title>
     <link rel="stylesheet" href="compiled.css">
+    <!-- <script src="htmx.min.js"></script>-->
+    <script src="https://unpkg.com/htmx.org@2.0.3/dist/htmx.js"
+        integrity="sha384-BBDmZzVt6vjz5YbQqZPtFZW82o8QotoM7RUp5xOxV3nSJ8u2pSdtzFAbGKzTlKtg"
+        crossorigin="anonymous"></script>
+    <script src="https://unpkg.com/htmx-ext-sse@2.2.2/sse.js"></script>
 </head>
 
 <body>
-    <script src="htmx.min.js"></script>
     <div class="maxwidthcontainer min-h-screen">
         <div class="mt-6 mx-auto flex flex-col text-center items-center">
             <h1 class="text-3xl font-bold mb-8">VSGuitar</h1>
             <div>
                 <h2 class="text-xl font-semibold">Guitar Information</h2>
-                <p class="font-medium">No song playing!</p>
+                <div>
+                    <p class="font-medium">Current song:</p>
+                    <div hx-ext="sse" sse-connect="/song-info" sse-swap="message">
+                    </div>
+                </div>
 
                 <div id="song-form-container" hx-get="/song-select-form" hx-trigger="load" class="mt-4">
                 </div>

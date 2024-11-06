@@ -58,17 +58,17 @@ struct Message {
 
 // Helper functions to build specific message types
 
-inline auto create_reset_message() -> Message { return {MessageType::Reset, {}, 0}; }
+constexpr inline auto create_reset_message() -> Message { return {MessageType::Reset, {}, 0}; }
 
-inline auto create_start_song_loading_message(std::uint8_t song_id) -> Message {
+constexpr inline auto create_start_song_loading_message(std::uint8_t const song_id) -> Message {
     Message msg{MessageType::StartSongLoading, {}, 1};
     msg.data[0] = song_id;
     return msg;
 }
 
-inline auto create_end_song_loading_message() -> Message { return {MessageType::EndSongLoading, {}, 0}; }
+constexpr inline auto create_end_song_loading_message() -> Message { return {MessageType::EndSongLoading, {}, 0}; }
 
-inline auto create_note_message(timestamp_t timestamp, fret_t fret, string_e string) -> Message {
+constexpr inline auto create_note_message(timestamp_t const timestamp, fret_t const fret, string_e const string) -> Message {
     Message msg{MessageType::Note, {}, 5};
     msg.data[0] = (timestamp >> 24) & 0xFF;
     msg.data[1] = (timestamp >> 16) & 0xFF;
@@ -78,16 +78,16 @@ inline auto create_note_message(timestamp_t timestamp, fret_t fret, string_e str
     return msg;
 }
 
-inline auto create_start_loaded_song_message() -> Message { return {MessageType::StartLoadedSong, {}, 0}; }
+constexpr inline auto create_start_loaded_song_message() -> Message { return {MessageType::StartLoadedSong, {}, 0}; }
 
-inline auto create_end_loaded_song_message() -> Message { return {MessageType::EndLoadedSong, {}, 0}; }
+constexpr inline auto create_end_loaded_song_message() -> Message { return {MessageType::EndLoadedSong, {}, 0}; }
 
-inline auto create_request_song_id_message() -> Message { return {MessageType::RequestSongID, {}, 0}; }
+constexpr inline auto create_request_song_id_message() -> Message { return {MessageType::RequestSongID, {}, 0}; }
 
-inline auto create_loaded_song_id_message(std::uint8_t song_id) -> Message {
+constexpr inline auto create_loaded_song_id_message(std::uint8_t const song_id) -> Message {
     Message msg{MessageType::LoadedSongID, {}, 1};
     msg.data[0] = song_id;
     return msg;
 }
 
-inline auto create_ack_message() -> Message { return {MessageType::ACK, {}, 0}; }
+constexpr inline auto create_ack_message() -> Message { return {MessageType::ACK, {}, 0}; }

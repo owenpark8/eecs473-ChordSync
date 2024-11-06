@@ -15,6 +15,7 @@ target_sources(${RPI_BACKEND_TARGET} PRIVATE
     src/main.cpp
     src/web.cpp
     src/data.cpp
+    src/mcu.cpp
     src/serial.cpp
 )
 
@@ -28,12 +29,15 @@ target_compile_definitions(${RPI_BACKEND_TARGET} PRIVATE
     USER_HOME_DIR="$ENV{HOME}/"
 )
 
-add_custom_target(run_web_server_scripts ALL
-    COMMAND ${CMAKE_COMMAND} -E echo "Compiling tailwind .css file..."
-    COMMAND ${CMAKE_COMMAND} -E env bash ${CMAKE_CURRENT_SOURCE_DIR}/scripts/compile_tailwind.sh ${CMAKE_CURRENT_SOURCE_DIR}
-    COMMAND ${CMAKE_COMMAND} -E echo "Generating source file strings..."
-    COMMAND ${CMAKE_COMMAND} -E env bash ${CMAKE_CURRENT_SOURCE_DIR}/scripts/generate_web_sources.sh ${CMAKE_CURRENT_SOURCE_DIR}/public ${CMAKE_CURRENT_SOURCE_DIR}/include/web_sources.hpp
-    COMMENT "Running web server scripts"
-)
-
-add_dependencies(${RPI_BACKEND_TARGET} run_web_server_scripts)
+if (NOT CMAKE_BUILD_TYPE STREQUAL "Debug")
+    add_custom_target(run_web_server_scripts ALL
+            COMMAND ${CMAKE_COMMAND} -E echo "Compiling tailwind .css file..."
+            COMMAND ${CMAKE_COMMAND} -E env bash ${CMAKE_CURRENT_SOURCE_DIR}/scripts/compile_tailwind.sh ${CMAKE_CURRENT_SOURCE_DIR}
+            COMMAND ${CMAKE_COMMAND} -E echo "Generating source file strings..."
+            COMMAND ${CMAKE_COMMAND} -E env bash ${CMAKE_CURRENT_SOURCE_DIR}/scripts/generate_web_sources.sh ${CMAKE_CURRENT_SOURCE_DIR}/public ${CMAKE_CURRENT_SOURCE_DIR}/include/web_sources.hpp
+            COMMENT "Running web server scripts"
+    )
+    add_dependencies(${RPI_BACKEND_TARGET} run_web_server_scripts)
+else()
+    add_compile_definitions(DEBUG)
+endif()

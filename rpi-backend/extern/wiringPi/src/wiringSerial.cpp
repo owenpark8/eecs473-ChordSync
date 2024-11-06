@@ -40,7 +40,7 @@
  *	port parameters - or as many as are required - hopefully!
  *********************************************************************************
  */
-int serialOpen(std::string const& device, int const baud) { serialOpen(device.c_str(), baud); }
+int serialOpen(std::string const& device, int const baud) { return serialOpen(device.c_str(), baud); }
 
 int serialOpen(char const* device, int const baud) {
     struct termios options;
