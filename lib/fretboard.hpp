@@ -13,7 +13,7 @@
  */
 class Fretboard {
     static constexpr std::size_t NUM_LCDS = 6;
-    static constexpr std::size_t NUM_FRETS = 24; // TODO: Check this number
+    static constexpr std::size_t NUM_FRETS = 23;
     static constexpr std::size_t NUM_STRINGS = 6;
     static constexpr uint16_t TOTAL_PIXEL_WIDTH = NUM_LCDS * ILI9486_TFTHEIGHT;
 
@@ -22,6 +22,9 @@ class Fretboard {
         uint16_t w;
         uint16_t h;
     };
+
+    std::array<LCD, NUM_LCDS> m_lcds{};
+
 
 public:
     /**
@@ -99,9 +102,8 @@ private:
         static const std::array<uint16_t, NUM_FRETS> fret_pixel_array = {
                 // keeps track of fret to pixel_location.x
                 0, 100, 200, 300, 400, 500, 600, 700, 800, 900, 1000, 1100,
-                1200, 1300, 1400, 1500, 1600, 1700, 1800, 1900, 2000, 2100, 2200, 2300
+                1200, 1300, 1400, 1500, 1600, 1700, 1800, 1900, 2000, 2100, 2200
         };
-
 
         uint16_t pixel_x = fret_pixel_array[note_location.fret];
         uint16_t pixel_y = 0;
@@ -159,6 +161,4 @@ private:
         }
     }
 
-private:
-    std::array<LCD, NUM_LCDS> m_lcds{};
 };
