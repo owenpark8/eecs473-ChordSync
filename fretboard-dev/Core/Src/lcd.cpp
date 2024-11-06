@@ -90,7 +90,8 @@ auto LCD::init() const -> void {
     send_command(ILI9486_DISPON); // Turn Display on
 
     send_command(0x36); // Memory Access Control, determines orientation of how LCD is updated
-    send_data(0x28);
+    // send_data(0x28);
+    send_data(0xE8);
 }
 
 auto LCD::reset_lcd() const -> void {
