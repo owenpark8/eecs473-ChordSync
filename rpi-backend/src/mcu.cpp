@@ -1,26 +1,48 @@
+#include <array>
+#include <chrono>
+#include <cstdint>
+
+#include "guitar.hpp"
 #include "messaging.hpp"
 #include "serial.hpp"
 
 #include "mcu.hpp"
 
 namespace mcu {
-    auto send_message(Message const& msg) -> bool {
-        std::size_t buf_size = msg.size();
-        std::uint8_t buf[buf_size];
-        msg.encode(buf);
+    auto send_control_message(ControlMessage const& message) -> void { serial::send(message.data(), sizeof(ControlMessage)); }
 
-        return serial::send(buf, buf_size);
+    auto send_data_message(DataMessage const& message) -> void {
+        std::visit([](auto const& msg) { serial::send(reinterpret_cast<uint8_t const*>(&msg), sizeof(msg)); }, message);
     }
 
-    auto update_loaded_song_id() -> bool {
-        constexpr Message msg = create_request_song_id_message();
-        return send_message(msg);
+    [[nodiscard]] auto receive_ack() -> bool {
+        ControlMessage msg{};
+        serial::receive(msg.data(), msg.size());
+
+        return (msg == ACK_MESSAGE);
     }
 
-    auto play_loaded_song() -> bool {
-        constexpr Message msg = create_start_loaded_song_message();
-        return send_message(msg);
+    auto start_song_loading(std::uint8_t id) -> void {
+        send_control_message(START_SONG_LOADING_MESSAGE);
+        // receive_ack();
+        send_data_message(StartSongLoadingDataMessage{id});
+        // receive_ack();
     }
+    auto send_note(std::chrono::milliseconds timestamp, fret_t fret, string_e string) -> void {
+        NoteDataMessage msg{
+                .timestamp = static_cast<std::uint32_t>(timestamp.count()),
+                .fret = static_cast<std::uint8_t>(fret),
+                .string = static_cast<std::uint8_t>(string),
+        };
+        send_control_message(NOTE_MESSAGE);
+        // receive_ack();
+        send_data_message(msg);
+        // receive_ack();
+    }
+
+    auto get_and_update_loaded_song_id() -> void { send_control_message(REQUEST_SONG_ID_MESSAGE); }
+
+    auto play_loaded_song() -> void { send_control_message(START_SONG_MESSAGE); }
 
     std::mutex mut{};
     std::uint8_t current_song_id = 0x00;

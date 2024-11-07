@@ -1,7 +1,10 @@
 #pragma once
 
+#include <chrono>
 #include <cstdint>
 #include <mutex>
+
+#include "guitar.hpp"
 
 namespace mcu {
     enum class song_status_e {
@@ -13,8 +16,10 @@ namespace mcu {
 
     using song_id_t = std::uint8_t;
 
-    auto update_loaded_song_id() -> bool;
-    auto play_loaded_song() -> bool;
+    auto start_song_loading(std::uint8_t id) -> void;
+    auto send_note(std::chrono::milliseconds timestamp, fret_t fret, string_e string) -> void;
+    auto get_and_update_loaded_song_id() -> void;
+    auto play_loaded_song() -> void;
 
     extern std::mutex mut;
     extern song_id_t current_song_id;
