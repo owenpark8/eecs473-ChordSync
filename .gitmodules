@@ -7,3 +7,6 @@
 [submodule "rpi-backend/extern/fmt"]
 	path = rpi-backend/extern/fmt
 	url = https://github.com/fmtlib/fmt.git
+[submodule "rpi-backend/extern/ctre"]
+	path = rpi-backend/extern/ctre
+	url = https://github.com/hanickadot/compile-time-regular-expressions.git
