@@ -26,6 +26,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <fcntl.h>
+#include <stdexcept>
 #include <sys/ioctl.h>
 #include <sys/stat.h>
 #include <sys/types.h>
@@ -40,10 +41,10 @@
  *	port parameters - or as many as are required - hopefully!
  *********************************************************************************
  */
-int serialOpen(std::string const& device, int const baud) { return serialOpen(device.c_str(), baud); }
+auto serialOpen(std::string const& device, int const baud) -> int { return serialOpen(device.c_str(), baud); }
 
-int serialOpen(char const* device, int const baud) {
-    struct termios options;
+auto serialOpen(char const* device, int const baud) -> int {
+    termios options{};
     speed_t myBaud;
     int status, fd;
 
@@ -181,12 +182,11 @@ void serialClose(int const fd) { close(fd); }
  *********************************************************************************
  */
 
-auto serialPutchar(int const fd, unsigned char const c) -> bool {
+auto serialPutchar(int const fd, unsigned char const c) -> void {
     ssize_t bytes_written = write(fd, &c, 1);
     if (bytes_written != 1) {
-        return false;
+        throw std::runtime_error("Could not write all bytes to serial port!");
     }
-    return true;
 }
 
 /*
@@ -195,12 +195,11 @@ auto serialPutchar(int const fd, unsigned char const c) -> bool {
  *********************************************************************************
  */
 
-auto serialPutbuffer(int const fd, char const* buffer, size_t length) -> bool {
+auto serialPutbuffer(int const fd, char const* buffer, size_t length) -> void {
     ssize_t bytes_written = write(fd, buffer, length);
     if (bytes_written != static_cast<ssize_t>(length)) {
-        return false;
+        throw std::runtime_error("Could not write all bytes to serial port!");
     }
-    return true;
 }
 
 /*
@@ -209,13 +208,12 @@ auto serialPutbuffer(int const fd, char const* buffer, size_t length) -> bool {
  *********************************************************************************
  */
 
-auto serialPuts(int const fd, char const* c_str) -> bool {
+auto serialPuts(int const fd, char const* c_str) -> void {
     size_t length = strlen(c_str);
     ssize_t bytes_written = write(fd, c_str, length);
     if (bytes_written != static_cast<ssize_t>(length)) {
-        return false;
+        throw std::runtime_error("Could not write all bytes to serial port!");
     }
-    return true;
 }
 
 /*
@@ -224,7 +222,7 @@ auto serialPuts(int const fd, char const* c_str) -> bool {
  *********************************************************************************
  */
 
-void serialPrintf(int const fd, char const* message, ...) {
+auto serialPrintf(int const fd, char const* message, ...) -> void {
     va_list argp;
     char buffer[1024];
 
@@ -242,7 +240,7 @@ void serialPrintf(int const fd, char const* message, ...) {
  *********************************************************************************
  */
 
-int serialDataAvail(int const fd) {
+auto serialDataAvail(int const fd) -> int {
     int result;
 
     if (ioctl(fd, FIONREAD, &result) == -1) return -1;
@@ -259,7 +257,7 @@ int serialDataAvail(int const fd) {
  *********************************************************************************
  */
 
-int serialGetchar(int const fd) {
+auto serialGetchar(int const fd) -> int {
     uint8_t x;
 
     if (read(fd, &x, 1) != 1) return -1;

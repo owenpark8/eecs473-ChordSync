@@ -4,6 +4,7 @@
 #include <thread>
 
 #include <SQLiteCpp/SQLiteCpp.h>
+#include <ctre.hpp>
 #include <fmt/format.h>
 #include <httplib.h>
 
@@ -75,25 +76,45 @@ void web_server() {
     //     });
     // });
 
-    svr.Post("/play-song", [&](auto const& req, auto& res) {
+    svr.Post("/play-song", [&](Request const& req, Response& res) {
         std::unique_lock<std::mutex> lock(mcu::mut);
-        bool status = mcu::play_loaded_song();
-        if (!status) {
-            res.status = httplib::StatusCode::InternalServerError_500;
-        }
+        mcu::play_loaded_song();
     });
 
-    svr.Get("/song-select-form", [](httplib::Request const& req, httplib::Response& res) {
+    svr.Get("/song-select-form", [](Request const& req, Response& res) {
         std::string options;
 
         SQLite::Database db(data::db_filename);
         for (auto const& song_info: data::songs::get_all_songs(db)) {
-            options += fmt::format("<option value=\"{}\">{}</option>", song_info.id, song_info.title);
+            options += fmt::format("<option value={}>{}</option>", song_info.id, song_info.title);
         }
 
         std::string song_select_form = fmt::format(web::get_source_file(web::source_files_e::SONGSELECTFORM_HTML), options);
 
         res.set_content(song_select_form, web::html_type);
+    });
+
+    svr.Post("/submit-song-select", [&](Request const& req, Response& res) {
+        using namespace ctre::literals;
+        constexpr auto pattern = ctll::fixed_string{R"(^song-id=([0-9]{1,2}|1[0-9]{2}|2[0-4][0-9]|25[0-5])$)"};
+
+        auto match = ctre::match<pattern>(req.body);
+        if (!match) {
+            res.status = httplib::StatusCode::BadRequest_400;
+            return;
+        }
+
+        std::uint8_t id;
+        auto view = match.get<1>().to_view();
+        auto [ptr, ec] = std::from_chars(view.data(), view.data() + view.size(), id);
+
+        if (ec != std::errc()) {
+            res.status = httplib::StatusCode::BadRequest_400;
+            return;
+        }
+
+        mcu::start_song_loading(id);
+        // TODO: get song and send notes
     });
 
     svr.set_exception_handler([](httplib::Request const& req, httplib::Response& res, std::exception_ptr const& ep) {

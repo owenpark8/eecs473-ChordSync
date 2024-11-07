@@ -21,7 +21,7 @@ namespace data {
 
     namespace songs {
         struct SongInfo {
-            int id;
+            uint8_t id;
             std::string title;
             std::string artist;
             std::chrono::milliseconds length = std::chrono::milliseconds(0);

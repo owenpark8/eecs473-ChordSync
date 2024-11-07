@@ -77,7 +77,7 @@ namespace data {
             SQLite::Statement query(db, "INSERT INTO " + data::songs::song_table_name + " (title, artist, length) VALUES (?, ?, ?)");
             query.bind(1, song.title);
             query.bind(2, song.artist);
-            query.bind(3, static_cast<int>(song.length.count()));
+            query.bind(3, static_cast<uint32_t>(song.length.count()));
             query.exec();
         }
 
@@ -88,10 +88,10 @@ namespace data {
 
             while (query.executeStep()) {
                 SongInfo song;
-                song.id = query.getColumn(0).getInt();
+                song.id = query.getColumn(0).getUInt();
                 song.title = query.getColumn(1).getString();
                 song.artist = query.getColumn(2).getString();
-                song.length = std::chrono::milliseconds(query.getColumn(3).getInt());
+                song.length = std::chrono::milliseconds(query.getColumn(3).getUInt());
 
                 songs.push_back(song);
             }
