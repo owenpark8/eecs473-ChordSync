@@ -54,6 +54,26 @@ auto init() -> void {
 			fretboard.draw_note({i, string_e::HIGH_E}, (i % 2 == 0) ? RED : BLUE);
 			HAL_Delay(20);
 		}
+		for(int i = 0; i < 23; ++i) {
+			fretboard.draw_note({i, string_e::A}, (i % 2 == 1) ? RED : BLUE);
+			HAL_Delay(20);
+		}
+		for(int i = 0; i < 23; ++i) {
+			fretboard.draw_note({i, string_e::D}, (i % 2 == 0) ? RED : BLUE);
+			HAL_Delay(20);
+		}
+		for(int i = 0; i < 23; ++i) {
+			fretboard.draw_note({i, string_e::G}, (i % 2 == 1) ? RED : BLUE);
+			HAL_Delay(20);
+		}
+		for(int i = 0; i < 23; ++i) {
+			fretboard.draw_note({i, string_e::B}, (i % 2 == 0) ? RED : BLUE);
+			HAL_Delay(20);
+		}
+		for(int i = 0; i < 23; ++i) {
+			fretboard.draw_note({i, string_e::LOW_E}, (i % 2 == 1) ? RED : BLUE);
+			HAL_Delay(20);
+		}
 	}
 }
 

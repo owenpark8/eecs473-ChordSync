@@ -74,11 +74,14 @@ public:
         uint16_t lcd_index_2 = (note_location_rectangle.pixel_loc.x + note_location_rectangle.w) / 480; // 480 is width of LCD screen in pixels
         // In both cases, we want to draw a rectangle on the first LCD, our
         // if condition will confine the set_addr_window to not go beyond the bounds of the screen
-
-        m_lcds[lcd_index_1].draw_rectangle({note_location_rectangle.pixel_loc.x % 480, note_location_rectangle.pixel_loc.y}, note_location_rectangle.w, note_location_rectangle.h, color);
+        if (lcd_index_1 < NUM_LCDS) {
+            m_lcds[lcd_index_1].draw_rectangle({note_location_rectangle.pixel_loc.x % 480, note_location_rectangle.pixel_loc.y}, note_location_rectangle.w, note_location_rectangle.h, color);
+        }
         if (lcd_index_1 != lcd_index_2) {
             // Note goes across screens
-            m_lcds[lcd_index_2].draw_rectangle({0, note_location_rectangle.pixel_loc.y}, (note_location_rectangle.pixel_loc.x+note_location_rectangle.w) % 480, note_location_rectangle.h, color);
+            if (lcd_index_2 < NUM_LCDS) {
+                m_lcds[lcd_index_2].draw_rectangle({0, note_location_rectangle.pixel_loc.y}, (note_location_rectangle.pixel_loc.x+note_location_rectangle.w) % 480, note_location_rectangle.h, color);
+            }
         }
     }
 
