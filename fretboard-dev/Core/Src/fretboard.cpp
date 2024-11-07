@@ -47,21 +47,13 @@ auto init() -> void {
 	HAL_Delay(20);
 	lcd_4.fill_screen(GREEN);
 	HAL_Delay(20);
+	lcd_5.fill_screen(GREEN);
+	HAL_Delay(20);
 	while(true) {
-		fretboard.draw_note({0, string_e::HIGH_E}, RED);
-		HAL_Delay(20);
-		fretboard.draw_note({1, string_e::HIGH_E}, BLUE);
-		HAL_Delay(20);
-		fretboard.draw_note({2, string_e::HIGH_E}, RED);
-		HAL_Delay(20);
-		fretboard.draw_note({3, string_e::HIGH_E}, BLUE);
-		HAL_Delay(20);
-		fretboard.draw_note({4, string_e::HIGH_E}, RED);
-		HAL_Delay(20);
-		fretboard.draw_note({5, string_e::HIGH_E}, BLUE);
-		HAL_Delay(20);
-		fretboard.draw_note({6, string_e::HIGH_E}, RED);
-		HAL_Delay(20);
+		for(int i = 0; i < 23; ++i) {
+			fretboard.draw_note({i, string_e::HIGH_E}, (i % 2 == 0) ? RED : BLUE);
+			HAL_Delay(20);
+		}
 	}
 }
 
