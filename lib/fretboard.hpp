@@ -23,7 +23,15 @@ class Fretboard {
         uint16_t h;
     };
 
+    enum class uart_state {
+        REC_NEW_MSG,       // Receive a new header and message (2 bytes)
+        REC_SONG_ID,
+        REC_NOTE
+    };
+
     std::array<LCD, NUM_LCDS> m_lcds{};
+    uint8_t uart_buf = {0};
+    uart_state m_uart_state;
 
 
 public:
@@ -46,13 +54,12 @@ public:
      *
      */
     auto init() -> void {
-        for (auto& lcd: m_lcds) {
-            lcd.reset_lcd();
-        }
+        m_lcds[0].reset_lcd(); // only need to call it on an arbitrary one since they are all tied together
         for (auto& lcd: m_lcds) {
             lcd.init();
         }
-        clear();
+        m_uart_state = uart_state::REC_NEW_MSG;
+        // clear();
     }
 
     /**
@@ -70,7 +77,7 @@ public:
         m_lcds[lcd_index_1].draw_rectangle(note_location_rectangle.pixel_loc, note_location_rectangle.w, note_location_rectangle.h, color);
         if (lcd_index_1 != lcd_index_2) {
             // Note goes across screens
-            m_lcds[lcd_index_2].draw_rectangle(note_location_rectangle.pixel_loc, note_location_rectangle.w % 480, note_location_rectangle.h, color);
+            m_lcds[lcd_index_2].draw_rectangle({0, note_location_rectangle.pixel_loc.y}, (note_location_rectangle.pixel_loc.x+note_location_rectangle.w) % 480, note_location_rectangle.h, color);
         }
     }
 
@@ -86,6 +93,22 @@ public:
         convert_string_to_y(string, pixel_y, height); // Gives values to pixel_y and height
         for (auto& lcd: m_lcds) {
             lcd.draw_horizontal_line({0, pixel_y}, height, color);
+        }
+    }
+
+
+    /**
+     * @brief Handles a uart message, called on interrupt
+     */
+    auto handle_uart_message(UART_HandleTypeDef *huart) -> void {
+        switch (m_uart_state) {
+            case uart_state::REC_NEW_MSG:
+                // HAL_UART_Receive_IT(huart, uart_buf, 2);
+                break;
+            case uart_state::REC_SONG_ID:
+                break;
+            case uart_state::REC_NOTE:
+                break;
         }
     }
 

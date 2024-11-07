@@ -53,6 +53,7 @@ UART_HandleTypeDef huart1;
 
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
+void PeriphCommonClock_Config(void);
 static void MX_GPIO_Init(void);
 static void MX_ICACHE_Init(void);
 static void MX_SPI1_Init(void);
@@ -90,6 +91,9 @@ int main(void)
 
   /* Configure the system clock */
   SystemClock_Config();
+
+  /* Configure the peripherals common clocks */
+  PeriphCommonClock_Config();
 
   /* USER CODE BEGIN SysInit */
 
@@ -177,6 +181,37 @@ void SystemClock_Config(void)
   /** Configure the programming delay
   */
   __HAL_FLASH_SET_PROGRAM_DELAY(FLASH_PROGRAMMING_DELAY_2);
+}
+
+/**
+  * @brief Peripherals Common Clock Configuration
+  * @retval None
+  */
+void PeriphCommonClock_Config(void)
+{
+  RCC_PeriphCLKInitTypeDef PeriphClkInitStruct = {0};
+
+  /** Initializes the peripherals clock
+  */
+  PeriphClkInitStruct.PeriphClockSelection = RCC_PERIPHCLK_SPI1|RCC_PERIPHCLK_SPI2
+                              |RCC_PERIPHCLK_SPI3;
+  PeriphClkInitStruct.PLL2.PLL2Source = RCC_PLL2_SOURCE_CSI;
+  PeriphClkInitStruct.PLL2.PLL2M = 1;
+  PeriphClkInitStruct.PLL2.PLL2N = 37;
+  PeriphClkInitStruct.PLL2.PLL2P = 5;
+  PeriphClkInitStruct.PLL2.PLL2Q = 2;
+  PeriphClkInitStruct.PLL2.PLL2R = 2;
+  PeriphClkInitStruct.PLL2.PLL2RGE = RCC_PLL2_VCIRANGE_2;
+  PeriphClkInitStruct.PLL2.PLL2VCOSEL = RCC_PLL2_VCORANGE_WIDE;
+  PeriphClkInitStruct.PLL2.PLL2FRACN = 4096;
+  PeriphClkInitStruct.PLL2.PLL2ClockOut = RCC_PLL2_DIVP;
+  PeriphClkInitStruct.Spi1ClockSelection = RCC_SPI1CLKSOURCE_PLL2P;
+  PeriphClkInitStruct.Spi2ClockSelection = RCC_SPI2CLKSOURCE_PLL2P;
+  PeriphClkInitStruct.Spi3ClockSelection = RCC_SPI3CLKSOURCE_PLL2P;
+  if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInitStruct) != HAL_OK)
+  {
+    Error_Handler();
+  }
 }
 
 /**
@@ -429,7 +464,10 @@ static void MX_GPIO_Init(void)
   HAL_GPIO_WritePin(GPIOC, LCD_RST_Pin|CSX_A_Pin, GPIO_PIN_SET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOB, CSX_B_Pin|CSX_C_Pin|CSX_D_Pin|CSX_E_Pin, GPIO_PIN_SET);
+  HAL_GPIO_WritePin(GPIOB, CSX_B_Pin|CSX_D_Pin|CSX_E_Pin, GPIO_PIN_SET);
+
+  /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(CSX_C_GPIO_Port, CSX_C_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin : B1_BLUE_USER_BUTTON_Pin */
   GPIO_InitStruct.Pin = B1_BLUE_USER_BUTTON_Pin;
@@ -459,8 +497,8 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : CSX_B_Pin CSX_C_Pin CSX_D_Pin CSX_E_Pin */
-  GPIO_InitStruct.Pin = CSX_B_Pin|CSX_C_Pin|CSX_D_Pin|CSX_E_Pin;
+  /*Configure GPIO pins : CSX_B_Pin CSX_D_Pin CSX_E_Pin CSX_C_Pin */
+  GPIO_InitStruct.Pin = CSX_B_Pin|CSX_D_Pin|CSX_E_Pin|CSX_C_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
