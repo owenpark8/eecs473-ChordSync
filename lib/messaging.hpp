@@ -35,13 +35,13 @@ constexpr std::uint8_t MESSAGE_HEADER = 0x01;
 
 // clang-format off
 constexpr ControlMessage RESET_MESSAGE              = {MESSAGE_HEADER, static_cast<uint8_t>(MessageType::Reset)};
-constexpr ControlMessage START_SONG_LOADING_MESSAGE = {MESSAGE_HEADER, static_cast<uint8_t>(MessageType::Reset)};
+constexpr ControlMessage START_SONG_LOADING_MESSAGE = {MESSAGE_HEADER, static_cast<uint8_t>(MessageType::StartSongLoading)};
 constexpr ControlMessage END_SONG_LOADING_MESSAGE   = {MESSAGE_HEADER, static_cast<uint8_t>(MessageType::EndSongLoading)};
 constexpr ControlMessage NOTE_MESSAGE               = {MESSAGE_HEADER, static_cast<uint8_t>(MessageType::Note)};
 constexpr ControlMessage START_SONG_MESSAGE         = {MESSAGE_HEADER, static_cast<uint8_t>(MessageType::StartSong)};
 constexpr ControlMessage END_SONG_MESSAGE           = {MESSAGE_HEADER, static_cast<uint8_t>(MessageType::EndSong)};
 constexpr ControlMessage REQUEST_SONG_ID_MESSAGE    = {MESSAGE_HEADER, static_cast<uint8_t>(MessageType::RequestSongID)};
-constexpr ControlMessage LOADED_SONG_ID_MESSAGE     = {MESSAGE_HEADER, static_cast<uint8_t>(MessageType::RequestSongID)};
+constexpr ControlMessage LOADED_SONG_ID_MESSAGE     = {MESSAGE_HEADER, static_cast<uint8_t>(MessageType::LoadedSongID)};
 constexpr ControlMessage ACK_MESSAGE                = {MESSAGE_HEADER, static_cast<uint8_t>(MessageType::ACK)};
 // clang-format on
 
@@ -59,4 +59,4 @@ struct LoadedSongDataMessage {
     std::uint8_t song_id;
 };
 
-using DataMessage = std::variant<StartSongLoadingDataMessage, NoteDataMessage, LoadedSongDataMessage>;
+// using DataMessage = std::variant<StartSongLoadingDataMessage, NoteDataMessage, LoadedSongDataMessage>;

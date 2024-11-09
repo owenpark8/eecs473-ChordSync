@@ -5,6 +5,7 @@
 
 #include "lcd.hpp"
 #include "guitar.hpp"
+#include "messaging.hpp"
 
 
 /**
@@ -24,14 +25,18 @@ class Fretboard {
     };
 
     enum class uart_state {
-        REC_NEW_MSG,       // Receive a new header and message (2 bytes)
-        REC_SONG_ID,
-        REC_NOTE
+        NEW_MSG,       // Process a new header and message (2 bytes)
+        SONG_ID,
+        NOTE
     };
 
+
     std::array<LCD, NUM_LCDS> m_lcds{};
-    uint8_t uart_buf = {0};
+    std::vector<NoteDataMessage> song;
+    UART_HandleTypeDef *huart;
+    uint8_t m_uart_buf[5] = {0}; // 5 is the max size message we will need to receive
     uart_state m_uart_state;
+    uint8_t m_song_id;
 
 
 public:
@@ -45,8 +50,8 @@ public:
      * @brief Constructor for Fretboard with 6 LCDs
      *
      */
-    Fretboard(LCD const& lcd_1, LCD const& lcd_2, LCD const& lcd_3, LCD const& lcd_4, LCD const& lcd_5, LCD const& lcd_6)
-        : m_lcds{lcd_1, lcd_2, lcd_3, lcd_4, lcd_5, lcd_6} {}
+    Fretboard(LCD const& lcd_1, LCD const& lcd_2, LCD const& lcd_3, LCD const& lcd_4, LCD const& lcd_5, LCD const& lcd_6, UART_HandleTypeDef *huart)
+        : m_lcds{lcd_1, lcd_2, lcd_3, lcd_4, lcd_5, lcd_6}, huart(huart) {}
 
 
     /**
@@ -58,8 +63,9 @@ public:
         for (auto& lcd: m_lcds) {
             lcd.init();
         }
-        m_uart_state = uart_state::REC_NEW_MSG;
-        // clear();
+        clear();
+        // Initialize UART Protocol
+        rec_new_msg();
     }
 
     /**
@@ -103,16 +109,52 @@ public:
 
     /**
      * @brief Handles a uart message, called on interrupt
+     * @note Make sure state transition happens before call to interrupt
      */
     auto handle_uart_message(UART_HandleTypeDef *huart) -> void {
-        switch (m_uart_state) {
-            case uart_state::REC_NEW_MSG:
-                // HAL_UART_Receive_IT(huart, uart_buf, 2);
-                break;
-            case uart_state::REC_SONG_ID:
-                break;
-            case uart_state::REC_NOTE:
-                break;
+        if (m_uart_buf[0] != 0x01) return; // Header was not received correctly
+        if (m_uart_state == uart_state::NEW_MSG) {
+            uint8_t &message = m_uart_buf[1]; // Header is byte 0, msg is byte 1
+            switch(static_cast<MessageType>(message)) {
+                case MessageType::Reset:
+                    init(); // init requests for a new message
+                    break;
+                case MessageType::StartSongLoading:
+                    m_uart_state = uart_state::SONG_ID;
+                    send_ack();
+                    HAL_UART_Receive_IT(huart, m_uart_buf, 1); // 1 byte for song id
+                    break;
+                case MessageType::EndSongLoading:
+                    break;
+                case MessageType::Note:
+                    m_uart_state = uart_state::NOTE;
+                    send_ack();
+                    HAL_UART_Receive_IT(huart, m_uart_buf, sizeof(NoteDataMessage)); // receive note Data
+                    break;
+                case MessageType::StartSong:
+
+                    rec_new_msg();
+                    break;
+                case MessageType::EndSong:
+                    rec_new_msg();
+                    break;
+                case MessageType::RequestSongID:
+                    send_ack();
+                    HAL_UART_Transmit(huart, LOADED_SONG_ID_MESSAGE.data(), sizeof(LOADED_SONG_ID_MESSAGE), 100);
+                    // TODO: Receive ACK here?
+                    HAL_UART_Transmit(huart, &m_song_id, sizeof(m_song_id), 100);
+                    rec_new_msg();
+                    break;
+                default:
+                    break;
+            }
+        } else if (m_uart_state == uart_state::SONG_ID){
+            m_song_id = m_uart_buf[0];
+            rec_new_msg();
+        } else { // m_uart_state == NOTE
+            NoteDataMessage& message = *reinterpret_cast<NoteDataMessage*>(m_uart_buf);
+            song.push_back(message);
+            rec_new_msg();
         }
     }
 
@@ -186,6 +228,15 @@ private:
             default:
                 break;
         }
+    }
+
+    auto send_ack() -> void {
+        HAL_UART_Transmit(huart, ACK_MESSAGE.data(), sizeof(ACK_MESSAGE), 100);
+    }
+
+    auto rec_new_msg() -> void {
+        m_uart_state = uart_state::NEW_MSG;
+        HAL_UART_Receive_IT(huart, m_uart_buf, 2);
     }
 
 };

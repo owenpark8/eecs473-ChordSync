@@ -36,7 +36,7 @@ auto init() -> void {
 	LCD lcd_6 = LCD(SPI_F, reg_sel_in, reset_in);
 
 
-	fretboard = Fretboard{lcd_1, lcd_2, lcd_3, lcd_4, lcd_5, lcd_6};
+	fretboard = Fretboard{lcd_1, lcd_2, lcd_3, lcd_4, lcd_5, lcd_6, &huart1};
 	fretboard.init();
 
 	lcd_1.fill_screen(GREEN);
