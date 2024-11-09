@@ -65,7 +65,7 @@ public:
         }
         clear();
         // Initialize UART Protocol
-        rec_new_msg();
+        // rec_new_msg();
     }
 
     /**
@@ -170,8 +170,8 @@ private:
         // TODO: replace these numbers with actual pixels after measuring with guitar
         static const std::array<uint16_t, NUM_FRETS> fret_pixel_array = {
                 // keeps track of fret to pixel_location.x
-                0, 100, 200, 300, 400, 500, 600, 700, 800, 900, 1000, 1100,
-                1200, 1300, 1400, 1500, 1600, 1700, 1800, 1900, 2000, 2100, 2200
+                0, 163, 388, 520, 715, 800, 900, 1000, 1100,
+                1200, 1300, 1400, 1500, 1600, 1700, 1800, 1900, 2000, 2100, 2200, 2300, 2400, 2500
         };
 
         uint16_t pixel_x = fret_pixel_array[note_location.fret];

@@ -39,16 +39,16 @@ auto init() -> void {
 	fretboard = Fretboard{lcd_1, lcd_2, lcd_3, lcd_4, lcd_5, lcd_6, &huart1};
 	fretboard.init();
 
-	lcd_1.fill_screen(GREEN);
-	HAL_Delay(20);
-	lcd_2.fill_screen(GREEN);
-	HAL_Delay(20);
-	lcd_3.fill_screen(GREEN);
-	HAL_Delay(20);
-	lcd_4.fill_screen(GREEN);
-	HAL_Delay(20);
-	lcd_5.fill_screen(GREEN);
-	HAL_Delay(20);
+//	lcd_1.fill_screen(GREEN);
+//	HAL_Delay(20);
+//	lcd_2.fill_screen(GREEN);
+//	HAL_Delay(20);
+//	lcd_3.fill_screen(GREEN);
+//	HAL_Delay(20);
+//	lcd_4.fill_screen(GREEN);
+//	HAL_Delay(20);
+//	lcd_5.fill_screen(GREEN);
+//	HAL_Delay(20);
 	while(true) {
 		for(int i = 0; i < 23; ++i) {
 			fretboard.draw_note({i, string_e::HIGH_E}, (i % 2 == 0) ? RED : BLUE);
