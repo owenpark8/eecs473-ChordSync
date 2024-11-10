@@ -1,5 +1,6 @@
 #include <array>
 #include <cstdint>
+#include <stdexcept>
 
 #include "messaging.hpp"
 #include "serial.hpp"
@@ -9,8 +10,19 @@
 namespace mcu {
     auto send_control_message(ControlMessage const& message) -> void { serial::send(message.data(), sizeof(ControlMessage)); }
 
-    auto send_data_message(DataMessage const& message) -> void {
-        std::visit([](auto const& msg) { serial::send(reinterpret_cast<uint8_t const*>(&msg), sizeof(msg)); }, message);
+    template<typename T>
+    struct is_valid_data_message : std::false_type {};
+    template<>
+    struct is_valid_data_message<StartSongLoadingDataMessage> : std::true_type {};
+    template<>
+    struct is_valid_data_message<NoteDataMessage> : std::true_type {};
+    template<>
+    struct is_valid_data_message<LoadedSongDataMessage> : std::true_type {};
+
+    template<typename MessageType>
+    auto send_data_message(MessageType const& message) -> typename std::enable_if<is_valid_data_message<MessageType>::value, void>::type {
+        serial::send(MESSAGE_HEADER);
+        serial::send(reinterpret_cast<std::uint8_t const*>(&message), sizeof(MessageType));
     }
 
     [[nodiscard]] auto receive_ack() -> bool {
@@ -22,9 +34,13 @@ namespace mcu {
 
     auto start_song_loading(std::uint8_t id) -> void {
         send_control_message(START_SONG_LOADING_MESSAGE);
-        // receive_ack();
+        if (!receive_ack()) {
+            throw std::runtime_error("Could not start song loading: did not receive ACK!");
+        }
         send_data_message(StartSongLoadingDataMessage{id});
-        // receive_ack();
+        if (!receive_ack()) {
+            throw std::runtime_error("Could not start song loading: did not receive ACK!");
+        }
     }
     auto send_note(std::uint32_t timestamp_ms, std::uint16_t length_ms, std::uint8_t fret, std::uint8_t string) -> void {
         NoteDataMessage msg{
@@ -33,9 +49,19 @@ namespace mcu {
                 .fret = static_cast<std::uint8_t>(fret),
                 .string = static_cast<std::uint8_t>(string),
         };
+
         send_control_message(NOTE_MESSAGE);
-        // receive_ack();
+        if (!receive_ack()) {
+            throw std::runtime_error("Could not send note: did not receive ACK!");
+        }
         send_data_message(msg);
+        if (!receive_ack()) {
+            throw std::runtime_error("Could not send note: did not receive ACK!");
+        }
+    }
+
+    auto end_song_loading() -> void {
+        send_control_message(END_SONG_LOADING_MESSAGE);
         // receive_ack();
     }
 
@@ -46,4 +72,5 @@ namespace mcu {
     std::mutex mut{};
     std::uint8_t current_song_id = 0x00;
     song_status_e current_song_status = song_status_e::UNKNOWN;
+
 } // namespace mcu

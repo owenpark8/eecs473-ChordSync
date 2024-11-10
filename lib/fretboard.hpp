@@ -65,7 +65,7 @@ public:
         }
         clear();
         // Initialize UART Protocol
-        // rec_new_msg();
+        rec_new_msg();
     }
 
     /**
@@ -122,7 +122,7 @@ public:
                 case MessageType::StartSongLoading:
                     m_uart_state = uart_state::SONG_ID;
                     send_ack();
-                    HAL_UART_Receive_IT(huart, m_uart_buf, 1); // 1 byte for song id
+                    HAL_UART_Receive_IT(huart, m_uart_buf, 2); // 1 byte for song id
                     break;
                 case MessageType::EndSongLoading:
                     break;

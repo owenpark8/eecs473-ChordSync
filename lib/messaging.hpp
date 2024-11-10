@@ -2,7 +2,6 @@
 
 #include <array>
 #include <cstdint>
-#include <variant>
 
 // Maximum data size for the message payload.
 constexpr std::size_t MAX_DATA_SIZE = 6;
@@ -59,5 +58,3 @@ struct __attribute__((packed)) NoteDataMessage {
 struct LoadedSongDataMessage {
     std::uint8_t song_id;
 };
-
-using DataMessage = std::variant<StartSongLoadingDataMessage, NoteDataMessage, LoadedSongDataMessage>;

@@ -32,6 +32,7 @@ namespace serial {
         return true;
     }
 
+    auto send(std::uint8_t const data) -> void { serialPutchar(fd, data); }
     auto send(std::uint8_t const* buffer, std::size_t size) -> void { serialPutbuffer(fd, reinterpret_cast<char const*>(buffer), size); }
 
     auto receive(std::uint8_t* buffer, std::size_t size) -> void {
