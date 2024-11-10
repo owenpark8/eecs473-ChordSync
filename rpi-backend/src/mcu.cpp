@@ -1,8 +1,6 @@
 #include <array>
-#include <chrono>
 #include <cstdint>
 
-#include "guitar.hpp"
 #include "messaging.hpp"
 #include "serial.hpp"
 
@@ -28,9 +26,10 @@ namespace mcu {
         send_data_message(StartSongLoadingDataMessage{id});
         // receive_ack();
     }
-    auto send_note(std::chrono::milliseconds timestamp, fret_t fret, string_e string) -> void {
+    auto send_note(std::uint32_t timestamp_ms, std::uint16_t length_ms, std::uint8_t fret, std::uint8_t string) -> void {
         NoteDataMessage msg{
-                .timestamp = static_cast<std::uint32_t>(timestamp.count()),
+                .timestamp_ms = timestamp_ms,
+                .length_ms = length_ms,
                 .fret = static_cast<std::uint8_t>(fret),
                 .string = static_cast<std::uint8_t>(string),
         };

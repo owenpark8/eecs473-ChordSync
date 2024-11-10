@@ -10,7 +10,6 @@
 
 #include "data.hpp"
 #include "mcu.hpp"
-#include "serial.hpp"
 #include "web.hpp"
 
 void web_server() {
@@ -87,6 +86,12 @@ void web_server() {
         SQLite::Database db(data::db_filename);
         for (auto const& song_info: data::songs::get_all_songs(db)) {
             options += fmt::format("<option value={}>{}</option>", song_info.id, song_info.title);
+#ifdef DEBUG
+            for (auto const& note: song_info.notes) {
+                std::cout << "note: ";
+                note.print();
+            }
+#endif
         }
 
         std::string song_select_form = fmt::format(web::get_source_file(web::source_files_e::SONGSELECTFORM_HTML), options);
@@ -113,8 +118,14 @@ void web_server() {
             return;
         }
 
+        SQLite::Database db(data::db_filename, SQLite::OPEN_READWRITE | SQLite::OPEN_CREATE);
+        data::songs::SongInfo song = data::songs::get_song_by_id(db, id);
+
         mcu::start_song_loading(id);
-        // TODO: get song and send notes
+
+        for (auto const& note: song.notes) {
+            mcu::send_note(note.start_timestamp_ms, note.length_ms, note.fret, note.string);
+        }
     });
 
     svr.set_exception_handler([](httplib::Request const& req, httplib::Response& res, std::exception_ptr const& ep) {
@@ -147,19 +158,31 @@ auto main(int argc, char* args[]) -> int {
     //      return 1;
     //  }
 
-    //     data::songs::SongInfo song = {
-    //             .title = "baby shark",
-    //             .artist = "doodoodoo",
-    //             .length = std::chrono::milliseconds(88),
-    //     };
-    //     try {
-    //         SQLite::Database db(data::db_filename, SQLite::OPEN_READWRITE | SQLite::OPEN_CREATE);
-    //         data::songs::insert_new_song(db, song);
-    //     } catch (std::exception& e) {
-    // #ifdef DEBUG
-    //         std::cerr << "SQLite exception: " << e.what() << std::endl;
-    // #endif
-    //     }
+#ifdef DEBUG
+    data::songs::SongInfo song = {
+            .title = "baby shark",
+            .artist = "doodoodoo",
+            .length = std::chrono::seconds(137),
+            .bpm = 115,
+            .notes =
+                    {
+                            data::songs::Note{.start_timestamp_ms = 0, .length_ms = 200, .midi_note = 0, .fret = 0, .string = 0},
+                            data::songs::Note{.start_timestamp_ms = 200, .length_ms = 200, .midi_note = 1, .fret = 2, .string = 1},
+                            data::songs::Note{.start_timestamp_ms = 400, .length_ms = 200, .midi_note = 2, .fret = 4, .string = 2},
+                            data::songs::Note{.start_timestamp_ms = 600, .length_ms = 200, .midi_note = 3, .fret = 6, .string = 3},
+                    },
+    };
+    std::cout << "Inserting baby shark with notes: \n";
+    for (auto const& note: song.notes) {
+        note.print();
+    }
+    try {
+        SQLite::Database db(data::db_filename, SQLite::OPEN_READWRITE | SQLite::OPEN_CREATE);
+        data::songs::insert_new_song(db, song);
+    } catch (std::exception& e) {
+        std::cerr << "SQLite exception: " << e.what() << std::endl;
+    }
+#endif
 
 
 #ifdef DEBUG

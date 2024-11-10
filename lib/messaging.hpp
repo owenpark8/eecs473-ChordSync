@@ -49,8 +49,9 @@ struct StartSongLoadingDataMessage {
     std::uint8_t song_id;
 };
 
-struct NoteDataMessage {
-    std::uint32_t timestamp;
+struct __attribute__((packed)) NoteDataMessage {
+    std::uint32_t timestamp_ms;
+    std::uint16_t length_ms;
     std::uint8_t fret : 4;
     std::uint8_t string : 4;
 };
@@ -59,4 +60,4 @@ struct LoadedSongDataMessage {
     std::uint8_t song_id;
 };
 
-// using DataMessage = std::variant<StartSongLoadingDataMessage, NoteDataMessage, LoadedSongDataMessage>;
+using DataMessage = std::variant<StartSongLoadingDataMessage, NoteDataMessage, LoadedSongDataMessage>;
