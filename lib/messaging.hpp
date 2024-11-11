@@ -6,6 +6,9 @@
 // Maximum data size for the message payload.
 constexpr std::size_t MAX_DATA_SIZE = 6;
 
+// Maximum number of notes in a song
+constexpr std::size_t MAX_NOTES_IN_SONG = 30;
+
 // Represents a timestamp in milliseconds.
 using timestamp_t = std::uint32_t;
 

@@ -3,8 +3,8 @@
 #include <array>
 #include <cstdint>
 
-#include "lcd.hpp"
 #include "guitar.hpp"
+#include "lcd.hpp"
 #include "messaging.hpp"
 
 
@@ -25,16 +25,17 @@ class Fretboard {
     };
 
     enum class uart_state {
-        NEW_MSG,       // Process a new header and message (2 bytes)
+        NEW_MSG, // Process a new header and message (2 bytes)
         SONG_ID,
         NOTE
     };
 
 
     std::array<LCD, NUM_LCDS> m_lcds{};
-    std::vector<NoteDataMessage> song;
-    UART_HandleTypeDef *huart;
-    uint8_t m_uart_buf[5] = {0}; // 5 is the max size message we will need to receive
+    std::size_t m_song_size{};
+    std::array<NoteDataMessage, MAX_NOTES_IN_SONG> m_song{};
+    UART_HandleTypeDef* m_huart;
+    uint8_t m_uart_buf[sizeof(NoteDataMessage) + 1] = {0}; // 5 is the max size message we will need to receive
     uart_state m_uart_state;
     uint8_t m_song_id;
 
@@ -50,8 +51,8 @@ public:
      * @brief Constructor for Fretboard with 6 LCDs
      *
      */
-    Fretboard(LCD const& lcd_1, LCD const& lcd_2, LCD const& lcd_3, LCD const& lcd_4, LCD const& lcd_5, LCD const& lcd_6, UART_HandleTypeDef *huart)
-        : m_lcds{lcd_1, lcd_2, lcd_3, lcd_4, lcd_5, lcd_6}, huart(huart) {}
+    Fretboard(LCD const& lcd_1, LCD const& lcd_2, LCD const& lcd_3, LCD const& lcd_4, LCD const& lcd_5, LCD const& lcd_6, UART_HandleTypeDef* huart)
+        : m_lcds{lcd_1, lcd_2, lcd_3, lcd_4, lcd_5, lcd_6}, m_huart(huart) {}
 
 
     /**
@@ -76,17 +77,20 @@ public:
     auto draw_note(note_location_t note_location, uint16_t color) -> void {
         note_location_rectangle_t note_location_rectangle = convert_note_to_pixels(note_location);
         // Find which lcd(s) will be selected to draw this note
-        uint16_t lcd_index_1 = note_location_rectangle.pixel_loc.x / 480; // 480 is width of LCD screen in pixels
+        uint16_t lcd_index_1 = note_location_rectangle.pixel_loc.x / 480;                               // 480 is width of LCD screen in pixels
         uint16_t lcd_index_2 = (note_location_rectangle.pixel_loc.x + note_location_rectangle.w) / 480; // 480 is width of LCD screen in pixels
         // In both cases, we want to draw a rectangle on the first LCD, our
         // if condition will confine the set_addr_window to not go beyond the bounds of the screen
         if (lcd_index_1 < NUM_LCDS) {
-            m_lcds[lcd_index_1].draw_rectangle({note_location_rectangle.pixel_loc.x % 480, note_location_rectangle.pixel_loc.y}, note_location_rectangle.w, note_location_rectangle.h, color);
+            m_lcds[lcd_index_1].draw_rectangle({note_location_rectangle.pixel_loc.x % 480, note_location_rectangle.pixel_loc.y},
+                                               note_location_rectangle.w, note_location_rectangle.h, color);
         }
         if (lcd_index_1 != lcd_index_2) {
             // Note goes across screens
             if (lcd_index_2 < NUM_LCDS) {
-                m_lcds[lcd_index_2].draw_rectangle({0, note_location_rectangle.pixel_loc.y}, (note_location_rectangle.pixel_loc.x+note_location_rectangle.w) % 480, note_location_rectangle.h, color);
+                m_lcds[lcd_index_2].draw_rectangle({0, note_location_rectangle.pixel_loc.y},
+                                                   (note_location_rectangle.pixel_loc.x + note_location_rectangle.w) % 480, note_location_rectangle.h,
+                                                   color);
             }
         }
     }
@@ -111,49 +115,56 @@ public:
      * @brief Handles a uart message, called on interrupt
      * @note Make sure state transition happens before call to interrupt
      */
-    auto handle_uart_message(UART_HandleTypeDef *huart) -> void {
+    auto handle_uart_message(UART_HandleTypeDef* huart) -> void {
         if (m_uart_buf[0] != 0x01) return; // Header was not received correctly
         if (m_uart_state == uart_state::NEW_MSG) {
-            uint8_t &message = m_uart_buf[1]; // Header is byte 0, msg is byte 1
-            switch(static_cast<MessageType>(message)) {
+            uint8_t& message = m_uart_buf[1]; // Header is byte 0, msg is byte 1
+            switch (static_cast<MessageType>(message)) {
                 case MessageType::Reset:
+                    send_ack();
                     init(); // init requests for a new message
                     break;
                 case MessageType::StartSongLoading:
-                    m_uart_state = uart_state::SONG_ID;
                     send_ack();
-                    HAL_UART_Receive_IT(huart, m_uart_buf, 2); // 1 byte for song id
+                    m_song_size = 0;
+                    m_uart_state = uart_state::SONG_ID;
+                    HAL_UART_Receive_IT(m_huart, m_uart_buf, sizeof(StartSongLoadingDataMessage) + 1); // 1 byte for ID + 1 byte for header
                     break;
                 case MessageType::EndSongLoading:
+                    send_ack();
+                    rec_new_msg();
                     break;
                 case MessageType::Note:
-                    m_uart_state = uart_state::NOTE;
                     send_ack();
-                    HAL_UART_Receive_IT(huart, m_uart_buf, sizeof(NoteDataMessage)); // receive note Data
+                    m_uart_state = uart_state::NOTE;
+                    HAL_UART_Receive_IT(m_huart, m_uart_buf, sizeof(NoteDataMessage) + 1); // receive note Data + 1 byte for header
                     break;
                 case MessageType::StartSong:
-
+                    send_ack();
                     rec_new_msg();
                     break;
                 case MessageType::EndSong:
+                    send_ack();
                     rec_new_msg();
                     break;
                 case MessageType::RequestSongID:
                     send_ack();
-                    HAL_UART_Transmit(huart, LOADED_SONG_ID_MESSAGE.data(), sizeof(LOADED_SONG_ID_MESSAGE), 100);
+                    HAL_UART_Transmit(m_huart, LOADED_SONG_ID_MESSAGE.data(), sizeof(LOADED_SONG_ID_MESSAGE), 100);
                     // TODO: Receive ACK here?
-                    HAL_UART_Transmit(huart, &m_song_id, sizeof(m_song_id), 100);
+                    HAL_UART_Transmit(m_huart, &m_song_id, sizeof(m_song_id), 100);
                     rec_new_msg();
                     break;
                 default:
                     break;
             }
-        } else if (m_uart_state == uart_state::SONG_ID){
-            m_song_id = m_uart_buf[0];
+        } else if (m_uart_state == uart_state::SONG_ID) {
+            m_song_id = m_uart_buf[1];
+            send_ack();
             rec_new_msg();
         } else { // m_uart_state == NOTE
-            NoteDataMessage& message = *reinterpret_cast<NoteDataMessage*>(m_uart_buf);
-            song.push_back(message);
+            NoteDataMessage message = *reinterpret_cast<NoteDataMessage*>(m_uart_buf + 1);
+            m_song[m_song_size++] = message;
+            send_ack();
             rec_new_msg();
         }
     }
@@ -168,11 +179,9 @@ private:
      */
     auto convert_note_to_pixels(note_location_t note_location) -> note_location_rectangle_t {
         // TODO: replace these numbers with actual pixels after measuring with guitar
-        static const std::array<uint16_t, NUM_FRETS> fret_pixel_array = {
-                // keeps track of fret to pixel_location.x
-                0, 163, 388, 520, 715, 800, 900, 1000, 1100,
-                1200, 1300, 1400, 1500, 1600, 1700, 1800, 1900, 2000, 2100, 2200, 2300, 2400, 2500
-        };
+        static std::array<uint16_t, NUM_FRETS> const fret_pixel_array = {// keeps track of fret to pixel_location.x
+                                                                         0,    163,  388,  520,  715,  800,  900,  1000, 1100, 1200, 1300, 1400,
+                                                                         1500, 1600, 1700, 1800, 1900, 2000, 2100, 2200, 2300, 2400, 2500};
 
         uint16_t pixel_x = fret_pixel_array[note_location.fret];
         uint16_t pixel_y = 0;
@@ -230,13 +239,10 @@ private:
         }
     }
 
-    auto send_ack() -> void {
-        HAL_UART_Transmit(huart, ACK_MESSAGE.data(), sizeof(ACK_MESSAGE), 100);
-    }
+    auto send_ack() -> void { HAL_UART_Transmit(m_huart, ACK_MESSAGE.data(), sizeof(ACK_MESSAGE), 100); }
 
     auto rec_new_msg() -> void {
         m_uart_state = uart_state::NEW_MSG;
-        HAL_UART_Receive_IT(huart, m_uart_buf, 2);
+        HAL_UART_Receive_IT(m_huart, m_uart_buf, 2);
     }
-
 };
