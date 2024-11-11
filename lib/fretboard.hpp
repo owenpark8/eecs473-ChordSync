@@ -17,11 +17,18 @@ class Fretboard {
     static constexpr std::size_t NUM_FRETS = 23;
     static constexpr std::size_t NUM_STRINGS = 6;
     static constexpr uint16_t TOTAL_PIXEL_WIDTH = NUM_LCDS * ILI9486_TFTHEIGHT;
+    static constexpr uint32_t WARNING_DELAY = 500; // Delay between green, yellow, red in ms
 
     struct note_location_rectangle_t {
         pixel_location_t pixel_loc;
         uint16_t w;
         uint16_t h;
+    };
+
+    struct note_timestamps { // note to be played at timestamp x
+        note_location_t note_loc;
+        uint32_t timestamp;
+        uint16_t color;
     };
 
     enum class uart_state {
@@ -33,11 +40,16 @@ class Fretboard {
 
     std::array<LCD, NUM_LCDS> m_lcds{};
     std::size_t m_song_size{};
-    std::array<NoteDataMessage, MAX_NOTES_IN_SONG> m_song{};
+    std::array<NoteDataMessage, MAX_NOTES_IN_SONG> m_song{}; // elements in this array should be sorted
+    std::size_t m_timestamps_size{}; // total size of m_timestamps
+    std::size_t m_timestamp_idx{}; // index of next note to be displayed on the fretboard
+    std::array<note_timestamps, MAX_NOTES_IN_SONG*4> m_timestamps{}; // first display green, yellow, then clear with white (4 colors)
     UART_HandleTypeDef* m_huart;
-    uint8_t m_uart_buf[sizeof(NoteDataMessage) + 1] = {0}; // 5 is the max size message we will need to receive
+    uint32_t m_song_count_ms; // keeps track of the amount of ms elapsed, incremented every 1 ms
+    uint8_t m_uart_buf[sizeof(NoteDataMessage) + 1] = {0};
     uart_state m_uart_state;
     uint8_t m_song_id;
+    bool m_playing_song; // true iff we are currently playing a song on the fretboard
 
 
 public:
@@ -65,6 +77,7 @@ public:
             lcd.init();
         }
         clear();
+        m_playing_song = false;
         // Initialize UART Protocol
         rec_new_msg();
     }
@@ -115,7 +128,7 @@ public:
      * @brief Handles a uart message, called on interrupt
      * @note Make sure state transition happens before call to interrupt
      */
-    auto handle_uart_message(UART_HandleTypeDef* huart) -> void {
+    auto handle_uart_message() -> void {
         if (m_uart_buf[0] != 0x01) return; // Header was not received correctly
         if (m_uart_state == uart_state::NEW_MSG) {
             uint8_t& message = m_uart_buf[1]; // Header is byte 0, msg is byte 1
@@ -131,6 +144,7 @@ public:
                     HAL_UART_Receive_IT(m_huart, m_uart_buf, sizeof(StartSongLoadingDataMessage) + 1); // 1 byte for ID + 1 byte for header
                     break;
                 case MessageType::EndSongLoading:
+                    process_loaded_song();
                     send_ack();
                     rec_new_msg();
                     break;
@@ -140,10 +154,15 @@ public:
                     HAL_UART_Receive_IT(m_huart, m_uart_buf, sizeof(NoteDataMessage) + 1); // receive note Data + 1 byte for header
                     break;
                 case MessageType::StartSong:
+                    m_playing_song = true;
+                    m_song_count_ms = 0;
+                    m_timestamps_size = 0;
+                    m_timestamp_idx = 0;
                     send_ack();
                     rec_new_msg();
                     break;
                 case MessageType::EndSong:
+                    m_playing_song = false;
                     send_ack();
                     rec_new_msg();
                     break;
@@ -163,9 +182,23 @@ public:
             rec_new_msg();
         } else { // m_uart_state == NOTE
             NoteDataMessage message = *reinterpret_cast<NoteDataMessage*>(m_uart_buf + 1);
-            m_song[m_song_size++] = message;
+            if (m_song_size < MAX_NOTES_IN_SONG) m_song[m_song_size++] = message;
             send_ack();
             rec_new_msg();
+        }
+    }
+
+    /**
+     * @brief increments counter and checks to see if we have to display a note
+     */
+    auto handle_song_time() -> void {
+        if (m_playing_song) {
+        while (m_timestamps[m_timestamp_idx].timestamp <= m_song_count_ms) {
+            const auto& tempstamp = m_timestamps[m_timestamp_idx]; // LOL!!!!!!!!!!!!!
+            draw_note(tempstamp.note_loc, tempstamp.color);
+            ++m_timestamp_idx;
+        }
+            ++m_song_count_ms;
         }
     }
 
@@ -180,8 +213,8 @@ private:
     auto convert_note_to_pixels(note_location_t note_location) -> note_location_rectangle_t {
         // TODO: replace these numbers with actual pixels after measuring with guitar
         static std::array<uint16_t, NUM_FRETS> const fret_pixel_array = {// keeps track of fret to pixel_location.x
-                                                                         0,    163,  388,  520,  715,  800,  900,  1000, 1100, 1200, 1300, 1400,
-                                                                         1500, 1600, 1700, 1800, 1900, 2000, 2100, 2200, 2300, 2400, 2500};
+            0,    163,  388,  520,  715,  800,  900,  1000, 1100, 1200, 1300, 1400,
+            1500, 1600, 1700, 1800, 1900, 2000, 2100, 2200, 2300, 2400, 2500};
 
         uint16_t pixel_x = fret_pixel_array[note_location.fret];
         uint16_t pixel_y = 0;
@@ -236,6 +269,26 @@ private:
                 break;
             default:
                 break;
+        }
+    }
+
+    /**
+     * @brief increments counter and checks to see if we have to display a note
+     */
+    auto process_loaded_song() -> void {
+        for (auto &note_data : m_song) { // parse through notedata and populated timestamps
+            m_timestamps[m_timestamps_size++] = {{static_cast<fret_t>(note_data.fret), static_cast<string_e>(note_data.string)}, note_data.timestamp_ms, GREEN};
+            m_timestamps[m_timestamps_size++] = {{static_cast<fret_t>(note_data.fret), static_cast<string_e>(note_data.string)}, note_data.timestamp_ms + WARNING_DELAY, YELLOW};
+            m_timestamps[m_timestamps_size++] = {{static_cast<fret_t>(note_data.fret), static_cast<string_e>(note_data.string)}, note_data.timestamp_ms + WARNING_DELAY*2, RED};
+            m_timestamps[m_timestamps_size++] = {{static_cast<fret_t>(note_data.fret), static_cast<string_e>(note_data.string)}, note_data.timestamp_ms + WARNING_DELAY*2 + note_data.length_ms, WHITE};
+        }
+        // Insertion sort since the array is already mostly sorted
+        for (int i = 0; i < m_timestamps_size; ++i) {
+            int swapped = i;
+            for(int j = i+1; j < m_timestamps_size; ++j) {
+                if (m_timestamps[j].timestamp < m_timestamps[swapped].timestamp) swapped = j;
+            }
+            std::swap(m_timestamps[i], m_timestamps[swapped]);
         }
     }
 

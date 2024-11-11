@@ -271,7 +271,6 @@ static const unsigned char font1[] = {
 #define ILI9486_PASET 0x2B  //
 #define ILI9486_RAMWR 0x2C
 
-#define swap(a, b) { int16_t t = a; a = b; b = t; }
 #define pgm_read_byte(addr) (*(const unsigned char *)(addr))
 #define min(a,b) (((a)<(b))?(a):(b))
 

@@ -77,7 +77,13 @@ auto init() -> void {
     }
 }
 
-void HAL_UART_RxCpltCallback(UART_HandleTypeDef* huart) { fretboard.handle_uart_message(huart); }
+void HAL_UART_RxCpltCallback(UART_HandleTypeDef* huart) { fretboard.handle_uart_message(); }
+
+void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
+    if (htim->Instance == TIM6) {
+        fretboard.handle_song_time();
+    }
+}
 
 
 extern "C" {
