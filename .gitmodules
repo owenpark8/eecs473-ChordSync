@@ -10,3 +10,7 @@
 [submodule "rpi-backend/extern/ctre"]
 	path = rpi-backend/extern/ctre
 	url = https://github.com/hanickadot/compile-time-regular-expressions.git
+[submodule "rpi-backend/extern/pybind11"]
+	path = rpi-backend/extern/pybind11
+	url = https://github.com/pybind/pybind11.git
+	branch = stable

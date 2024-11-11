@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.21)
 
 project(eecs473-rpi-backend)
 
-set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON) # IDE support
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
@@ -20,6 +20,14 @@ target_sources(${RPI_BACKEND_TARGET} PRIVATE
 )
 
 target_include_directories(${RPI_BACKEND_TARGET} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
+
+# pybind11
+set(PYTHON_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/py")
+set(PYTHON_VENV_PATH "${PYTHON_MODULE_PATH}/.venv/lib/python3.11/site-packages")
+target_compile_definitions(${RPI_BACKEND_TARGET} PRIVATE
+    PY_MODULE_PATH="${PYTHON_MODULE_PATH}"
+    PY_VENV_PATH="${PYTHON_VENV_PATH}"
+)
 
 add_subdirectory(extern)
 target_link_libraries(${RPI_BACKEND_TARGET} PRIVATE extern)
