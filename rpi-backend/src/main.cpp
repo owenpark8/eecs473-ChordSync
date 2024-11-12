@@ -1,4 +1,3 @@
-#include <cstddef>
 #include <iostream>
 #include <string>
 #include <thread>
@@ -183,6 +182,11 @@ auto main(int argc, char* args[]) -> int {
         std::cerr << "SQLite exception: " << e.what() << std::endl;
     }
 #endif
+
+#ifdef DEBUG
+    std::cout << "Getting ID of song loaded on MCU...\n";
+#endif
+    mcu::get_and_update_loaded_song_id();
 
 
 #ifdef DEBUG

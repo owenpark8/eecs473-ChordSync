@@ -62,12 +62,31 @@ namespace mcu {
 
     auto end_song_loading() -> void {
         send_control_message(END_SONG_LOADING_MESSAGE);
-        // receive_ack();
+        if (!receive_ack()) {
+            throw std::runtime_error("Could not end song loading: did not receive ACK!");
+        }
     }
 
-    auto get_and_update_loaded_song_id() -> void { send_control_message(REQUEST_SONG_ID_MESSAGE); }
+    auto get_and_update_loaded_song_id() -> void {
+        send_control_message(REQUEST_SONG_ID_MESSAGE);
+        if (!receive_ack()) {
+            throw std::runtime_error("Could not request song ID: did not receive ACK!");
+        }
+        std::uint8_t buf[2] = {0};
+        serial::receive(buf, 2);
+        if (buf[0] != 0x01) {
+            throw std::runtime_error("Could not request song ID: received malformed data");
+        }
+        send_control_message(ACK_MESSAGE);
+        current_song_id = buf[1];
+    }
 
-    auto play_loaded_song() -> void { send_control_message(START_SONG_MESSAGE); }
+    auto play_loaded_song() -> void {
+        send_control_message(START_SONG_MESSAGE);
+        if (!receive_ack()) {
+            throw std::runtime_error("Could not play loaded song: did not receive ACK!");
+        }
+    }
 
     std::mutex mut{};
     std::uint8_t current_song_id = 0x00;
