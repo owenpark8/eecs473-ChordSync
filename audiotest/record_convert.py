@@ -35,7 +35,11 @@ if record == '-r':
         save_model_outputs=False,
         save_notes=False,
         model_or_model_path=basic_pitch_model,
-        midi_tempo=int(bpm_value)
+        onset_threshold=0.70,
+        frame_threshold=0.50,
+        minimum_note_length=11,
+        midi_tempo=int(bpm_value),
+        multiple_pitch_bends=False
     )
     
     
@@ -56,7 +60,7 @@ print(notes)
 print(len(notes))
 
 #remove
-#os.remove(wav_name)
-#os.remove(mid_basic)
-#os.remove(mid_basic_wav)
+os.remove(wav_name)
+os.remove(mid_basic)
+os.remove(mid_basic_wav)
 

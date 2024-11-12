@@ -13,16 +13,21 @@ def getMessages(midi):
   
   # Iterate over the messages in the file
   for msg in mid:
-    #check first note
-    #print(msg.type)
-    if msg.type == 'note_on':
+    if msg.type == 'note_on' and (msg.velocity > 0 or time == -1):
       if time == -1:
           time = 0
       else:
           #nothing should happen if immediate note.
           time += msg.time
       currNotes_deque.append([msg.note, time, -1])
-    elif msg.type == 'note_off':
+    elif msg.type=='pitchwheel':
+        #pitchwheel noise, so just add time
+        #pitchwheel could be first.
+        if time == -1:
+          time = 0
+        else:
+          time += msg.time
+    elif msg.type == 'note_off' or (msg.type == 'note_on' and msg.velocity == 0):
         #update time, nothing should happen if it is the same time as the previous.
         time += msg.time
 
@@ -66,8 +71,18 @@ def getMessages(midi):
 
     formattedNotes[i][1] = int(start)
     formattedNotes[i][2] = int(end)
-  return formattedNotes
-  #return [1,2, 3, 4, 5]
+
+
+    
+  #return formattedNotes
+  
+
+  unique_list = []
+  for item in formattedNotes:
+    if item not in unique_list:
+        unique_list.append(item)
+
+  return unique_list
 
 
 def get_tempo_and_time_signature(midi_file):
