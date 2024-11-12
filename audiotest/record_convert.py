@@ -1,6 +1,9 @@
 import tensorflow as tf
 import os
 import sys
+from dataParse import get_tempo_and_time_signature
+from dataParse import getMessages
+#getMessages(midi)
 
 record = sys.argv[1]
 id = sys.argv[2]
@@ -27,15 +30,33 @@ if record == '-r':
     predict_and_save(
         audio_path_list=[wav_name],
         output_directory=".",
-        output_filename= mid_name,
         save_midi=True,
         sonify_midi=True,
         save_model_outputs=False,
         save_notes=False,
         model_or_model_path=basic_pitch_model,
-        bpm=bpm_value
+        midi_tempo=int(bpm_value)
     )
+    
+    
 
 #convert data then figure out how you will push delete the midi files.
 #pybind stuff. 
+mid_basic = f'{id}_rec_basic_pitch.mid'
+mid_basic_wav = f'{id}_rec_basic_pitch.wav'
+
+
+tempo, time_signature, ticks_per_beat = get_tempo_and_time_signature(mid_basic)
+print(tempo)
+print(time_signature)
+print(ticks_per_beat)
+
+notes = getMessages(mid_basic)
+print(notes)
+print(len(notes))
+
+#remove
+#os.remove(wav_name)
+#os.remove(mid_basic)
+#os.remove(mid_basic_wav)
 

@@ -10,10 +10,11 @@ def getMessages(midi):
 
   # Open the MIDI file
   mid = mido.MidiFile(midi)
-
+  
   # Iterate over the messages in the file
   for msg in mid:
     #check first note
+    #print(msg.type)
     if msg.type == 'note_on':
       if time == -1:
           time = 0
@@ -66,6 +67,7 @@ def getMessages(midi):
     formattedNotes[i][1] = int(start)
     formattedNotes[i][2] = int(end)
   return formattedNotes
+  #return [1,2, 3, 4, 5]
 
 
 def get_tempo_and_time_signature(midi_file):
