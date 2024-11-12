@@ -85,6 +85,7 @@ def get_tempo_and_time_signature(midi_file):
 
     return tempo, time_signature, ticks_per_beat
 
+
 #do we need this?
 def clean_extraneous_notes(id_rec, id):
    return [x for x in id_rec if any(x[0] == y[0] for y in id)]
