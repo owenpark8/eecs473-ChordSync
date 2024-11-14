@@ -213,8 +213,8 @@ private:
     auto convert_note_to_pixels(note_location_t note_location) -> note_location_rectangle_t {
         // TODO: replace these numbers with actual pixels after measuring with guitar
         static std::array<uint16_t, NUM_FRETS> const fret_pixel_array = {// keeps track of fret to pixel_location.x
-            0,    163,  388,  520,  715,  800,  900,  1000, 1100, 1200, 1300, 1400,
-            1500, 1600, 1700, 1800, 1900, 2000, 2100, 2200, 2300, 2400, 2500};
+            0,    158,  378,  510,  705,  900,  995, 1166, 1315, 1440, 1520,
+            1650, 1775, 1900, 1934, 2040, 2137, 2233, 2315, 2393, 2405, 2476, 2551};
 
         uint16_t pixel_x = fret_pixel_array[note_location.fret];
         uint16_t pixel_y = 0;

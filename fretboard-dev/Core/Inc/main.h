@@ -66,8 +66,6 @@ void HAL_Post_Init();
 #define T_VCP_TX_GPIO_Port GPIOA
 #define USER_LED_Pin GPIO_PIN_5
 #define USER_LED_GPIO_Port GPIOA
-#define CSX_F_Pin GPIO_PIN_6
-#define CSX_F_GPIO_Port GPIOA
 #define LCD_RS_Pin GPIO_PIN_7
 #define LCD_RS_GPIO_Port GPIOA
 #define LCD_RST_Pin GPIO_PIN_4
@@ -80,8 +78,10 @@ void HAL_Post_Init();
 #define CSX_D_GPIO_Port GPIOB
 #define CSX_E_Pin GPIO_PIN_10
 #define CSX_E_GPIO_Port GPIOB
-#define CSX_C_Pin GPIO_PIN_12
+#define CSX_C_Pin GPIO_PIN_14
 #define CSX_C_GPIO_Port GPIOB
+#define CSX_F_Pin GPIO_PIN_15
+#define CSX_F_GPIO_Port GPIOB
 
 /* USER CODE BEGIN Private defines */
 

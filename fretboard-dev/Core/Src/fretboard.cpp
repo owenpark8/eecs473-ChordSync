@@ -10,12 +10,12 @@ extern SPI_HandleTypeDef hspi3;
 Fretboard fretboard;
 
 auto init() -> void {
-    Pin CS_A = Pin(CSX_A_GPIO_Port, CSX_A_Pin);
-    Pin CS_B = Pin(CSX_B_GPIO_Port, CSX_B_Pin);
-    Pin CS_C = Pin(CSX_C_GPIO_Port, CSX_C_Pin);
-    Pin CS_D = Pin(CSX_D_GPIO_Port, CSX_D_Pin);
-    Pin CS_E = Pin(CSX_E_GPIO_Port, CSX_E_Pin);
-    Pin CS_F = Pin(CSX_F_GPIO_Port, CSX_F_Pin);
+    Pin CS_A = Pin(CSX_F_GPIO_Port, CSX_F_Pin);
+    Pin CS_B = Pin(CSX_E_GPIO_Port, CSX_E_Pin);
+    Pin CS_C = Pin(CSX_D_GPIO_Port, CSX_D_Pin);
+    Pin CS_D = Pin(CSX_C_GPIO_Port, CSX_C_Pin);
+    Pin CS_E = Pin(CSX_B_GPIO_Port, CSX_B_Pin);
+    Pin CS_F = Pin(CSX_A_GPIO_Port, CSX_A_Pin);
 
     SPI SPI_A = SPI(&hspi1, CS_A);
     SPI SPI_B = SPI(&hspi1, CS_B);
@@ -39,6 +39,7 @@ auto init() -> void {
     fretboard = Fretboard{lcd_1, lcd_2, lcd_3, lcd_4, lcd_5, lcd_6, &huart1};
     fretboard.init();
 
+
     //	lcd_1.fill_screen(GREEN);
     //	HAL_Delay(20);
     //	lcd_2.fill_screen(GREEN);
@@ -51,27 +52,27 @@ auto init() -> void {
     //	HAL_Delay(20);
     while (true) {
         for (int i = 0; i < 23; ++i) {
-            fretboard.draw_note({i, string_e::HIGH_E}, (i % 2 == 0) ? RED : BLUE);
+            fretboard.draw_note({i, string_e::HIGH_E}, (i % 2 == 0) ? GREEN : WHITE);
             HAL_Delay(20);
         }
         for (int i = 0; i < 23; ++i) {
-            fretboard.draw_note({i, string_e::A}, (i % 2 == 1) ? RED : BLUE);
+            fretboard.draw_note({i, string_e::A}, (i % 2 == 1) ? GREEN : WHITE);
             HAL_Delay(20);
         }
         for (int i = 0; i < 23; ++i) {
-            fretboard.draw_note({i, string_e::D}, (i % 2 == 0) ? RED : BLUE);
+            fretboard.draw_note({i, string_e::D}, (i % 2 == 0) ? GREEN : WHITE);
             HAL_Delay(20);
         }
         for (int i = 0; i < 23; ++i) {
-            fretboard.draw_note({i, string_e::G}, (i % 2 == 1) ? RED : BLUE);
+            fretboard.draw_note({i, string_e::G}, (i % 2 == 1) ? GREEN : WHITE);
             HAL_Delay(20);
         }
         for (int i = 0; i < 23; ++i) {
-            fretboard.draw_note({i, string_e::B}, (i % 2 == 0) ? RED : BLUE);
+            fretboard.draw_note({i, string_e::B}, (i % 2 == 0) ? GREEN : WHITE);
             HAL_Delay(20);
         }
         for (int i = 0; i < 23; ++i) {
-            fretboard.draw_note({i, string_e::LOW_E}, (i % 2 == 1) ? RED : BLUE);
+            fretboard.draw_note({i, string_e::LOW_E}, (i % 2 == 1) ? GREEN : WHITE);
             HAL_Delay(20);
         }
     }

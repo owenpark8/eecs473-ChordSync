@@ -500,16 +500,11 @@ static void MX_GPIO_Init(void)
   HAL_GPIO_WritePin(GPIOA, USER_LED_Pin|LCD_RS_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(CSX_F_GPIO_Port, CSX_F_Pin, GPIO_PIN_SET);
-
-  /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOC, LCD_RST_Pin|CSX_A_Pin, GPIO_PIN_SET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOB, CSX_B_Pin|CSX_D_Pin|CSX_E_Pin, GPIO_PIN_SET);
-
-  /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(CSX_C_GPIO_Port, CSX_C_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOB, CSX_B_Pin|CSX_D_Pin|CSX_E_Pin|CSX_C_Pin
+                          |CSX_F_Pin, GPIO_PIN_SET);
 
   /*Configure GPIO pin : B1_BLUE_USER_BUTTON_Pin */
   GPIO_InitStruct.Pin = B1_BLUE_USER_BUTTON_Pin;
@@ -525,8 +520,8 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Alternate = GPIO_AF13_USART3;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : USER_LED_Pin CSX_F_Pin LCD_RS_Pin */
-  GPIO_InitStruct.Pin = USER_LED_Pin|CSX_F_Pin|LCD_RS_Pin;
+  /*Configure GPIO pins : USER_LED_Pin LCD_RS_Pin */
+  GPIO_InitStruct.Pin = USER_LED_Pin|LCD_RS_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
@@ -539,8 +534,10 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : CSX_B_Pin CSX_D_Pin CSX_E_Pin CSX_C_Pin */
-  GPIO_InitStruct.Pin = CSX_B_Pin|CSX_D_Pin|CSX_E_Pin|CSX_C_Pin;
+  /*Configure GPIO pins : CSX_B_Pin CSX_D_Pin CSX_E_Pin CSX_C_Pin
+                           CSX_F_Pin */
+  GPIO_InitStruct.Pin = CSX_B_Pin|CSX_D_Pin|CSX_E_Pin|CSX_C_Pin
+                          |CSX_F_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
