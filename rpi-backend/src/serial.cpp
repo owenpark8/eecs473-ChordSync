@@ -1,6 +1,7 @@
 #ifdef DEBUG
 #include <iostream>
 #endif
+#include <chrono>
 #include <string>
 
 #include <wiringSerial.hpp>
@@ -35,13 +36,32 @@ namespace serial {
     auto send(std::uint8_t const data) -> void { serialPutchar(fd, data); }
     auto send(std::uint8_t const* buffer, std::size_t size) -> void { serialPutbuffer(fd, reinterpret_cast<char const*>(buffer), size); }
 
-    auto receive(std::uint8_t* buffer, std::size_t size) -> void {
-        // this is sus
-        while (serialDataAvail(fd) != size);
+    auto receive(std::uint8_t* buffer, std::size_t size, std::chrono::seconds timeout) -> bool {
+        auto start_time = std::chrono::steady_clock::now();
+        std::size_t received = 0;
 
-        for (std::size_t i = 0; i < size; ++i) {
-            *(buffer + i) = serialGetchar(fd);
+        while (received < size) {
+            // Check timeout
+            auto elapsed = std::chrono::steady_clock::now() - start_time;
+            if (elapsed > timeout) {
+#ifdef DEBUG
+                std::cerr << "Timeout occurred after " << timeout.count() << " seconds\n";
+#endif
+                return false;
+            }
+
+            if (serialDataAvail(fd) > 0) {
+                int data = serialGetchar(fd);
+                if (data == -1) {
+#ifdef DEBUG
+                    std::cerr << "Error: serialGetchar returned -1\n";
+#endif
+                    return false;
+                }
+                buffer[received++] = static_cast<std::uint8_t>(data);
+            }
         }
+        return true;
     }
 
 } // namespace serial

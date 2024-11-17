@@ -4,6 +4,8 @@
 #include <fstream>
 #endif
 
+#include <httplib.h>
+
 namespace web {
     std::unordered_set<std::string> const allowed_image_upload_types = {jpeg_type, png_type};
 

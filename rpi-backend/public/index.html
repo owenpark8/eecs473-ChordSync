@@ -22,8 +22,7 @@
                 <h2 class="text-xl font-semibold">Guitar Information</h2>
                 <div>
                     <p class="font-medium">Current song:</p>
-                    <p>[server-sent-event here]</p>
-                    <!--<div hx-ext="sse" sse-connect="/song-info" sse-swap="message"></div>-->
+                    <div hx-ext="sse" sse-connect="/song-info" sse-swap="message"></div>
 
                     <button hx-post="/play-song" hx-swap="outerHTML"
                         class="mt-2 bg-blue-500 hover:bg-blue-700 text-white font-medium py-1.5 px-3 rounded-md">

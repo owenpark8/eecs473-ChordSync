@@ -67,8 +67,8 @@ namespace data {
 
     namespace songs {
         std::string const song_table_name = "songs";
-        std::string const song_table_schema =
-                "(id INTEGER PRIMARY KEY, title TEXT NOT NULL, artist TEXT NOT NULL, length INTEGER NOT NULL, bpm INTEGER NOT NULL, notes BLOB)";
+        std::string const song_table_schema = "(id INTEGER PRIMARY KEY AUTOINCREMENT, title TEXT NOT NULL, artist TEXT NOT NULL, length INTEGER NOT "
+                                              "NULL, bpm INTEGER NOT NULL, notes BLOB)";
 
         auto serialize_notes(std::vector<Note> const& notes) -> std::vector<uint8_t> {
             std::vector<uint8_t> blob;
@@ -167,6 +167,9 @@ namespace data {
         }
 
         auto get_song_by_id(SQLite::Database& db, std::uint8_t song_id) -> SongInfo {
+#ifdef DEBUG
+            std::cout << "Querying database for song id " << static_cast<int>(song_id) << "\n";
+#endif
             SQLite::Statement query(db, "SELECT id, title, artist, bpm, length, notes FROM " + data::songs::song_table_name + " WHERE id = ?");
             query.bind(1, song_id);
 

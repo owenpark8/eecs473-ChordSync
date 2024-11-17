@@ -19,6 +19,8 @@ namespace mcu {
     auto play_loaded_song() -> void;
 
     extern std::mutex mut;
+
+    extern std::mutex song_info_mut;
     extern song_id_t current_song_id;
     extern song_status_e current_song_status;
 } // namespace mcu

@@ -1,4 +1,5 @@
 #include <array>
+#include <chrono>
 #include <cstdint>
 #include <stdexcept>
 
@@ -26,8 +27,10 @@ namespace mcu {
     }
 
     [[nodiscard]] auto receive_ack() -> bool {
+        using namespace std::chrono_literals;
+
         ControlMessage msg{};
-        serial::receive(msg.data(), msg.size());
+        serial::receive(msg.data(), msg.size(), 5s);
 
         return (msg == ACK_MESSAGE);
     }
@@ -89,6 +92,8 @@ namespace mcu {
     }
 
     std::mutex mut{};
+
+    std::mutex song_info_mut{};
     std::uint8_t current_song_id = 0x00;
     song_status_e current_song_status = song_status_e::UNKNOWN;
 
