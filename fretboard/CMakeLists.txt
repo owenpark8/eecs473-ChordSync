@@ -1,7 +1,7 @@
 #THIS FILE IS AUTO GENERATED FROM THE TEMPLATE! DO NOT CHANGE!
 set(CMAKE_SYSTEM_NAME Generic)
 set(CMAKE_SYSTEM_VERSION 1)
-cmake_minimum_required(VERSION 3.22)
+cmake_minimum_required(VERSION 3.29)
 
 # specify cross-compilers and tools
 set(CMAKE_C_COMPILER arm-none-eabi-gcc)
@@ -26,7 +26,7 @@ add_link_options(-mfloat-abi=hard -mfpu=fpv4-sp-d16)
 #Uncomment for software floating point
 #add_compile_options(-mfloat-abi=soft)
 
-add_compile_options(-mcpu=cortex-m4 -mthumb -mthumb-interwork)
+add_compile_options(-mcpu=cortex-m33 -mthumb -mthumb-interwork)
 add_compile_options(-ffunction-sections -fdata-sections -fno-common -fmessage-length=0)
 
 # (MRover) Ignore warnings about "maybe_unused" attribute
@@ -50,16 +50,16 @@ else ()
     add_compile_options(-Og -g)
 endif ()
 
-include_directories(Core/Inc Drivers/STM32H5xx_HAL_Driver/Inc Drivers/STM32H5xx_HAL_Driver/Inc/Legacy Drivers/CMSIS/Device/ST/STM32H5xx/Include Drivers/CMSIS/Include)
+include_directories(Core/Inc Drivers/STM32H5xx_HAL_Driver/Inc Drivers/STM32H5xx_HAL_Driver/Inc/Legacy Drivers/CMSIS/Device/ST/STM32H5xx/Include Drivers/CMSIS/Include Core/Inc Drivers/STM32H5xx_HAL_Driver/Inc Drivers/STM32H5xx_HAL_Driver/Inc/Legacy Drivers/CMSIS/Device/ST/STM32H5xx/Include Drivers/CMSIS/Include)
 
-add_definitions(-DDEBUG -DUSE_HAL_DRIVER -DSTM32H562xx)
+add_definitions(-DDEBUG -DUSE_HAL_DRIVER -DSTM32H562xx -DDEBUG -DUSE_HAL_DRIVER -DSTM32H562xx)
 
-file(GLOB_RECURSE SOURCES "Core/*.*" "Drivers/*.*")
+file(GLOB_RECURSE SOURCES "Core/*.*" "Drivers/*.*" "Core/*.*" "Drivers/*.*")
 
 set(LINKER_SCRIPT ${CMAKE_SOURCE_DIR}/STM32H562RGTX_FLASH.ld)
 
 add_link_options(-Wl,-gc-sections,--print-memory-usage,-Map=${PROJECT_BINARY_DIR}/${PROJECT_NAME}.map)
-add_link_options(-mcpu=cortex-m4 -mthumb -mthumb-interwork)
+add_link_options(-mcpu=cortex-m33 -mthumb -mthumb-interwork)
 add_link_options(-T ${LINKER_SCRIPT})
 
 add_executable(${PROJECT_NAME}.elf ${SOURCES} ${LINKER_SCRIPT})
