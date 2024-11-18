@@ -85,7 +85,7 @@ auto LCD::init() const -> void {
     send_data(0x82);    // D7 stream, loose
 
     send_command(ILI9486_SLPOUT); // Exit Sleep mode
-    HAL_Delay(120);
+    busyWaitMs(120);
 
     send_command(ILI9486_DISPON); // Turn Display on
 
@@ -95,7 +95,7 @@ auto LCD::init() const -> void {
 
 auto LCD::reset_lcd() const -> void {
     start_reset();
-    HAL_Delay(10);
+    busyWaitMs(10);
     end_reset();
 }
 
@@ -243,5 +243,15 @@ auto LCD::set_command() const -> void { m_reg_sel.reset(); }
 auto LCD::set_data() const -> void { m_reg_sel.set(); }
 auto LCD::noop() const -> void {send_command(0x00); }
 
-/*---------------------BITMAPS-----------------------------*/
+auto LCD::busyWaitMs(uint32_t delay_ms) const -> void{
+    // Calculate the number of iterations per millisecond
+    uint32_t cycles_per_ms = SystemCoreClock / 1000;
 
+    // Outer loop for milliseconds
+    for (uint32_t i = 0; i < delay_ms; i++) {
+        // Inner loop to waste cycles for one millisecond
+        for (uint32_t j = 0; j < cycles_per_ms; j++) {
+            __NOP(); // No operation, just waste cycles
+        }
+    }
+}

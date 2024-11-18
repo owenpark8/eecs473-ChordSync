@@ -134,22 +134,18 @@ public:
             uint8_t& message = m_uart_buf[1]; // Header is byte 0, msg is byte 1
             switch (static_cast<MessageType>(message)) {
                 case MessageType::Reset:
-                    send_ack();
-                    init(); // init requests for a new message
+                    init();
                     break;
                 case MessageType::StartSongLoading:
-                    send_ack();
                     m_song_size = 0;
                     m_uart_state = uart_state::SONG_ID;
                     HAL_UART_Receive_IT(m_huart, m_uart_buf, sizeof(StartSongLoadingDataMessage) + 1); // 1 byte for ID + 1 byte for header
                     break;
                 case MessageType::EndSongLoading:
                     process_loaded_song();
-                    send_ack();
                     rec_new_msg();
                     break;
                 case MessageType::Note:
-                    send_ack();
                     m_uart_state = uart_state::NOTE;
                     HAL_UART_Receive_IT(m_huart, m_uart_buf, sizeof(NoteDataMessage) + 1); // receive note Data + 1 byte for header
                     break;
@@ -158,16 +154,13 @@ public:
                     m_song_count_ms = 0;
                     m_timestamps_size = 0;
                     m_timestamp_idx = 0;
-                    send_ack();
                     rec_new_msg();
                     break;
                 case MessageType::EndSong:
                     m_playing_song = false;
-                    send_ack();
                     rec_new_msg();
                     break;
                 case MessageType::RequestSongID:
-                    send_ack();
                     HAL_UART_Transmit(m_huart, LOADED_SONG_ID_MESSAGE.data(), sizeof(LOADED_SONG_ID_MESSAGE), 100);
                     // TODO: Receive ACK here?
                     HAL_UART_Transmit(m_huart, &m_song_id, sizeof(m_song_id), 100);
@@ -178,14 +171,13 @@ public:
             }
         } else if (m_uart_state == uart_state::SONG_ID) {
             m_song_id = m_uart_buf[1];
-            send_ack();
             rec_new_msg();
         } else { // m_uart_state == NOTE
             NoteDataMessage message = *reinterpret_cast<NoteDataMessage*>(m_uart_buf + 1);
             if (m_song_size < MAX_NOTES_IN_SONG) m_song[m_song_size++] = message;
-            send_ack();
             rec_new_msg();
         }
+        send_ack();
     }
 
     /**

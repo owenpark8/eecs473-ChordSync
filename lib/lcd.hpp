@@ -381,6 +381,8 @@ public:
     auto set_data() const -> void;
     auto noop() const -> void;
 
+	auto busyWaitMs(uint32_t delay_ms) const -> void;
+
 
 private:
     SPI m_spi{};

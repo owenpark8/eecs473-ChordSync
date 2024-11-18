@@ -40,8 +40,9 @@ auto init() -> void {
     fretboard.init();
 
 
-    //	lcd_1.fill_screen(GREEN);
-    //	HAL_Delay(20);
+    
+    // lcd_1.fill_screen(GREEN);
+    // HAL_Delay(20);
     //	lcd_2.fill_screen(GREEN);
     //	HAL_Delay(20);
     //	lcd_3.fill_screen(GREEN);
@@ -50,38 +51,38 @@ auto init() -> void {
     //	HAL_Delay(20);
     //	lcd_5.fill_screen(GREEN);
     //	HAL_Delay(20);
-    while (true) {
-        for (int i = 0; i < 23; ++i) {
-            fretboard.draw_note({i, string_e::HIGH_E}, (i % 2 == 0) ? GREEN : WHITE);
-            HAL_Delay(20);
-        }
-        for (int i = 0; i < 23; ++i) {
-            fretboard.draw_note({i, string_e::A}, (i % 2 == 1) ? GREEN : WHITE);
-            HAL_Delay(20);
-        }
-        for (int i = 0; i < 23; ++i) {
-            fretboard.draw_note({i, string_e::D}, (i % 2 == 0) ? GREEN : WHITE);
-            HAL_Delay(20);
-        }
-        for (int i = 0; i < 23; ++i) {
-            fretboard.draw_note({i, string_e::G}, (i % 2 == 1) ? GREEN : WHITE);
-            HAL_Delay(20);
-        }
-        for (int i = 0; i < 23; ++i) {
-            fretboard.draw_note({i, string_e::B}, (i % 2 == 0) ? GREEN : WHITE);
-            HAL_Delay(20);
-        }
-        for (int i = 0; i < 23; ++i) {
-            fretboard.draw_note({i, string_e::LOW_E}, (i % 2 == 1) ? GREEN : WHITE);
-            HAL_Delay(20);
-        }
-    }
+    // while (true) {
+    //     for (int i = 0; i < 23; ++i) {
+    //         fretboard.draw_note({i, string_e::HIGH_E}, (i % 2 == 0) ? GREEN : WHITE);
+    //         HAL_Delay(20);
+    //     }
+    //     for (int i = 0; i < 23; ++i) {
+    //         fretboard.draw_note({i, string_e::A}, (i % 2 == 1) ? GREEN : WHITE);
+    //         HAL_Delay(20);
+    //     }
+    //     for (int i = 0; i < 23; ++i) {
+    //         fretboard.draw_note({i, string_e::D}, (i % 2 == 0) ? GREEN : WHITE);
+    //         HAL_Delay(20);
+    //     }
+    //     for (int i = 0; i < 23; ++i) {
+    //         fretboard.draw_note({i, string_e::G}, (i % 2 == 1) ? GREEN : WHITE);
+    //         HAL_Delay(20);
+    //     }
+    //     for (int i = 0; i < 23; ++i) {
+    //         fretboard.draw_note({i, string_e::B}, (i % 2 == 0) ? GREEN : WHITE);
+    //         HAL_Delay(20);
+    //     }
+    //     for (int i = 0; i < 23; ++i) {
+    //         fretboard.draw_note({i, string_e::LOW_E}, (i % 2 == 1) ? GREEN : WHITE);
+    //         HAL_Delay(20);
+    //     }
+    // }
 }
 
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef* huart) { fretboard.handle_uart_message(); }
 
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
-    if (htim->Instance == TIM6) {
+	    if (htim->Instance == TIM6) {
         fretboard.handle_song_time();
     }
 }
