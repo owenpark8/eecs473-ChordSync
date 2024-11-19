@@ -1,13 +1,27 @@
 #include <pybind11/embed.h>
 #include <pybind11/stl.h>
 
+#include <playerMode.hpp>
+//#include <SQLiteCpp/SQLiteCpp.h>
+//#include <ctre.hpp>
+//#include <fmt/format.h>
+//#include <httplib.h>
+
 #include <iostream>
 #include <vector>
 
 namespace py = pybind11;
 
+
 auto main() -> int {
-    py::scoped_interpreter guard{};
+    playerMode* player = new playerMode(1, 1, "C4", "1", "1", 15, 95);
+    bool outcome = player->analysis("C4");
+
+    if (outcome == false)
+        std::cout << "Wrong!" << std::endl;
+    else
+        std::cout << "Correct!" << std::endl;
+    /*py::scoped_interpreter guard{};
 
     py::module sys = py::module::import("sys");
     sys.attr("path").attr("insert")(0, PY_VENV_PATH);
@@ -32,6 +46,6 @@ auto main() -> int {
         std::cout << "End Time: " << numbers[i][2] << std::endl;   // Third element
     }
 
-    std::cout << std::endl;
+    std::cout << std::endl;*/
     return 0;
 }

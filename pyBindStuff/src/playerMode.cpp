@@ -4,13 +4,23 @@
 
 #include <iostream>
 
+namespace py = pybind11;
 
 //add in cleanout function
-playerMode::playerMode(std::uint8_t const& song_id, std::uint8_t const& mode, std::uint8_t const& duration, std::uint8_t& bpm) {
-    this->song_id = song_id;
-    this->bpm = bpm;
+playerMode::playerMode(uint8_t song_id, uint8_t mode, std::string const& note, std::string const& title, std::string const artist, uint8_t duration,
+                       uint8_t bpm) {
+    this->song.id = song_id;
+    this->song.title = title;
+    this->song.artist = artist;
+    this->song.length = std::chrono::seconds(duration);
+    this->song.bpm = bpm;
+
+
     this->mode = mode;
-    this->duration = duration;
+
+
+    this->note = note;
+
 
     py::scoped_interpreter guard{};
 
@@ -23,52 +33,64 @@ playerMode::playerMode(std::uint8_t const& song_id, std::uint8_t const& mode, st
         std::cout << "Module imported successfully!" << std::endl;
     } catch (py::error_already_set const& e) {
         std::cerr << "Error: " << e.what() << std::endl;
-        return -1;
     }
 
     auto get_record_convert_module = py::module_::import("record_convert");
     py::object get_record_convert = get_record_convert_module.attr("record_convert");
 
-    std::vector<std::vector<int>> numbers = get_record_convert("-r", song_id, duration, bpm).cast<std::vector<std::vector<uint8_t>>>();
+    std::vector<std::vector<int>> numbers = get_record_convert("-r", song_id, duration, bpm).cast<std::vector<std::vector<int>>>();
 
     for (std::size_t i = 0; i < numbers.size(); i++) {
-        NoteDataMessage* entry = new NoteDataMessage;
-        entry->note = numbers[i][0];
-        entry->timestamp_ms = numbers[i][1];
-        entry->length_ms = numbers[i][2] - entry->timestamp_ms;
-        this->recording.push_back(entry);
+        Note* entry = new Note;
+        entry->midi_note = static_cast<uint8_t>(numbers[i][0]);
+        entry->start_timestamp_ms = static_cast<uint8_t>(numbers[i][1]);
+        entry->length_ms = static_cast<uint8_t>(numbers[i][2] - entry->start_timestamp_ms);
+        (this->song.notes).push_back(*entry);
+        delete entry;
     }
-
-    std::cout << std::endl;
-    return 0;
 }
 
 
-std::string& playerMode::get_mode() const { return this->mode; }
-std::uint8_t& playerMode::get_bpm() const { return this->bpm; }
+std::string playerMode::get_mode() const {
+    if (this->mode == 1) return "single note";
+    return "pls wait";
+}
+uint8_t playerMode::get_bpm() const { return this->song.bpm; }
 
-std::uint8_t& playerMode::get_resolution() const {return 0}
+uint8_t playerMode::get_resolution() const { return 0; }
 
 
-std::vector<std::string> playerMode::analysis(std::vector<NoteDataMessage>& ref) const {
-    std::vector<string> s = new std::vector<string>;
-    s.push_back("hi");
+std::vector<bool> playerMode::analysis(std::vector<Note>& ref) {
+    std::vector<bool> s;
+    s.push_back(false);
     return s;
 }
 
-std::vector<std::string> playerMode::analysis(std::string& note) const {
+bool playerMode::analysis(std::string const& note) {
     uint8_t refNote = this->noteToInt(note);
-    std::unordered_map<uint8_t, uint8_t> freq; //make this into data variable.
+    std::unordered_map<uint8_t, uint8_t> freq;
 
     uint8_t maxNote = 0;
+
+    uint8_t maxCount = 0;
+
+    for (int i = 0; i < this->song.notes.size(); i++) {
+        freq[(this->song.notes[i]).midi_note]++;
+    }
     //iterate through and check max freqeucy, then output if it is correct or note.
-    for (int i = 0; i < freq.size(); i++) {}
+    for (auto it = freq.begin(); it != freq.end(); it++) {
+        if (it->second > maxCount) {
+            maxCount = it->second;
+            maxNote = it->first;
+        }
+    }
+    return maxNote == refNote ? true : false;
 }
 
-~playerMode() {}
+playerMode::~playerMode() {}
 
 
-uint8_t playerMode::noteToInt(std::string& note) {
+uint8_t playerMode::noteToInt(std::string const& note) {
     // Map of note names to semitone offsets
     // Extract the note name and octave from the input string
     std::string name = note.substr(0, note.size() - 1); // Extract the note name

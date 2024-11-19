@@ -16,6 +16,7 @@ add_executable(${PYBIND_TEST_TARGET})
 
 target_sources(${PYBIND_TEST_TARGET} PRIVATE
     src/main.cpp
+    src/playerMode.cpp
 )
 
 target_include_directories(${PYBIND_TEST_TARGET} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
@@ -47,7 +48,7 @@ else()
 endif()
 
 
-
+ 
 # pybind11
 set(PYTHON_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/src/py")
 
@@ -65,7 +66,3 @@ target_link_libraries(${PYBIND_TEST_TARGET} PRIVATE extern)
 
 # Debug definitions
 add_compile_definitions(DEBUG)
-
-
-
-.venv/bin/python3 -m pip install -r requirements.txt
