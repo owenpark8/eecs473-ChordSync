@@ -4,6 +4,7 @@
 
 #include <messaging.hpp>
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 class playerMode {
@@ -19,10 +20,10 @@ public:
 
     //this is analysis for song mode.
     //call the user
-    vector<std::string> analysis(std::vector<NoteDataMessage>& ref) const;
+    std::vector<std::string> analysis(std::vector<NoteDataMessage>& ref) const;
 
     //this is analysis for note mode.
-    vector<std::string> analysis(std::string& note) const;
+    std::vector<std::string> analysis(std::string& note) const;
 
     // Needed to avoid some compiler errors
     ~playerMode() {}
@@ -37,5 +38,9 @@ private:
 
     //used to convert Note
     uint8_t noteToInt(std::string& note);
+
+    std::unordered_map<std::string, uint8_t> semitoneOffsets = {{"C", 0},  {"C#", 1}, {"Db", 1},  {"D", 2},   {"D#", 3}, {"Eb", 3},
+                                                                {"E", 4},  {"F", 5},  {"F#", 6},  {"Gb", 6},  {"G", 7},  {"G#", 8},
+                                                                {"Ab", 8}, {"A", 9},  {"A#", 10}, {"Bb", 10}, {"B", 11}};
 };
 #endif

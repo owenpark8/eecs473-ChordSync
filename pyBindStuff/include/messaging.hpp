@@ -52,6 +52,7 @@ struct StartSongLoadingDataMessage {
 };
 
 struct __attribute__((packed)) NoteDataMessage {
+    std::unit8_t note;
     std::uint32_t timestamp_ms;
     std::uint16_t length_ms;
     std::uint8_t fret : 4;
