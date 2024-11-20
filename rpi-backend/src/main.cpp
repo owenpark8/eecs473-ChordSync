@@ -70,6 +70,14 @@ void web_server() {
                 last_song_id = mcu::current_song_id;
             }
 
+            if (last_song_id == 0) {
+                constexpr char const* no_song_loaded = "data: <p>No song loaded onto guitar!</p>\n\n";
+                if (!sink.write(no_song_loaded, std::strlen(no_song_loaded))) {
+                    return false;
+                }
+            }
+
+
             while (sink.is_writable()) {
                 std::unique_lock<std::mutex> lock(mcu::song_info_mut);
 
@@ -85,8 +93,9 @@ void web_server() {
 
                 SQLite::Database db(data::db_filename);
                 data::songs::SongInfo const song_info = data::songs::get_song_by_id(db, last_song_id);
-                std::string song_info_html = std::format(R"(data: <p id="current-song-title">{}</p><p id="current-song-artist">{}</p>)",
+                std::string song_info_html = fmt::format(R"(data: <p id="current-song-title">{}</p><p id="current-song-artist">{}</p>)",
                                                          song_info.title, song_info.artist);
+                song_info_html += fmt::format(web::get_source_file(web::source_files_e::BUTTON_HTML), "/play-song", "Play song!");
                 song_info_html += "\n\n";
 
                 if (!sink.write(song_info_html.data(), song_info_html.size())) {

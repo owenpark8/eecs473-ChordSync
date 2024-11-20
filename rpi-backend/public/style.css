@@ -19,3 +19,14 @@ div.maxwidthcontainer {
     }
 }
 
+.htmx-indicator {
+    display: none;
+}
+
+.htmx-request .htmx-indicator {
+    display: inline-block;
+}
+
+.htmx-request .button-text {
+    display: none;
+}
