@@ -12,6 +12,7 @@
 
 #include "data.hpp"
 #include "mcu.hpp"
+#include "playerMode.hpp"
 #include "web.hpp"
 
 
@@ -201,9 +202,16 @@ auto main(int argc, char* args[]) -> int {
         return 1;
     }
 
-    //  if (!serial::init()) {
-    //      return 1;
-    //  }
+    auto* player = new playerMode(1, 1, "C4", "1", "1", 15, 95);
+    bool outcome = player->analysis("C4");
+
+    if (outcome == false)
+        std::cout << "Wrong!" << std::endl;
+    else
+        std::cout << "Correct!" << std::endl;
+        //  if (!serial::init()) {
+        //      return 1;
+        //  }
 
 #ifdef DEBUG
     data::songs::SongInfo song = {
