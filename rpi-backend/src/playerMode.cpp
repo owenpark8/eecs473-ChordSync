@@ -6,12 +6,9 @@
 
 namespace py = pybind11;
 
-//add in cleanout function
-playerMode::playerMode(uint8_t song_id, uint8_t mode, std::string const& note, std::string const& title, std::string const artist, uint8_t duration,
-                       uint8_t bpm)
-    : song{song_id, title, artist, std::chrono::seconds(duration), bpm}, mode(mode), note(note) {
 
-
+auto midiParse(uint8_t song_id, uint8_t mode, uint8_t duration,
+               uint8_t bpm) -> std::vector<std::vector<int>>{
     py::scoped_interpreter guard{};
 
     py::module sys = py::module::import("sys");
@@ -28,7 +25,45 @@ playerMode::playerMode(uint8_t song_id, uint8_t mode, std::string const& note, s
     auto get_record_convert_module = py::module_::import("record_convert");
     py::object get_record_convert = get_record_convert_module.attr("record_convert");
 
-    auto numbers = get_record_convert("-r", song_id, duration, bpm).cast<std::vector<std::vector<int>>>();
+
+
+    std::string rec_mode = "-r";
+
+    //mode 1 and 2 are record song and single 
+    if(mode == 3){
+        rec_mode = "-c";
+    }
+
+    auto numbers = get_record_convert(rec_mode, song_id, duration, bpm).cast<std::vector<std::vector<int>>>();
+
+    return numbers;
+               }
+    
+//add in cleanout function
+playerMode::playerMode(uint8_t song_id, uint8_t mode, std::string const& note, std::string const& title, std::string const artist, uint8_t duration,
+                       uint8_t bpm)
+    : song{song_id, title, artist, std::chrono::seconds(duration), bpm}, mode(mode), note(note) {
+
+
+    /*py::scoped_interpreter guard{};
+
+    py::module sys = py::module::import("sys");
+    sys.attr("path").attr("insert")(0, PY_VENV_PATH);
+    sys.attr("path").attr("insert")(0, PY_MODULE_PATH);
+
+    try {
+        py::module pybind_module = py::module::import("basic_pitch");
+        std::cout << "Module imported successfully!" << std::endl;
+    } catch (py::error_already_set const& e) {
+        std::cerr << "Error: " << e.what() << std::endl;
+    }
+
+    auto get_record_convert_module = py::module_::import("record_convert");
+    py::object get_record_convert = get_record_convert_module.attr("record_convert");*/
+
+    //auto numbers = get_record_convert("-r", song_id, duration, bpm).cast<std::vector<std::vector<int>>>();
+
+    auto numbers = midiParse(song_id, 1, duration, bpm);
 
     for (auto& number: numbers) {
         auto entry = new data::songs::Note;
@@ -38,6 +73,10 @@ playerMode::playerMode(uint8_t song_id, uint8_t mode, std::string const& note, s
         (this->song.notes).push_back(*entry);
         delete entry;
     }
+}
+
+auto playerMode::dataParseRef(uint8_t song_id, uint8_t bpm) -> std::vector<std::vector<int>>{
+    return midiParse(song_id, 3, 0, bpm);
 }
 
 
@@ -89,3 +128,25 @@ auto playerMode::noteToInt(std::string const& note) -> uint8_t {
     // Calculate the MIDI note number
     return 12 + (12 * octave) + semitoneOffsets[name];
 }
+
+/*auto playerMode::analysis() -> void{
+    py::scoped_interpreter guard{};
+
+    py::module sys = py::module::import("sys");
+    sys.attr("path").attr("insert")(0, PY_VENV_PATH);
+    sys.attr("path").attr("insert")(0, PY_MODULE_PATH);
+
+    try {
+        py::module pybind_module = py::module::import("basic_pitch");
+        std::cout << "Module imported successfully!" << std::endl;
+    } catch (py::error_already_set const& e) {
+        std::cerr << "Error: " << e.what() << std::endl;
+    }
+
+    auto get_record_convert_module = py::module_::import("record_convert");
+    py::object get_record_convert = get_record_convert_module.attr("record_convert");
+
+    auto numbers = get_record_convert("c", this->song.id, this->song.length, this->song.bpm).cast<std::vector<std::vector<int>>>();
+
+    
+}*/

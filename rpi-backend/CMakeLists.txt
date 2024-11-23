@@ -24,7 +24,7 @@ target_include_directories(${RPI_BACKEND_TARGET} PUBLIC ${CMAKE_CURRENT_SOURCE_D
 
 # pybind11
 set(PYTHON_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/py")
-set(PYTHON_VENV_PATH "${PYTHON_MODULE_PATH}/.venv/lib/python3.10/site-packages")
+set(PYTHON_VENV_PATH "${PYTHON_MODULE_PATH}/.venv/lib/python3.11/site-packages")
 target_compile_definitions(${RPI_BACKEND_TARGET} PRIVATE
     PY_MODULE_PATH="${PYTHON_MODULE_PATH}"
     PY_VENV_PATH="${PYTHON_VENV_PATH}"

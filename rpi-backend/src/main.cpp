@@ -202,13 +202,16 @@ auto main(int argc, char* args[]) -> int {
         return 1;
     }
 
-    auto* player = new playerMode(1, 1, "C4", "1", "1", 15, 95);
-    bool outcome = player->analysis("C4");
+    auto* player = new playerMode(1, 1, "C4", "1", "1", 5, 95);
 
-    if (outcome == false)
+    //player->analysis();
+    auto numbers = player->dataParseRef(1, 95);
+    //bool outcome = player->analysis("C4");
+
+    /*if (outcome == false)
         std::cout << "Wrong!" << std::endl;
     else
-        std::cout << "Correct!" << std::endl;
+        std::cout << "Correct!" << std::endl;*/
         //  if (!serial::init()) {
         //      return 1;
         //  }

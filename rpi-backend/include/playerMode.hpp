@@ -24,11 +24,16 @@ public:
     [[nodiscard]] auto performanceFeedback() const -> std::vector<std::string>;
 
 
+    //auto analysis() -> void;
+    
     //call the user
     auto analysis(std::vector<data::songs::Note>& ref) -> std::vector<bool>;
 
     //this is analysis for note mode.
     auto analysis(std::string const& note) -> bool;
+
+    //change this to note or overloaded. 
+    auto dataParseRef(uint8_t song_id, uint8_t bpm) -> std::vector<std::vector<int>>;
 
 
     // Needed to avoid some compiler errors
