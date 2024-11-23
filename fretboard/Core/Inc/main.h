@@ -62,8 +62,6 @@ void HAL_Post_Init();
 #define LCD_RST_GPIO_Port GPIOC
 #define LCD_RS_Pin GPIO_PIN_4
 #define LCD_RS_GPIO_Port GPIOA
-#define LCD_RSTA6_Pin GPIO_PIN_6
-#define LCD_RSTA6_GPIO_Port GPIOA
 #define CSX_A_Pin GPIO_PIN_4
 #define CSX_A_GPIO_Port GPIOC
 #define CSX_B_Pin GPIO_PIN_5

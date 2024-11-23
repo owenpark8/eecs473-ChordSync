@@ -14,19 +14,19 @@ extern TIM_HandleTypeDef htim6;
 Fretboard fretboard;
 
 auto init() -> void {
-    Pin CS_A = Pin(CSX_F_GPIO_Port, CSX_F_Pin);
-    Pin CS_B = Pin(CSX_E_GPIO_Port, CSX_E_Pin);
-    Pin CS_C = Pin(CSX_D_GPIO_Port, CSX_D_Pin);
-    Pin CS_D = Pin(CSX_C_GPIO_Port, CSX_C_Pin);
-    Pin CS_E = Pin(CSX_B_GPIO_Port, CSX_B_Pin);
-    Pin CS_F = Pin(CSX_A_GPIO_Port, CSX_A_Pin);
+    Pin CS_A = Pin(CSX_A_GPIO_Port, CSX_A_Pin);
+    Pin CS_B = Pin(CSX_B_GPIO_Port, CSX_B_Pin);
+    Pin CS_C = Pin(CSX_C_GPIO_Port, CSX_C_Pin);
+    Pin CS_D = Pin(CSX_D_GPIO_Port, CSX_D_Pin);
+    Pin CS_E = Pin(CSX_E_GPIO_Port, CSX_E_Pin);
+    Pin CS_F = Pin(CSX_F_GPIO_Port, CSX_F_Pin);
 
-    SPI SPI_A = SPI(&hspi1, CS_A);
-    SPI SPI_B = SPI(&hspi1, CS_B);
+    SPI SPI_A = SPI(&hspi3, CS_A);
+    SPI SPI_B = SPI(&hspi3, CS_B);
     SPI SPI_C = SPI(&hspi2, CS_C);
     SPI SPI_D = SPI(&hspi2, CS_D);
-    SPI SPI_E = SPI(&hspi3, CS_E);
-    SPI SPI_F = SPI(&hspi3, CS_F);
+    SPI SPI_E = SPI(&hspi1, CS_E);
+    SPI SPI_F = SPI(&hspi1, CS_F);
 
 
     Pin reg_sel_in = Pin(LCD_RS_GPIO_Port, LCD_RS_Pin);
@@ -40,46 +40,74 @@ auto init() -> void {
     LCD lcd_6 = LCD(SPI_F, reg_sel_in, reset_in);
 
 
-    fretboard = Fretboard{lcd_1, lcd_2, lcd_3, lcd_4, lcd_5, lcd_6, &huart1};
-    fretboard.init();
+//    fretboard = Fretboard{lcd_1, lcd_2, lcd_3, lcd_4, lcd_5, lcd_6, &huart1};
+//    fretboard.init();
+    HAL_Delay(5000);
+
+    lcd_1.reset_lcd();
+//    lcd_2.reset_lcd();
+
+    lcd_1.init();
+    lcd_2.init();
+
+    lcd_1.fill_screen(GREEN);
+   	HAL_Delay(20);
+   	lcd_2.fill_screen(GREEN);
+   	HAL_Delay(20);
 
 
-    //	lcd_1.fill_screen(GREEN);
-    //	HAL_Delay(20);
-    //	lcd_2.fill_screen(GREEN);
-    //	HAL_Delay(20);
-    //	lcd_3.fill_screen(GREEN);
-    //	HAL_Delay(20);
-    //	lcd_4.fill_screen(GREEN);
-    //	HAL_Delay(20);
-    //	lcd_5.fill_screen(GREEN);
-    //	HAL_Delay(20);
-    while (true) {
-        for (int i = 0; i < 23; ++i) {
-            fretboard.draw_note({i, string_e::HIGH_E}, (i % 2 == 0) ? GREEN : WHITE);
-            HAL_Delay(20);
-        }
-        for (int i = 0; i < 23; ++i) {
-            fretboard.draw_note({i, string_e::A}, (i % 2 == 1) ? GREEN : WHITE);
-            HAL_Delay(20);
-        }
-        for (int i = 0; i < 23; ++i) {
-            fretboard.draw_note({i, string_e::D}, (i % 2 == 0) ? GREEN : WHITE);
-            HAL_Delay(20);
-        }
-        for (int i = 0; i < 23; ++i) {
-            fretboard.draw_note({i, string_e::G}, (i % 2 == 1) ? GREEN : WHITE);
-            HAL_Delay(20);
-        }
-        for (int i = 0; i < 23; ++i) {
-            fretboard.draw_note({i, string_e::B}, (i % 2 == 0) ? GREEN : WHITE);
-            HAL_Delay(20);
-        }
-        for (int i = 0; i < 23; ++i) {
-            fretboard.draw_note({i, string_e::LOW_E}, (i % 2 == 1) ? GREEN : WHITE);
-            HAL_Delay(20);
-        }
-    }
+    lcd_5.init();
+    lcd_6.init();
+
+   	lcd_5.fill_screen(GREEN);
+   	HAL_Delay(20);
+   	lcd_6.fill_screen(GREEN);
+   	HAL_Delay(20);
+
+    lcd_3.init();
+    lcd_4.init();
+
+    lcd_3.fill_screen(GREEN);
+   	HAL_Delay(20);
+   	lcd_4.fill_screen(GREEN);
+   	HAL_Delay(20);
+
+    	while (true) {
+    		      HAL_GPIO_WritePin(DEBUG_LED_GPIO_Port, DEBUG_LED_Pin, GPIO_PIN_SET);
+    		      HAL_Delay(500);
+    		      HAL_GPIO_WritePin(DEBUG_LED_GPIO_Port, DEBUG_LED_Pin, GPIO_PIN_RESET);
+    		      HAL_Delay(500);
+    	}
+//    while (true) {
+//        for (int i = 0; i < 23; ++i) {
+//            fretboard.draw_note({i, string_e::HIGH_E}, (i % 2 == 0) ? GREEN : WHITE);
+//            HAL_Delay(20);
+//        }
+//        for (int i = 0; i < 23; ++i) {
+//            fretboard.draw_note({i, string_e::A}, (i % 2 == 1) ? GREEN : WHITE);
+//            HAL_Delay(20);
+//        }
+//        for (int i = 0; i < 23; ++i) {
+//            fretboard.draw_note({i, string_e::D}, (i % 2 == 0) ? GREEN : WHITE);
+//            HAL_Delay(20);
+//        }
+//        for (int i = 0; i < 23; ++i) {
+//            fretboard.draw_note({i, string_e::G}, (i % 2 == 1) ? GREEN : WHITE);
+//            HAL_Delay(20);
+//        }
+//        for (int i = 0; i < 23; ++i) {
+//            fretboard.draw_note({i, string_e::B}, (i % 2 == 0) ? GREEN : WHITE);
+//            HAL_Delay(20);
+//        }
+//        for (int i = 0; i < 23; ++i) {
+//            fretboard.draw_note({i, string_e::LOW_E}, (i % 2 == 1) ? GREEN : WHITE);
+//            HAL_Delay(20);
+//        }
+//        HAL_GPIO_WritePin(DEBUG_LED_GPIO_Port, DEBUG_LED_Pin, GPIO_PIN_SET);
+//        HAL_Delay(500);
+//        HAL_GPIO_WritePin(DEBUG_LED_GPIO_Port, DEBUG_LED_Pin, GPIO_PIN_RESET);
+//        HAL_Delay(500);
+//    }
 }
 
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef* huart) { fretboard.handle_uart_message(); }

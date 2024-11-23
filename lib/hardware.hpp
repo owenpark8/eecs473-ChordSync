@@ -34,7 +34,9 @@ public:
 
     auto spi_write(uint8_t const* data, uint16_t const size) const -> void {
         m_csx.reset();
-        HAL_SPI_Transmit(m_hspi, data, size, m_timeout);
+        if (HAL_SPI_Transmit(m_hspi, data, size, m_timeout) != HAL_OK) {
+        	Error_Handler();
+        }
         m_csx.set();
     }
 
