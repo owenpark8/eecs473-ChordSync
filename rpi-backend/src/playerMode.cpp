@@ -111,7 +111,14 @@ auto playerMode::get_bpm() const -> uint8_t { return this->song.bpm; }
 auto playerMode::get_resolution() const -> uint8_t { return 0; }
 
 
-auto playerMode::analysis(std::vector<data::songs::Note>& ref) -> std::vector<bool> {
+auto playerMode::analysis() -> std::vector<bool> {
+    SQLite::Database db(data::db_filename, SQLite::OPEN_READWRITE | SQLite::OPEN_CREATE);
+    data::songs::SongInfo song = data::songs::get_song_by_id(db, 1);
+    
+    for(int i = 0; i < song.notes.size(); i++){
+        //std::cout << (song.notes[i]).midi_note << "\n";
+        printf( "%i\n", song.notes[i].midi_note);
+    }
     std::vector<bool> s;
     s.push_back(false);
     return s;

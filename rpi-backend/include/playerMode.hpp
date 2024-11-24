@@ -29,6 +29,7 @@ public:
     
     //call the user
     auto analysis(std::vector<data::songs::Note>& ref) -> std::vector<bool>;
+    auto analysis() -> std::vector<bool>;
 
     //this is analysis for note mode.
     auto analysis(std::string const& note) -> bool;
