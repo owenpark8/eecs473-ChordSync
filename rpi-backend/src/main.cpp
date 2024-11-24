@@ -202,15 +202,23 @@ auto main(int argc, char* args[]) -> int {
         return 1;
     }
 
+
+    // playerMode(uint8_t song_id, uint8_t mode, std::string const& note, std::string const& title, std::string const& artist, uint8_t duration,
+               //uint8_t bpm);
     auto* player = new playerMode(1, 1, "C4", "1", "1", 5, 95);
+
+    //dataParseUpload(std::string const& filename, uint8_t song_id, std::string const& title, std::string const& artist, uint8_t duration, uint8_t bpm) -> void;
+    player->dataParseUpload("2_rec_basic_pitch.mid", 1, "twinkle-twinkle-ref", "unknown", 55, 95);
 
 
     //player->analysis();
-    auto numbers = player->dataParseRef(2);
+    /*auto numbers = player->dataParseRef("2_rec_basic_pitch.mid");
 
     for(int i = 0; i < numbers.size(); i++){
         std::cout << "[" << numbers[i][0] << "," << numbers[i][1] << "," << numbers[i][2] << "]" << std::endl;
-    }
+    }*/
+
+
     //bool outcome = player->analysis("C4");
 
     /*if (outcome == false)

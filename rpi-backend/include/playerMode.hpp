@@ -12,7 +12,7 @@ public:
     //do the recording here
     //potential modes: reference create, record and convert song, record and convert note.
     //can pass in note to convert.
-    playerMode(uint8_t song_id, uint8_t mode, std::string const& note, std::string const& title, std::string const artist, uint8_t duration,
+    playerMode(uint8_t song_id, uint8_t mode, std::string const& note, std::string const& title, std::string const& artist, uint8_t duration,
                uint8_t bpm);
     // EFFECTS returns player's name
     [[nodiscard]] auto get_mode() const -> std::string;
@@ -25,6 +25,7 @@ public:
 
 
     //auto analysis() -> void;
+    //so need to have it so that they could either enter in song or 
     
     //call the user
     auto analysis(std::vector<data::songs::Note>& ref) -> std::vector<bool>;
@@ -33,7 +34,11 @@ public:
     auto analysis(std::string const& note) -> bool;
 
     //change this to note or overloaded. 
-    auto dataParseRef(std::string &filename) -> std::vector<std::vector<int>>;
+    auto dataParseRef(std::string const& filename) -> std::vector<std::vector<int>>;
+
+    //function that apploads midi to database.
+    auto dataParseUpload(std::string const& filename, uint8_t song_id, std::string const& title, std::string const& artist, uint8_t duration, uint8_t bpm) -> void;
+
 
 
     // Needed to avoid some compiler errors

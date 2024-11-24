@@ -32,7 +32,7 @@ auto playerMode::midiParse(uint8_t song_id, uint8_t duration,
                }
     
 //add in cleanout function
-playerMode::playerMode(uint8_t song_id, uint8_t mode, std::string const& note, std::string const& title, std::string const artist, uint8_t duration,
+playerMode::playerMode(uint8_t song_id, uint8_t mode, std::string const& note, std::string const& title, std::string const& artist, uint8_t duration,
                        uint8_t bpm)
     : song{song_id, title, artist, std::chrono::seconds(duration), bpm}, mode(mode), note(note) {
 
@@ -48,7 +48,7 @@ playerMode::playerMode(uint8_t song_id, uint8_t mode, std::string const& note, s
     }
 }
 
-auto playerMode::dataParseRef(std::string &filename) -> std::vector<std::vector<int>>{
+auto playerMode::dataParseRef(std::string const& filename) -> std::vector<std::vector<int>>{
     py::scoped_interpreter guard{};
 
     py::module sys = py::module::import("sys");
@@ -58,9 +58,47 @@ auto playerMode::dataParseRef(std::string &filename) -> std::vector<std::vector<
     //mode 1 and 2 are record song and single 
     auto get_dataParse_module = py::module_::import("dataParse");
     py::object get_Message = get_dataParse_module.attr("getMessages");
-    rec_mode = "-c";
     auto numbers = get_Message(filename).cast<std::vector<std::vector<int>>>();
     return numbers;
+}
+
+
+//uint8_t song_id, uint8_t mode, std::string const& note, std::string const& title, std::string const artist, uint8_t duration,
+                       //uint8_t bpm)
+    //: song{song_id, title, artist, std::chrono::seconds(duration), bpm}, mode(mode), note(note) {
+
+auto playerMode::dataParseUpload(std::string const& filename, uint8_t song_id, std::string const& title, std::string const& artist, uint8_t duration, uint8_t bpm) -> void{
+    auto numbers = dataParseRef(filename);
+
+    data::songs::SongInfo song = {
+        .id = song_id,
+        .title = title,
+        .artist = artist,
+        .length = std::chrono::seconds(duration),
+        .bpm = bpm
+    };
+
+    for (auto& number: numbers) {
+        auto entry = new data::songs::Note;
+        entry->midi_note = static_cast<uint8_t>(number[0]);
+        entry->start_timestamp_ms = static_cast<uint8_t>(number[1]);
+        entry->length_ms = static_cast<uint8_t>(number[2] - entry->start_timestamp_ms);
+        (song.notes).push_back(*entry);
+        delete entry;
+    }
+
+    std::cout << "Inserting " << title << " with notes (but no information about string and fret number)" << "\n";
+
+    /*for (auto const& note: song.notes) {
+        note.print();
+    }*/
+
+    try {
+        SQLite::Database db(data::db_filename, SQLite::OPEN_READWRITE | SQLite::OPEN_CREATE);
+        data::songs::insert_new_song(db, song);
+    } catch (std::exception& e) {
+        std::cerr << "SQLite exception: " << e.what() << std::endl;
+    }
 }
 
 
