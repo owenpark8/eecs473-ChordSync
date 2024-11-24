@@ -33,7 +33,7 @@ public:
     auto analysis(std::string const& note) -> bool;
 
     //change this to note or overloaded. 
-    auto dataParseRef(uint8_t song_id, uint8_t bpm) -> std::vector<std::vector<int>>;
+    auto dataParseRef(std::string &filename) -> std::vector<std::vector<int>>;
 
 
     // Needed to avoid some compiler errors
@@ -59,5 +59,8 @@ private:
     //used to convert Note
     auto noteToInt(std::string const& note) -> uint8_t;
     //this is analysis for song mode.
+
+    auto midiParse(uint8_t song_id, uint8_t duration,
+        uint8_t bpm) -> std::vector<std::vector<int>>;
 };
 #endif

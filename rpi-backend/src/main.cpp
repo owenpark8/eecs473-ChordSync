@@ -204,8 +204,13 @@ auto main(int argc, char* args[]) -> int {
 
     auto* player = new playerMode(1, 1, "C4", "1", "1", 5, 95);
 
+
     //player->analysis();
-    auto numbers = player->dataParseRef(1, 95);
+    auto numbers = player->dataParseRef(2);
+
+    for(int i = 0; i < numbers.size(); i++){
+        std::cout << "[" << numbers[i][0] << "," << numbers[i][1] << "," << numbers[i][2] << "]" << std::endl;
+    }
     //bool outcome = player->analysis("C4");
 
     /*if (outcome == false)
@@ -215,7 +220,7 @@ auto main(int argc, char* args[]) -> int {
         //  if (!serial::init()) {
         //      return 1;
         //  }
-
+/*
 #ifdef DEBUG
     data::songs::SongInfo song = {
             .title = "baby shark",
@@ -261,5 +266,5 @@ auto main(int argc, char* args[]) -> int {
     std::thread t(web_server);
 
 
-    t.join();
+    t.join();*/
 }
