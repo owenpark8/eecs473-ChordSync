@@ -6,6 +6,8 @@
 #include <string>
 #include <unordered_map>
 #include <vector>
+#include <map>
+#include <cmath>
 
 class playerMode {
 public:
@@ -68,5 +70,28 @@ private:
 
     auto midiParse(uint8_t song_id, uint8_t duration,
         uint8_t bpm) -> std::vector<std::vector<int>>;
-};
+    
+    struct noteEntry {
+        std::uint32_t start_time,
+        std::uint16_t duration,
+        std::uint16_t orig_pos
+    };
+
+    std::uint32_t ref_size; 
+
+    //ref data.
+    std::map<std::uint8_t, std::vector<noteEntry>> ref_data;
+
+    auto organizeRef() -> std::map<std::uint8_t, std::vector<noteEntry>>;
+
+    //checks seen
+    auto checkNote(data::songs::Note>& ref_note) -> void;
+
+    //youtube
+    auto compareByStartTime(const noteEntry& entry, std::uint32_t target)->bool;
+
+    // Comparator for reverse comparison, useful for certain cases
+    auto compareByStartTimeReverse(std::uint32_t target, const noteEntry& entry)->bool;
+
+}
 #endif

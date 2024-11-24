@@ -41,11 +41,22 @@ playerMode::playerMode(uint8_t song_id, uint8_t mode, std::string const& note, s
     for (auto& number: numbers) {
         auto entry = new data::songs::Note;
         entry->midi_note = static_cast<uint8_t>(number[0]);
-        entry->start_timestamp_ms = static_cast<uint8_t>(number[1]);
-        entry->length_ms = static_cast<uint8_t>(number[2] - entry->start_timestamp_ms);
+        entry->start_timestamp_ms = static_cast<uint32_t>(number[1]);
+        entry->length_ms = static_cast<uint16_t>(number[2] - entry->start_timestamp_ms);
         (this->song.notes).push_back(*entry);
         delete entry;
     }
+
+    try {
+        SQLite::Database db(data::db_filename, SQLite::OPEN_READWRITE | SQLite::OPEN_CREATE);
+        this->ref_data = this->organizeRef();
+        
+    } catch (std::exception& e) {
+        std::cerr << "SQLite exception: " << e.what() << std::endl;
+    }
+
+
+    //need to figure out filtering. 
 }
 
 auto playerMode::dataParseRef(std::string const& filename) -> std::vector<std::vector<int>>{
@@ -81,8 +92,8 @@ auto playerMode::dataParseUpload(std::string const& filename, uint8_t song_id, s
     for (auto& number: numbers) {
         auto entry = new data::songs::Note;
         entry->midi_note = static_cast<uint8_t>(number[0]);
-        entry->start_timestamp_ms = static_cast<uint8_t>(number[1]);
-        entry->length_ms = static_cast<uint8_t>(number[2] - entry->start_timestamp_ms);
+        entry->start_timestamp_ms = static_cast<uint32_t>(number[1]);
+        entry->length_ms = static_cast<uint16_t>(number[2] - entry->start_timestamp_ms);
         (song.notes).push_back(*entry);
         delete entry;
     }
@@ -111,17 +122,77 @@ auto playerMode::get_bpm() const -> uint8_t { return this->song.bpm; }
 auto playerMode::get_resolution() const -> uint8_t { return 0; }
 
 
-auto playerMode::analysis() -> std::vector<bool> {
+auto playerMode::organizeRef() -> std::map<std::uint8_t, std::vector<noteEntry>>{
     SQLite::Database db(data::db_filename, SQLite::OPEN_READWRITE | SQLite::OPEN_CREATE);
     data::songs::SongInfo song = data::songs::get_song_by_id(db, 1);
     
+    this->ref_size = song.notes.size();
+    std::map<std::uint8_t, std::vector<noteEntry>> ref;
     for(int i = 0; i < song.notes.size(); i++){
-        //std::cout << (song.notes[i]).midi_note << "\n";
-        printf( "%i\n", song.notes[i].midi_note);
+        auto entry = new noteEntry;
+        entry->start_time = static_cast<uint32_t>(song.notes[i].start_timestamp_ms);
+        entry->duration = static_cast<uint16_t>(song.notes[i].length_ms);
+        entry->orig_pos = static_cast<uint16_t>(i);
+        ref[song.notes.midi_note].push_back(*entry);
+        delete entry;
     }
-    std::vector<bool> s;
-    s.push_back(false);
-    return s;
+
+    return ref;
+}
+
+
+
+auto playerMode::compareByStartTime(const noteEntry& entry, std::uint32_t target)->bool {
+    return entry.start_time < target;
+}
+
+// Comparator for reverse comparison, useful for certain cases
+auto playerMode::compareByStartTimeReverse(std::uint32_t target, const noteEntry& entry)->bool{
+    return target < entry.start_time;
+}
+
+
+auto playerMode::checkNote(data::songs::Note>& rec_note) -> void{
+    //this is an extraneous
+
+    auto occurences = this->ref_data.find(rec_note.midi_note);
+    //so it exists. 
+
+    if(occurences != ref_data.end()){
+        //these are occurences.
+        auto lower = std::lower_bound(occurences.begin(), occurences.end(), rec_note.start_timestamp_ms, compareByStartTime);
+        auto upper = std::upper_bound(occurences.begin(), occurences.end(), rec_note.start_timestamp_ms, compareByStartTimeReverse);
+
+
+        auto closest = abs(lower->start_time - rec_note.start_timestamp_ms) < abs(upper->start_time - rec_note.start_timestamp_ms) ? lower : upper;
+
+        if(abs(closest->start_time - rec_note.start_timestamp_ms) > 1000){
+            closest->seen = false;
+            return;
+        }
+
+        std::float error = abs(closest->duration - rec_note.start_timestamp_ms) / closest->duration.
+
+        if(error <= 0.5){
+            closest->seen = true;
+            return;
+        }
+
+        closest->seen = false;    
+    }
+}
+
+auto playerMode::analysis() -> std::vector<bool>{
+    std::vector<bool> result(this->ref_size, false);
+    for (const auto& [key, noteVector] : this->ref_data) {
+        // Iterate through the vector of NoteEntry
+        for (const auto& note : noteVector) {
+            result[note.orig_pos] = note.seen;
+        }
+    }
+
+    //returns result.
+    return result;
 }
 
 auto playerMode::analysis(std::string const& note) -> bool {
