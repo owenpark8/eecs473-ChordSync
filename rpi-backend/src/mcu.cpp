@@ -91,6 +91,12 @@ namespace mcu {
         }
     }
 
+    auto end_loaded_song() -> void {
+        send_control_message(END_SONG_MESSAGE);
+        if (!receive_ack()) {
+            throw std::runtime_error("Could not play loaded song: did not receive ACK!");
+        }
+    }
     std::mutex mut{};
 
     std::mutex song_info_mut{};

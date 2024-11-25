@@ -17,6 +17,7 @@ namespace mcu {
     auto send_note(std::uint32_t timestamp_ms, std::uint16_t length_ms, std::uint8_t fret, std::uint8_t string) -> void;
     auto get_and_update_loaded_song_id() -> void;
     auto play_loaded_song() -> void;
+    auto end_loaded_song() -> void;
 
     extern std::mutex mut;
 
