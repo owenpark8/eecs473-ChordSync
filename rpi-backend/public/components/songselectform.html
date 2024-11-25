@@ -1,43 +1,22 @@
-<form class="max-w-sm mx-auto" hx-post="/submit-song-select" hx-trigger="submit" hx-swap="none">
-    <label for="song-select" class="block mb-2 text-sm font-medium text-gray-900">Select a song to
-        play</label>
-    <select id="song-select" name="song-id"
-        class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
-        {}
-    </select>
+<div hx-ext="response-targets">
+    <form class="max-w-sm mx-auto" hx-post="/submit-song-select" hx-trigger="submit" hx-target-5*="#error-popup"
+        hx-swap="none">
+        <label for="song-select" class="block mb-2 text-sm font-medium text-gray-900">Select a song to
+            play</label>
+        <select id="song-select" name="song-id"
+            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
+            {}
+        </select>
 
-    <button type="submit" class="mt-2 bg-blue-500 hover:bg-blue-700 py-1.5 px-3 rounded-md"
-        hx-indicator="closest form #spinner">
-        <span class="button-text text-white font-medium">Load song</span>
-        <svg id="spinner"  class="htmx-indicator" width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-            <style>
-                .spinner_b2T7 {{
-                        animation: spinner_xe7Q .8s linear infinite
-                }}
-
-                .spinner_YRVV {{
-                        animation-delay: -.65s
-                    }}
-
-                .spinner_c9oY {{
-                        animation-delay: -.5s
-                    }}
-
-                @keyframes spinner_xe7Q {{
-
-                        93.75%,
-                        100% {{
-                                r: 3px
-                            }}
-
-                        46.875% {{
-                                r: .2px
-                            }}
-                    }}
-            </style>
-            <circle class="spinner_b2T7" cx="4" cy="12" r="3" fill="white"/>
-            <circle class="spinner_b2T7 spinner_YRVV" cx="12" cy="12" r="3" fill="white"/>
-            <circle class="spinner_b2T7 spinner_c9oY" cx="20" cy="12" r="3" fill="white"/>
-        </svg>
-    </button>
-</form>
+        <button type="submit" class="mt-2 bg-blue-500 hover:bg-blue-700 py-1.5 px-3 rounded-md"
+            hx-indicator="closest form #spinner">
+            <span class="button-text text-white font-medium">Load song</span>
+            <svg id="spinner" class="htmx-indicator" width="24" height="24" viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg">
+                <circle class="spinner_b2T7" cx="4" cy="12" r="3" fill="white" />
+                <circle class="spinner_b2T7 spinner_YRVV" cx="12" cy="12" r="3" fill="white" />
+                <circle class="spinner_b2T7 spinner_c9oY" cx="20" cy="12" r="3" fill="white" />
+            </svg>
+        </button>
+    </form>
+</div>

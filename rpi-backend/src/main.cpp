@@ -116,6 +116,11 @@ void web_server() {
         mcu::play_loaded_song();
     });
 
+    svr.Post("/stop-song", [&](Request const& req, Response& res) {
+        std::unique_lock<std::mutex> lock(mcu::mut);
+        mcu::end_loaded_song();
+    });
+
     svr.Get("/song-select-form", [](Request const& req, Response& res) {
         std::string options;
 
@@ -169,7 +174,13 @@ void web_server() {
                 for (auto const& note: song.notes) {
                     mcu::send_note(note.start_timestamp_ms, note.length_ms, note.fret, note.string);
                 }
-            } catch (std::runtime_error const& err) {}
+            } catch (std::runtime_error const& err) {
+                res.set_content(fmt::format(web::get_source_file(web::source_files_e::ERROR_HTML), "Did not receive ACK when loading song to MCU!"),
+                                web::html_type);
+                res.set_header("HX-Reswap", "innerHTML");
+                res.status = httplib::StatusCode::InternalServerError_500;
+                return;
+            }
 
             std::unique_lock<std::mutex> song_info_lock(mcu::song_info_mut);
             mcu::current_song_id = id;

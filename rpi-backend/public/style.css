@@ -3,30 +3,53 @@
 @tailwind utilities;
 
 div.maxwidthcontainer {
-    margin-left: auto;
-    margin-right: auto;
-    width: 100%;
-    max-width: 1280px; /* max-w-screen-xl */
-    padding-left: 10px; /* px-2.5 (2.5 * 4px = 10px) */
-    padding-right: 10px; /* px-2.5 (2.5 * 4px = 10px) */
+  margin-left: auto;
+  margin-right: auto;
+  width: 100%;
+  max-width: 1280px; /* max-w-screen-xl */
+  padding-left: 10px; /* px-2.5 (2.5 * 4px = 10px) */
+  padding-right: 10px; /* px-2.5 (2.5 * 4px = 10px) */
 }
 
 @media (min-width: 768px) {
-    /* md breakpoint */
-    div.maxwidthcontainer {
-        padding-left: 80px; /* md:px-20 (20 * 4px = 80px) */
-        padding-right: 80px; /* md:px-20 (20 * 4px = 80px) */
-    }
+  /* md breakpoint */
+  div.maxwidthcontainer {
+    padding-left: 80px; /* md:px-20 (20 * 4px = 80px) */
+    padding-right: 80px; /* md:px-20 (20 * 4px = 80px) */
+  }
 }
 
 .htmx-indicator {
-    display: none;
+  display: none;
 }
 
 .htmx-request .htmx-indicator {
-    display: inline-block;
+  display: inline-block;
 }
 
 .htmx-request .button-text {
-    display: none;
+  display: none;
+}
+
+.spinner_b2T7 {
+  animation: spinner_xe7Q 0.8s linear infinite;
+}
+
+.spinner_YRVV {
+  animation-delay: -0.65s;
+}
+
+.spinner_c9oY {
+  animation-delay: -0.5s;
+}
+
+@keyframes spinner_xe7Q {
+  93.75%,
+  100% {
+    r: 3px;
+  }
+
+  46.875% {
+    r: 0.2px;
+  }
 }
