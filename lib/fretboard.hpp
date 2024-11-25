@@ -161,12 +161,18 @@ public:
                     m_playing_song = false;
                     rec_new_msg();
                     break;
-                case MessageType::RequestSongID:
+                case MessageType::RequestSongID: {
+                	send_ack();
                     HAL_UART_Transmit(m_huart, LOADED_SONG_ID_MESSAGE.data(), sizeof(LOADED_SONG_ID_MESSAGE), 100);
-                    // TODO: Receive ACK here?
-                    HAL_UART_Transmit(m_huart, &m_song_id, sizeof(m_song_id), 100);
+                    // Receive ACK
+                    HAL_UART_Receive(m_huart, m_uart_buf, sizeof(ACK_MESSAGE), HAL_MAX_DELAY);
+                    const uint8_t song_id_buf[2] = {MESSAGE_HEADER, m_song_id};
+                    HAL_UART_Transmit(m_huart, song_id_buf, sizeof(song_id_buf), 100);
+                    // Receive another ACK
+                    HAL_UART_Receive(m_huart, m_uart_buf, sizeof(ACK_MESSAGE), HAL_MAX_DELAY);
                     rec_new_msg();
-                    break;
+                    return;
+                }
                 default:
                 	rec_new_msg();
                     return;
