@@ -17,7 +17,7 @@ class Fretboard {
     static constexpr std::size_t NUM_FRETS = 23;
     static constexpr std::size_t NUM_STRINGS = 6;
     static constexpr uint16_t TOTAL_PIXEL_WIDTH = NUM_LCDS * ILI9486_TFTHEIGHT;
-    static constexpr uint32_t WARNING_DELAY = 500; // Delay between green, yellow, red in ms
+    static constexpr uint32_t WARNING_DELAY = 2500; // Delay between green, yellow, red in ms
 
     struct note_location_rectangle_t {
         pixel_location_t pixel_loc;
@@ -78,6 +78,7 @@ public:
         }
         clear();
         m_playing_song = false;
+        m_song_id = 0; // song id 0 means no song currently loaded
         // Initialize UART Protocol
         rec_new_msg();
     }
@@ -142,6 +143,7 @@ public:
                     HAL_UART_Receive_IT(m_huart, m_uart_buf, sizeof(StartSongLoadingDataMessage) + 1); // 1 byte for ID + 1 byte for header
                     break;
                 case MessageType::EndSongLoading:
+                	m_timestamps_size = 0;
                     process_loaded_song();
                     rec_new_msg();
                     break;
@@ -152,7 +154,6 @@ public:
                 case MessageType::StartSong:
                     m_playing_song = true;
                     m_song_count_ms = 0;
-                    m_timestamps_size = 0;
                     m_timestamp_idx = 0;
                     rec_new_msg();
                     break;
@@ -167,7 +168,8 @@ public:
                     rec_new_msg();
                     break;
                 default:
-                    break;
+                	rec_new_msg();
+                    return;
             }
         } else if (m_uart_state == uart_state::SONG_ID) {
             m_song_id = m_uart_buf[1];
@@ -185,13 +187,18 @@ public:
      */
     auto handle_song_time() -> void {
         if (m_playing_song) {
-        while (m_timestamps[m_timestamp_idx].timestamp <= m_song_count_ms) {
+        while (m_timestamp_idx < m_timestamps_size && m_timestamps[m_timestamp_idx].timestamp <= m_song_count_ms) {
             const auto& tempstamp = m_timestamps[m_timestamp_idx]; // LOL!!!!!!!!!!!!!
             draw_note(tempstamp.note_loc, tempstamp.color);
             ++m_timestamp_idx;
         }
             ++m_song_count_ms;
         }
+    }
+
+    auto rec_new_msg() -> void {
+        m_uart_state = uart_state::NEW_MSG;
+        HAL_UART_Receive_IT(m_huart, m_uart_buf, 2);
     }
 
 private:
@@ -268,7 +275,8 @@ private:
      * @brief increments counter and checks to see if we have to display a note
      */
     auto process_loaded_song() -> void {
-        for (auto &note_data : m_song) { // parse through notedata and populated timestamps
+        for (size_t i = 0; i < m_song_size; ++i) { // parse through notedata and populated timestamps
+        	const auto &note_data = m_song[i];
             m_timestamps[m_timestamps_size++] = {{static_cast<fret_t>(note_data.fret), static_cast<string_e>(note_data.string)}, note_data.timestamp_ms, GREEN};
             m_timestamps[m_timestamps_size++] = {{static_cast<fret_t>(note_data.fret), static_cast<string_e>(note_data.string)}, note_data.timestamp_ms + WARNING_DELAY, YELLOW};
             m_timestamps[m_timestamps_size++] = {{static_cast<fret_t>(note_data.fret), static_cast<string_e>(note_data.string)}, note_data.timestamp_ms + WARNING_DELAY*2, RED};
@@ -285,9 +293,4 @@ private:
     }
 
     auto send_ack() -> void { HAL_UART_Transmit(m_huart, ACK_MESSAGE.data(), sizeof(ACK_MESSAGE), 100); }
-
-    auto rec_new_msg() -> void {
-        m_uart_state = uart_state::NEW_MSG;
-        HAL_UART_Receive_IT(m_huart, m_uart_buf, 2);
-    }
 };
