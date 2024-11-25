@@ -93,6 +93,12 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
     }
 }
 
+void HAL_UART_ErrorCallback(UART_HandleTypeDef *huart)
+{
+	fretboard.handle_uart_error();
+
+}
+
 
 extern "C" {
 void HAL_Post_Init() { init(); }

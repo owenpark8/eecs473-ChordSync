@@ -202,11 +202,12 @@ public:
         }
     }
 
-    auto rec_new_msg() -> void {
-        m_uart_state = uart_state::NEW_MSG;
-        HAL_UART_Receive_IT(m_huart, m_uart_buf, 2);
+    auto handle_uart_error() -> void {
+    	// Clear all error flags
+    	__HAL_UART_CLEAR_FLAG(m_huart, UART_CLEAR_FEF | UART_CLEAR_NEF | UART_CLEAR_OREF | UART_CLEAR_PEF);
+    	rec_new_msg();
+    	// send_ack();
     }
-
 private:
     /*----------------------BACKDOOR FUNCTIONS-------------------------- */
 
@@ -299,4 +300,9 @@ private:
     }
 
     auto send_ack() -> void { HAL_UART_Transmit(m_huart, ACK_MESSAGE.data(), sizeof(ACK_MESSAGE), 100); }
+
+    auto rec_new_msg() -> void {
+        m_uart_state = uart_state::NEW_MSG;
+        HAL_UART_Receive_IT(m_huart, m_uart_buf, 2);
+    }
 };
