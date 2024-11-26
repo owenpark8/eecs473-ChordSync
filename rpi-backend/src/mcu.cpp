@@ -1,8 +1,8 @@
 #include <array>
-#include <chrono>
 #include <cstdint>
 #include <stdexcept>
 
+#include "data.hpp"
 #include "messaging.hpp"
 #include "serial.hpp"
 
@@ -27,80 +27,78 @@ namespace mcu {
     }
 
     [[nodiscard]] auto receive_ack() -> bool {
-        using namespace std::chrono_literals;
-
         ControlMessage msg{};
-        serial::receive(msg.data(), msg.size(), 5s);
-
+        serial::receive(msg.data(), msg.size(), std::chrono::seconds(5));
         return (msg == ACK_MESSAGE);
     }
 
-    auto start_song_loading(std::uint8_t id) -> void {
+    auto send_song(data::songs::SongInfo const& song) -> void {
         send_control_message(START_SONG_LOADING_MESSAGE);
         if (!receive_ack()) {
-            throw std::runtime_error("Could not start song loading: did not receive ACK!");
+            throw NoACKException("Could not start song loading");
         }
-        send_data_message(StartSongLoadingDataMessage{id});
+        send_data_message(StartSongLoadingDataMessage{song.id});
         if (!receive_ack()) {
-            throw std::runtime_error("Could not start song loading: did not receive ACK!");
+            throw NoACKException("Could not start song loading");
         }
-    }
-    auto send_note(std::uint32_t timestamp_ms, std::uint16_t length_ms, std::uint8_t fret, std::uint8_t string) -> void {
-        NoteDataMessage msg{
-                .timestamp_ms = timestamp_ms,
-                .length_ms = length_ms,
-                .fret = static_cast<std::uint8_t>(fret),
-                .string = static_cast<std::uint8_t>(string),
-        };
 
-        send_control_message(NOTE_MESSAGE);
-        if (!receive_ack()) {
-            throw std::runtime_error("Could not send note: did not receive ACK!");
+        for (auto const& note: song.notes) {
+            NoteDataMessage msg{
+                    .timestamp_ms = note.start_timestamp_ms,
+                    .length_ms = note.length_ms,
+                    .fret = static_cast<std::uint8_t>(note.fret),
+                    .string = static_cast<std::uint8_t>(note.string),
+            };
+            send_control_message(NOTE_MESSAGE);
+            if (!receive_ack()) {
+                throw NoACKException("Could not send note");
+            }
+            send_data_message(msg);
+            if (!receive_ack()) {
+                throw NoACKException("Could not send note");
+            }
         }
-        send_data_message(msg);
-        if (!receive_ack()) {
-            throw std::runtime_error("Could not send note: did not receive ACK!");
-        }
-    }
 
-    auto end_song_loading() -> void {
         send_control_message(END_SONG_LOADING_MESSAGE);
         if (!receive_ack()) {
-            throw std::runtime_error("Could not end song loading: did not receive ACK!");
+            throw NoACKException("Could not end song loading");
         }
     }
 
-    auto get_and_update_loaded_song_id() -> void {
+    [[nodiscard]] auto get_loaded_song_id() -> std::uint8_t {
         send_control_message(REQUEST_SONG_ID_MESSAGE);
         if (!receive_ack()) {
-            throw std::runtime_error("Could not request song ID: did not receive ACK!");
+            throw NoACKException("Could not request song ID");
         }
         std::uint8_t buf[2] = {0};
-        serial::receive(buf, 2);
+        if (!serial::receive(buf, 2)) {
+            throw NoACKException("Could not request song ID");
+        }
         if (buf[0] != 0x01) {
-            throw std::runtime_error("Could not request song ID: received malformed data");
+            throw NoACKException("Could not request song ID");
         }
         send_control_message(ACK_MESSAGE);
-        current_song_id = buf[1];
+
+        return buf[1];
     }
 
     auto play_loaded_song() -> void {
         send_control_message(START_SONG_MESSAGE);
         if (!receive_ack()) {
-            throw std::runtime_error("Could not play loaded song: did not receive ACK!");
+            throw NoACKException("Could not play loaded song");
         }
     }
 
     auto end_loaded_song() -> void {
         send_control_message(END_SONG_MESSAGE);
         if (!receive_ack()) {
-            throw std::runtime_error("Could not play loaded song: did not receive ACK!");
+            throw NoACKException("Could not end loaded song");
         }
     }
     std::mutex mut{};
 
     std::mutex song_info_mut{};
     std::uint8_t current_song_id = 0x00;
-    song_status_e current_song_status = song_status_e::UNKNOWN;
+    bool playing = false;
 
 } // namespace mcu

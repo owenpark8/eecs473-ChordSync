@@ -1,7 +1,6 @@
 #include <condition_variable>
 #include <cstdint>
 #include <iostream>
-#include <stdexcept>
 #include <string>
 #include <thread>
 
@@ -13,14 +12,12 @@
 #include "data.hpp"
 #include "mcu.hpp"
 #include "playerMode.hpp"
+#include "serial.hpp"
 #include "web.hpp"
 
 
-static std::condition_variable song_info_cv;
-void broadcast_song_update() {
-    std::lock_guard<std::mutex> lock(mcu::song_info_mut);
-    song_info_cv.notify_all();
-}
+static std::condition_variable song_id_cv;
+static std::condition_variable playing_cv;
 
 void web_server() {
     using httplib::Request, httplib::Response;
@@ -67,7 +64,7 @@ void web_server() {
             std::uint8_t last_song_id = 0;
 
             {
-                std::lock_guard<std::mutex> lock(mcu::song_info_mut);
+                std::lock_guard<std::mutex> lock(mcu::mut);
                 last_song_id = mcu::current_song_id;
             }
 
@@ -76,13 +73,24 @@ void web_server() {
                 if (!sink.write(no_song_loaded, std::strlen(no_song_loaded))) {
                     return false;
                 }
+            } else {
+                SQLite::Database db(data::db_filename);
+                data::songs::SongInfo const song_info = data::songs::get_song_by_id(db, last_song_id);
+                std::string song_info_html = fmt::format(R"(data: <p id="current-song-title">{}</p><p id="current-song-artist">{}</p>)",
+                                                         song_info.title, song_info.artist);
+                song_info_html += R"(<div hx-ext="sse" sse-connect="/play-stop-button" sse-swap="message"></div>)";
+                song_info_html += "\n\n";
+
+                if (!sink.write(song_info_html.data(), song_info_html.size())) {
+                    return false;
+                }
             }
 
 
             while (sink.is_writable()) {
-                std::unique_lock<std::mutex> lock(mcu::song_info_mut);
+                std::unique_lock<std::mutex> lock(mcu::mut);
 
-                song_info_cv.wait(lock, [&] { return mcu::current_song_id != last_song_id || !sink.is_writable(); });
+                song_id_cv.wait(lock, [&] { return mcu::current_song_id != last_song_id || !sink.is_writable(); });
 
                 if (!sink.is_writable()) {
                     break;
@@ -111,14 +119,88 @@ void web_server() {
         });
     });
 
+    svr.Get("/play-stop-button", [&](Request const& /*req*/, Response& res) {
+        static std::string const play_button_html_data =
+                "data: " + fmt::format(web::get_source_file(web::source_files_e::BUTTON_HTML), "/play-song", "Play song!") + "\n\n";
+
+        static std::string const stop_button_html_data =
+                "data: " + fmt::format(web::get_source_file(web::source_files_e::BUTTON_HTML), "/stop-song", "Stop song!") + "\n\n";
+
+
+        res.set_chunked_content_provider("text/event-stream", [&](size_t /*offset*/, httplib::DataSink& sink) {
+            bool last_playing;
+
+            {
+                std::lock_guard<std::mutex> lock(mcu::mut);
+                last_playing = mcu::playing;
+            }
+
+            if (last_playing) {
+                if (!sink.write(stop_button_html_data.data(), stop_button_html_data.size())) {
+                    return false;
+                }
+            } else {
+                if (!sink.write(play_button_html_data.data(), play_button_html_data.size())) {
+                    return false;
+                }
+            }
+
+
+            while (sink.is_writable()) {
+                std::unique_lock<std::mutex> lock(mcu::mut);
+
+                playing_cv.wait(lock, [&] { return mcu::playing != last_playing || !sink.is_writable(); });
+
+                if (!sink.is_writable()) {
+                    break;
+                }
+
+                last_playing = mcu::playing;
+
+                lock.unlock();
+
+                if (last_playing) {
+                    if (!sink.write(stop_button_html_data.data(), stop_button_html_data.size())) {
+                        return false;
+                    }
+                } else {
+                    if (!sink.write(play_button_html_data.data(), play_button_html_data.size())) {
+                        return false;
+                    }
+                }
+            }
+
+            return false;
+        });
+    });
+
+
     svr.Post("/play-song", [&](Request const& req, Response& res) {
-        std::unique_lock<std::mutex> lock(mcu::mut);
+        std::unique_lock<std::mutex> mcu_lock(mcu::mut);
+        if (mcu::current_song_id == 0) {
+            res.status = httplib::StatusCode::Conflict_409;
+            res.set_header("Error", "No song loaded on guitar");
+            return;
+        }
+
         mcu::play_loaded_song();
+
+        mcu::playing = true;
+        playing_cv.notify_all();
     });
 
     svr.Post("/stop-song", [&](Request const& req, Response& res) {
-        std::unique_lock<std::mutex> lock(mcu::mut);
+        std::unique_lock<std::mutex> mcu_lock(mcu::mut);
+        if (!mcu::playing) {
+            res.status = httplib::StatusCode::Conflict_409;
+            res.set_header("Error", "No content to stop");
+            return;
+        }
+
         mcu::end_loaded_song();
+
+        mcu::playing = false;
+        playing_cv.notify_all();
     });
 
     svr.Get("/song-select-form", [](Request const& req, Response& res) {
@@ -166,32 +248,30 @@ void web_server() {
         SQLite::Database db(data::db_filename, SQLite::OPEN_READWRITE | SQLite::OPEN_CREATE);
         data::songs::SongInfo song = data::songs::get_song_by_id(db, id);
 
-        {
-            std::unique_lock<std::mutex> mcu_lock(mcu::mut);
-            try {
-                mcu::start_song_loading(id);
+        std::unique_lock<std::mutex> mcu_lock(mcu::mut);
 
-                for (auto const& note: song.notes) {
-                    mcu::send_note(note.start_timestamp_ms, note.length_ms, note.fret, note.string);
-                }
-            } catch (std::runtime_error const& err) {
-                res.set_content(fmt::format(web::get_source_file(web::source_files_e::ERROR_HTML), "Did not receive ACK when loading song to MCU!"),
-                                web::html_type);
-                res.set_header("HX-Reswap", "innerHTML");
-                res.status = httplib::StatusCode::InternalServerError_500;
-                return;
-            }
-
-            std::unique_lock<std::mutex> song_info_lock(mcu::song_info_mut);
-            mcu::current_song_id = id;
+        if (mcu::playing) {
+            mcu::end_loaded_song();
+            mcu::playing = false;
         }
-        broadcast_song_update();
+
+        mcu::send_song(song);
+
+        mcu::current_song_id = id;
+        song_id_cv.notify_all();
+        playing_cv.notify_all();
     });
 
     svr.set_exception_handler([](httplib::Request const& req, httplib::Response& res, std::exception_ptr const& ep) {
         std::string error;
         try {
             std::rethrow_exception(ep);
+        } catch (mcu::NoACKException& e) {
+            res.set_content(fmt::format(web::get_source_file(web::source_files_e::ERROR_HTML), e.what()), web::html_type);
+            res.set_header("HX-Retarget", "#error-popup");
+            res.set_header("HX-Reswap", "innerHTML");
+            res.status = httplib::StatusCode::GatewayTimeout_504;
+            return;
         } catch (std::exception& e) {
             error = e.what();
         } catch (...) {
@@ -213,9 +293,9 @@ auto main(int argc, char* args[]) -> int {
         return 1;
     }
 
-
+    /*
     // playerMode(uint8_t song_id, uint8_t mode, std::string const& note, std::string const& title, std::string const& artist, uint8_t duration,
-               //uint8_t bpm);
+    //uint8_t bpm);
     auto* player = new playerMode(1, 1, "C4", "1", "1", 5, 95);
 
     //dataParseUpload(std::string const& filename, uint8_t song_id, std::string const& title, std::string const& artist, uint8_t duration, uint8_t bpm) -> void;
@@ -227,21 +307,25 @@ auto main(int argc, char* args[]) -> int {
     //player->analysis();
     auto numbers = player->dataParseRef("2_rec_basic_pitch.mid");
 
-    for(int i = 0; i < numbers.size(); i++){
+    for (int i = 0; i < numbers.size(); i++) {
         std::cout << "[" << numbers[i][0] << "," << numbers[i][1] << "," << numbers[i][2] << "]" << std::endl;
     }
 
 
     //bool outcome = player->analysis("C4");
 
-    /*if (outcome == false)
+    if (outcome == false) {
         std::cout << "Wrong!" << std::endl;
-    else
-        std::cout << "Correct!" << std::endl;*/
-        //  if (!serial::init()) {
-        //      return 1;
-        //  }
-/*
+    }
+    else {
+        std::cout << "Correct!" << std::endl;
+    }
+    */
+
+    if (!serial::init()) {
+        return 1;
+    }
+
 #ifdef DEBUG
     data::songs::SongInfo song = {
             .title = "baby shark",
@@ -272,14 +356,12 @@ auto main(int argc, char* args[]) -> int {
     std::cout << "Getting ID of song loaded on MCU...\n";
 #endif
     try {
-
-        mcu::get_and_update_loaded_song_id();
-    } catch (std::runtime_error const& err) {
+        mcu::current_song_id = mcu::get_loaded_song_id();
+    } catch (mcu::NoACKException const& e) {
 #ifdef DEBUG
         std::cerr << "Could not get ID of song loaded on MCU!\n";
 #endif
     }
-
 
 #ifdef DEBUG
     std::cout << "Starting web server thread...\n";
@@ -287,5 +369,5 @@ auto main(int argc, char* args[]) -> int {
     std::thread t(web_server);
 
 
-    t.join();*/
+    t.join();
 }

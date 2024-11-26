@@ -8,15 +8,22 @@
     <title>VSGuitar</title>
     <link rel="stylesheet" href="compiled.css">
     <script src="htmx.js"></script>
-    <script src="htmx.rt.js"></script>
     <script src="htmx.sse.js"></script>
+    <meta name="htmx-config" content='{
+        "responseHandling":[
+            {"code":"204", "swap": false},
+            {"code":"[23]..", "swap": true},
+            {"code":"422", "swap": true},
+            {"code":"504", "swap": true},
+            {"code":"[45]..", "swap": false, "error":true},
+            {"code":"...", "swap": true}
+        ]
+    }' />
 </head>
 
 <body>
     <div class="maxwidthcontainer min-h-screen">
-        <div hx-ext="response-targets" class="max-w-xl w-full fixed top-0 left-1/2 transform -translate-x-1/2 z-50">
-            <div id="error-popup"></div>
-        </div>
+        <div id="error-popup" class="max-w-xl w-full fixed top-0.5 left-1/2 transform -translate-x-1/2 z-50"></div>
         <div class="mt-6 mx-auto flex flex-col text-center items-center">
             <h1 class="text-3xl font-bold mb-8">VSGuitar</h1>
             <div>
