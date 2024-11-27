@@ -133,7 +133,7 @@ auto playerMode::organizeRef() -> std::map<std::uint8_t, std::vector<noteEntry>>
         entry->start_time = static_cast<uint32_t>(song.notes[i].start_timestamp_ms);
         entry->duration = static_cast<uint16_t>(song.notes[i].length_ms);
         entry->orig_pos = static_cast<uint16_t>(i);
-        ref[song.notes.midi_note].push_back(*entry);
+        ref[song.notes[i].midi_note].push_back(*entry);
         delete entry;
     }
 
@@ -152,7 +152,7 @@ auto playerMode::compareByStartTimeReverse(std::uint32_t target, const noteEntry
 }
 
 
-auto playerMode::checkNote(data::songs::Note>& rec_note) -> void{
+auto playerMode::checkNote(data::songs::Note& rec_note) -> void{
     //this is an extraneous
 
     auto occurences = this->ref_data.find(rec_note.midi_note);
@@ -160,18 +160,18 @@ auto playerMode::checkNote(data::songs::Note>& rec_note) -> void{
 
     if(occurences != ref_data.end()){
         //these are occurences.
-        auto lower = std::lower_bound(occurences.begin(), occurences.end(), rec_note.start_timestamp_ms, compareByStartTime);
-        auto upper = std::upper_bound(occurences.begin(), occurences.end(), rec_note.start_timestamp_ms, compareByStartTimeReverse);
+        auto lower = std::lower_bound(occurences->second.begin(), occurences->second.end(), rec_note.start_timestamp_ms, compareByStartTime);
+        auto upper = std::upper_bound(occurences->second.begin(), occurences->second.end(), rec_note.start_timestamp_ms, compareByStartTimeReverse);
 
 
-        auto closest = abs(lower->start_time - rec_note.start_timestamp_ms) < abs(upper->start_time - rec_note.start_timestamp_ms) ? lower : upper;
+        auto closest = abs((int32_t)lower->start_time - (int32_t)rec_note.start_timestamp_ms) < abs((int32_t)upper->start_time - (int32_t)rec_note.start_timestamp_ms) ? lower : upper;
 
-        if(abs(closest->start_time - rec_note.start_timestamp_ms) > 1000){
+        if(abs((int32_t)closest->start_time - (int32_t)rec_note.start_timestamp_ms) > 1000){
             closest->seen = false;
             return;
         }
 
-        std::float error = abs(closest->duration - rec_note.start_timestamp_ms) / closest->duration.
+        float error = float(abs((int32_t)closest->duration - (int32_t)rec_note.start_timestamp_ms)) / (float)(closest->duration);
 
         if(error <= 0.5){
             closest->seen = true;

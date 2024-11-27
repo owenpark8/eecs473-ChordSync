@@ -52,9 +52,9 @@ private:
     data::songs::SongInfo song;
 
     //record note based on mode.
-    std::uint8_t mode;
+    uint8_t mode;
 
-    std::uint8_t resolution;
+    uint8_t resolution;
 
     std::string note;
 
@@ -72,12 +72,13 @@ private:
         uint8_t bpm) -> std::vector<std::vector<int>>;
     
     struct noteEntry {
-        std::uint32_t start_time,
-        std::uint16_t duration,
-        std::uint16_t orig_pos
+        uint32_t start_time;
+        uint16_t duration;
+        uint16_t orig_pos;
+        bool seen;
     };
 
-    std::uint32_t ref_size; 
+    uint32_t ref_size; 
 
     //ref data.
     std::map<std::uint8_t, std::vector<noteEntry>> ref_data;
@@ -85,13 +86,13 @@ private:
     auto organizeRef() -> std::map<std::uint8_t, std::vector<noteEntry>>;
 
     //checks seen
-    auto checkNote(data::songs::Note>& ref_note) -> void;
+    auto checkNote(data::songs::Note& ref_note) -> void;
 
     //youtube
-    auto compareByStartTime(const noteEntry& entry, std::uint32_t target)->bool;
+   static auto compareByStartTime(const noteEntry& entry, std::uint32_t target)->bool;
 
     // Comparator for reverse comparison, useful for certain cases
-    auto compareByStartTimeReverse(std::uint32_t target, const noteEntry& entry)->bool;
+    static auto compareByStartTimeReverse(std::uint32_t target, const noteEntry& entry)->bool;
 
-}
+};
 #endif

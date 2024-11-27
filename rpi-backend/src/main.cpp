@@ -289,11 +289,63 @@ void web_server() {
 
 
 auto main(int argc, char* args[]) -> int {
+// // Create a pipe
+//     int pipefd[2];
+//     if (pipe(pipefd) == -1) {
+//         std::cerr << "Pipe creation failed" << std::endl;
+//         exit(EXIT_FAILURE);
+//     }
+
+//     // Fork the first child process for "arecord"
+//     pid_t pid1 = fork();
+//     if (pid1 == -1) {
+//         std::cerr << "Fork failed for arecord" << std::endl;
+//         exit(EXIT_FAILURE);
+//     }
+
+//     if (pid1 == 0) {
+//         // In the first child process (arecord)
+//         close(pipefd[0]); // Close reading end of the pipe
+
+//         // Redirect stdout to the pipe's writing end
+//         dup2(pipefd[1], STDOUT_FILENO);
+//         close(pipefd[1]); // Close the original writing end after dup2
+
+//         // Execute arecord command
+//         execlp("arecord", "arecord", "--rate=88200", "--format=S16_LE", "--buffer-time=1", "-", (char *)NULL);
+//         // If execlp fails
+//         std::cerr << "Failed to execute arecord" << std::endl;
+//         exit(EXIT_FAILURE);
+//     }
+
+//     // Fork the second child process for "aplay"
+//     pid_t pid2 = fork();
+//     if (pid2 == -1) {
+//         std::cerr << "Fork failed for aplay" << std::endl;
+//         exit(EXIT_FAILURE);
+//     }
+
+//     if (pid2 == 0) {
+//         // In the second child process (aplay)
+//         close(pipefd[1]); // Close writing end of the pipe
+
+//         // Redirect stdin to the pipe's reading end
+//         dup2(pipefd[0], STDIN_FILENO);
+//         close(pipefd[0]); // Close the original reading end after dup2
+
+//         // Execute aplay command
+//         execlp("aplay", "aplay", "--buffer-time=1", "-", (char *)NULL);
+//         // If execlp fails
+//         std::cerr << "Failed to execute aplay" << std::endl;
+//         exit(EXIT_FAILURE);
+//     }
+
+    
     if (!data::init()) {
         return 1;
     }
 
-    /*
+    
     // playerMode(uint8_t song_id, uint8_t mode, std::string const& note, std::string const& title, std::string const& artist, uint8_t duration,
     //uint8_t bpm);
     auto* player = new playerMode(1, 1, "C4", "1", "1", 5, 95);
@@ -312,7 +364,7 @@ auto main(int argc, char* args[]) -> int {
     }
 
 
-    //bool outcome = player->analysis("C4");
+    bool outcome = player->analysis("C4");
 
     if (outcome == false) {
         std::cout << "Wrong!" << std::endl;
@@ -320,7 +372,7 @@ auto main(int argc, char* args[]) -> int {
     else {
         std::cout << "Correct!" << std::endl;
     }
-    */
+    
 
     if (!serial::init()) {
         return 1;
