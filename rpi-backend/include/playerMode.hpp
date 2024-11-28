@@ -42,8 +42,8 @@ public:
     //function that apploads midi to database.
     auto dataParseUpload(std::string const& filename, uint8_t song_id, std::string const& title, std::string const& artist, uint8_t duration, uint8_t bpm) -> void;
 
-
-
+    std::vector <std::vector<int > >  recording_numbers;
+    std::vector <std::vector<int > >  reference_numbers;
     // Needed to avoid some compiler errors
     ~playerMode();
 
@@ -68,7 +68,7 @@ private:
     auto noteToInt(std::string const& note) -> uint8_t;
     //this is analysis for song mode.
 
-    auto midiParse(uint8_t song_id, uint8_t duration,
+    auto recordtoMIDI(uint8_t song_id, uint8_t duration,
         uint8_t bpm) -> std::vector<std::vector<int>>;
     
     struct noteEntry {
@@ -87,6 +87,8 @@ private:
 
     //checks seen
     auto checkNote(data::songs::Note& ref_note) -> void;
+
+    auto checkSong() -> void;
 
     //youtube
    static auto compareByStartTime(const noteEntry& entry, std::uint32_t target)->bool;

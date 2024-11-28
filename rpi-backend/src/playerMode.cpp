@@ -7,7 +7,7 @@
 namespace py = pybind11;
 
 
-auto playerMode::midiParse(uint8_t song_id, uint8_t duration,
+auto playerMode::recordtoMIDI(uint8_t song_id, uint8_t duration,
                uint8_t bpm) -> std::vector<std::vector<int>>{
     py::scoped_interpreter guard{};
 
@@ -29,15 +29,17 @@ auto playerMode::midiParse(uint8_t song_id, uint8_t duration,
     auto numbers = get_record_convert(song_id, duration, bpm).cast<std::vector<std::vector<int>>>();
 
     return numbers;
-               }
+    }
     
 //add in cleanout function
 playerMode::playerMode(uint8_t song_id, uint8_t mode, std::string const& note, std::string const& title, std::string const& artist, uint8_t duration,
                        uint8_t bpm)
     : song{song_id, title, artist, std::chrono::seconds(duration), bpm}, mode(mode), note(note) {
 
-    auto numbers = midiParse(song_id, duration, bpm);
-
+    //begin recording from Python.
+    auto numbers = recordtoMIDI(song_id, duration, bpm);
+    this->recording_numbers = numbers;
+    //Process each note in the RECORDING and add it our song vector
     for (auto& number: numbers) {
         auto entry = new data::songs::Note;
         entry->midi_note = static_cast<uint8_t>(number[0]);
@@ -47,6 +49,8 @@ playerMode::playerMode(uint8_t song_id, uint8_t mode, std::string const& note, s
         delete entry;
     }
 
+
+    //Check Database availaiblity, grab the reference song from the database, and re-structure it for our needs. 
     try {
         SQLite::Database db(data::db_filename, SQLite::OPEN_READWRITE | SQLite::OPEN_CREATE);
         this->ref_data = this->organizeRef();
@@ -151,6 +155,11 @@ auto playerMode::compareByStartTimeReverse(std::uint32_t target, const noteEntry
     return target < entry.start_time;
 }
 
+auto playerMode::checkSong() -> void {
+    for (auto note: this->song.notes){
+        checkNote(note);
+    }
+}
 
 auto playerMode::checkNote(data::songs::Note& rec_note) -> void{
     //this is an extraneous
@@ -159,19 +168,21 @@ auto playerMode::checkNote(data::songs::Note& rec_note) -> void{
     //so it exists. 
 
     if(occurences != ref_data.end()){
+        //std::cout << "Found Note " << (uint16_t)rec_note.midi_note << " within reference song. " << std::endl;
         //these are occurences.
         auto lower = std::lower_bound(occurences->second.begin(), occurences->second.end(), rec_note.start_timestamp_ms, compareByStartTime);
         auto upper = std::upper_bound(occurences->second.begin(), occurences->second.end(), rec_note.start_timestamp_ms, compareByStartTimeReverse);
 
-
+        //std::cout << "Found lower at " << lower->start_time << " and higher at " << upper->start_time << " comparing " << rec_note.start_timestamp_ms << std::endl;
         auto closest = abs((int32_t)lower->start_time - (int32_t)rec_note.start_timestamp_ms) < abs((int32_t)upper->start_time - (int32_t)rec_note.start_timestamp_ms) ? lower : upper;
 
         if(abs((int32_t)closest->start_time - (int32_t)rec_note.start_timestamp_ms) > 1000){
             closest->seen = false;
             return;
         }
+        //std::cout << "Now checking Note " << (uint16_t)rec_note.midi_note << " for duration requirement " << std::endl;
 
-        float error = float(abs((int32_t)closest->duration - (int32_t)rec_note.start_timestamp_ms)) / (float)(closest->duration);
+        float error = float(abs((int32_t)closest->duration - (int32_t)rec_note.length_ms)) / (float)(closest->duration);
 
         if(error <= 0.5){
             closest->seen = true;
@@ -183,7 +194,9 @@ auto playerMode::checkNote(data::songs::Note& rec_note) -> void{
 }
 
 auto playerMode::analysis() -> std::vector<bool>{
+    checkSong();
     std::vector<bool> result(this->ref_size, false);
+    
     for (const auto& [key, noteVector] : this->ref_data) {
         // Iterate through the vector of NoteEntry
         for (const auto& note : noteVector) {

@@ -289,56 +289,57 @@ void web_server() {
 
 
 auto main(int argc, char* args[]) -> int {
-// // Create a pipe
-//     int pipefd[2];
-//     if (pipe(pipefd) == -1) {
-//         std::cerr << "Pipe creation failed" << std::endl;
-//         exit(EXIT_FAILURE);
-//     }
+// Create a pipe
+/*
+    int pipefd[2];
+    if (pipe(pipefd) == -1) {
+        std::cerr << "Pipe creation failed" << std::endl;
+        exit(EXIT_FAILURE);
+    }
 
-//     // Fork the first child process for "arecord"
-//     pid_t pid1 = fork();
-//     if (pid1 == -1) {
-//         std::cerr << "Fork failed for arecord" << std::endl;
-//         exit(EXIT_FAILURE);
-//     }
+    // Fork the first child process for "arecord"
+    pid_t pid1 = fork();
+    if (pid1 == -1) {
+        std::cerr << "Fork failed for arecord" << std::endl;
+        exit(EXIT_FAILURE);
+    }
 
-//     if (pid1 == 0) {
-//         // In the first child process (arecord)
-//         close(pipefd[0]); // Close reading end of the pipe
+    if (pid1 == 0) {
+        // In the first child process (arecord)
+        close(pipefd[0]); // Close reading end of the pipe
 
-//         // Redirect stdout to the pipe's writing end
-//         dup2(pipefd[1], STDOUT_FILENO);
-//         close(pipefd[1]); // Close the original writing end after dup2
+        // Redirect stdout to the pipe's writing end
+        dup2(pipefd[1], STDOUT_FILENO);
+        close(pipefd[1]); // Close the original writing end after dup2
 
-//         // Execute arecord command
-//         execlp("arecord", "arecord", "--rate=88200", "--format=S16_LE", "--buffer-time=1", "-", (char *)NULL);
-//         // If execlp fails
-//         std::cerr << "Failed to execute arecord" << std::endl;
-//         exit(EXIT_FAILURE);
-//     }
+        // Execute arecord command
+        execlp("arecord", "arecord", "-D", "plughw:3,0", "--rate=88200", "--format=S16_LE", "--buffer-time=1", "-", (char *)NULL);
+        // If execlp fails
+        std::cerr << "Failed to execute arecord" << std::endl;
+        exit(EXIT_FAILURE);
+    }
 
-//     // Fork the second child process for "aplay"
-//     pid_t pid2 = fork();
-//     if (pid2 == -1) {
-//         std::cerr << "Fork failed for aplay" << std::endl;
-//         exit(EXIT_FAILURE);
-//     }
+    // Fork the second child process for "aplay"
+    pid_t pid2 = fork();
+    if (pid2 == -1) {
+        std::cerr << "Fork failed for aplay" << std::endl;
+        exit(EXIT_FAILURE);
+    }
 
-//     if (pid2 == 0) {
-//         // In the second child process (aplay)
-//         close(pipefd[1]); // Close writing end of the pipe
+    if (pid2 == 0) {
+        // In the second child process (aplay)
+        close(pipefd[1]); // Close writing end of the pipe
 
-//         // Redirect stdin to the pipe's reading end
-//         dup2(pipefd[0], STDIN_FILENO);
-//         close(pipefd[0]); // Close the original reading end after dup2
+        // Redirect stdin to the pipe's reading end
+        dup2(pipefd[0], STDIN_FILENO);
+        close(pipefd[0]); // Close the original reading end after dup2
 
-//         // Execute aplay command
-//         execlp("aplay", "aplay", "--buffer-time=1", "-", (char *)NULL);
-//         // If execlp fails
-//         std::cerr << "Failed to execute aplay" << std::endl;
-//         exit(EXIT_FAILURE);
-//     }
+        // Execute aplay command
+        execlp("aplay", "aplay", "-D", "plughw:2,0" "--buffer-time=1", "-", (char *)NULL);
+        // If execlp fails
+        std::cerr << "Failed to execute aplay" << std::endl;
+        exit(EXIT_FAILURE);
+    }*/
 
     
     if (!data::init()) {
@@ -348,22 +349,36 @@ auto main(int argc, char* args[]) -> int {
     
     // playerMode(uint8_t song_id, uint8_t mode, std::string const& note, std::string const& title, std::string const& artist, uint8_t duration,
     //uint8_t bpm);
-    auto* player = new playerMode(1, 1, "C4", "1", "1", 5, 95);
+
+    //The constructor creates a RECORDING, and populates the internal structure with information from this recording. 
+    //It also grabs the reference song from the database and populates our class with that.
+    auto* player = new playerMode(1, 1, "C4", "1", "1", 55, 95);
 
     //dataParseUpload(std::string const& filename, uint8_t song_id, std::string const& title, std::string const& artist, uint8_t duration, uint8_t bpm) -> void;
-    player->dataParseUpload("2_rec_basic_pitch.mid", 1, "twinkle-twinkle-ref", "unknown", 55, 95);
+   
+    //upload reference midi to the database. 
+    player->dataParseUpload("twinkle.mid", 1, "twinkle-twinkle-ref", "unknown", 55, 95);
 
-    player->analysis();
-
-
-    //player->analysis();
-    auto numbers = player->dataParseRef("2_rec_basic_pitch.mid");
-
+    //lets print the original
+    auto numbers = player->dataParseRef("twinkle.mid");
+    std::cout << "REFERENCE:" << std::endl;
     for (int i = 0; i < numbers.size(); i++) {
         std::cout << "[" << numbers[i][0] << "," << numbers[i][1] << "," << numbers[i][2] << "]" << std::endl;
     }
 
+    //lets print the recording
+    std::cout << "RECORDING:" << std::endl;
+    for (int i = 0; i < player->recording_numbers.size(); i++) {
+        std::cout << "[" << player->recording_numbers [i][0] << "," << player->recording_numbers[i][1] << "," << player->recording_numbers[i][2] << "]" << std::endl;
+    }
 
+    //player->analysis();
+    auto results = player->analysis();
+
+    for(auto result : results){
+        std::cout << result << std::endl;
+    }
+    /*
     bool outcome = player->analysis("C4");
 
     if (outcome == false) {
@@ -372,7 +387,7 @@ auto main(int argc, char* args[]) -> int {
     else {
         std::cout << "Correct!" << std::endl;
     }
-    
+    */
 
     if (!serial::init()) {
         return 1;

@@ -6,7 +6,7 @@ from dataParse import getMessages
 
 
 def record_convert(id, duration, bpm_value):
-    rec_command = f'arecord -D plughw:0,0 --duration={duration} --rate=88200 --format=S16_LE {id}_rec.wav'
+    rec_command = f'arecord -D plughw:3,0 --duration={duration} --rate=88200 --format=S16_LE {id}_rec.wav'
 
     #if we are recording, if we just want to parse data, we could just do it in other ways. 
     
