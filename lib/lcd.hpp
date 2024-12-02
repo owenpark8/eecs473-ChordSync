@@ -21,7 +21,7 @@
 // 16 Bits for Color
 constexpr uint16_t WHITE = 0xFFFF;
 constexpr uint16_t BLACK = 0x0000;
-constexpr uint16_t GRAY = 0x4208;
+constexpr uint16_t GRAY = 0x18c3;
 constexpr uint16_t RED = 0xF800;
 constexpr uint16_t GREEN = 0x07E0;
 constexpr uint16_t BLUE = 0x001F;
@@ -146,8 +146,8 @@ public:
     /**
      * @brief Clears the screen to be all white
      */
-    auto clear_screen() const -> void {
-		fill_screen(WHITE);
+    auto clear_screen(bool dark_mode) const -> void {
+		fill_screen(dark_mode ? BLACK : WHITE);
 	}
 
     /**

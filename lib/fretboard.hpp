@@ -50,6 +50,7 @@ class Fretboard {
     uart_state m_uart_state;
     uint8_t m_song_id;
     bool m_playing_song; // true iff we are currently playing a song on the fretboard
+    bool m_dark_mode = false;
 
 
 public:
@@ -78,6 +79,7 @@ public:
         }
         clear();
         m_playing_song = false;
+        m_dark_mode = false;
         m_song_id = 0; // song id 0 means no song currently loaded
         // Initialize UART Protocol
         rec_new_msg();
@@ -173,6 +175,16 @@ public:
                     rec_new_msg();
                     return;
                 }
+                case MessageType::DarkMode:
+                    m_dark_mode = true;
+                    process_color_mode();
+                    rec_new_msg();
+                    break;
+                case MessageType::LightMode:
+                    m_dark_mode = false;
+                    process_color_mode();
+                    rec_new_msg();
+                    break;
                 default:
                 	rec_new_msg();
                     return;
@@ -240,7 +252,7 @@ private:
      */
     auto clear() -> void {
         for (auto& lcds: m_lcds) {
-            lcds.clear_screen();
+            lcds.clear_screen(m_dark_mode);
         }
     }
 
@@ -291,7 +303,7 @@ private:
             m_timestamps[m_timestamps_size++] = {{static_cast<fret_t>(note_data.fret), static_cast<string_e>(note_data.string)}, note_data.timestamp_ms, GREEN};
             m_timestamps[m_timestamps_size++] = {{static_cast<fret_t>(note_data.fret), static_cast<string_e>(note_data.string)}, note_data.timestamp_ms + WARNING_DELAY, YELLOW};
             m_timestamps[m_timestamps_size++] = {{static_cast<fret_t>(note_data.fret), static_cast<string_e>(note_data.string)}, note_data.timestamp_ms + WARNING_DELAY*2, RED};
-            m_timestamps[m_timestamps_size++] = {{static_cast<fret_t>(note_data.fret), static_cast<string_e>(note_data.string)}, note_data.timestamp_ms + WARNING_DELAY*2 + note_data.length_ms, WHITE};
+            m_timestamps[m_timestamps_size++] = {{static_cast<fret_t>(note_data.fret), static_cast<string_e>(note_data.string)}, note_data.timestamp_ms + WARNING_DELAY*2 + note_data.length_ms, m_dark_mode ? BLACK : WHITE};
         }
         // Insertion sort since the array is already mostly sorted
         for (int i = 0; i < m_timestamps_size; ++i) {
@@ -300,6 +312,21 @@ private:
                 if (m_timestamps[j].timestamp < m_timestamps[swapped].timestamp) swapped = j;
             }
             std::swap(m_timestamps[i], m_timestamps[swapped]);
+        }
+    }
+
+    /**
+     * @brief Corrects m_timestamps when switching light mode/dark mode
+     */
+    auto process_color_mode() -> void {
+        for (int i = 0; i < m_timestamps_size; ++i) {
+            if (m_dark_mode) {
+                if (m_timestamps[i].color == BLACK) return; // No work to be done, as m_timestamps already in dark mode
+                if (m_timestamps[i].color == WHITE) m_timestamps[i].color = BLACK;
+            } else { // light mode
+                if (m_timestamps[i].color == WHITE) return; // No work to be done, as m_timestamps already in light mode
+                if (m_timestamps[i].color == BLACK) m_timestamps[i].color = WHITE;
+            }
         }
     }
 

@@ -27,6 +27,8 @@ enum class MessageType : std::uint8_t {
     EndSong          = 0x46, ///< End playing the loaded song
     RequestSongID    = 0x47, ///< Request the song ID
     LoadedSongID     = 0x48, ///< Send the loaded song ID
+    DarkMode         = 0x49, ///< Set Dark Mode
+    LightMode        = 0x50, ///< Set Light Mode (default)
     ACK              = 0x06  ///< Acknowledgment message
     // clang-format on
 };
@@ -44,6 +46,8 @@ constexpr ControlMessage START_SONG_MESSAGE         = {MESSAGE_HEADER, static_ca
 constexpr ControlMessage END_SONG_MESSAGE           = {MESSAGE_HEADER, static_cast<uint8_t>(MessageType::EndSong)};
 constexpr ControlMessage REQUEST_SONG_ID_MESSAGE    = {MESSAGE_HEADER, static_cast<uint8_t>(MessageType::RequestSongID)};
 constexpr ControlMessage LOADED_SONG_ID_MESSAGE     = {MESSAGE_HEADER, static_cast<uint8_t>(MessageType::LoadedSongID)};
+constexpr ControlMessage DARK_MODE_MESSAGE          = {MESSAGE_HEADER, static_cast<uint8_t>(MessageType::DarkMode)};
+constexpr ControlMessage LIGHT_MODE_MESSAGE         = {MESSAGE_HEADER, static_cast<uint8_t>(MessageType::LightMode)};
 constexpr ControlMessage ACK_MESSAGE                = {MESSAGE_HEADER, static_cast<uint8_t>(MessageType::ACK)};
 // clang-format on
 
