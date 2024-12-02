@@ -10,6 +10,7 @@
 #include <httplib.h>
 
 #include "data.hpp"
+#include "guitar.hpp"
 #include "mcu.hpp"
 #include "playerMode.hpp"
 #include "serial.hpp"
@@ -393,41 +394,42 @@ auto main(int argc, char* args[]) -> int {
         return 1;
     }
 
-#ifdef DEBUG
-    data::songs::SongInfo song = {
-            .title = "baby shark",
-            .artist = "doodoodoo",
-            .length = std::chrono::seconds(137),
-            .bpm = 115,
-            .notes =
-                    {
-                            data::songs::Note{.start_timestamp_ms = 0, .length_ms = 200, .midi_note = 0, .fret = 0, .string = 0},
-                            data::songs::Note{.start_timestamp_ms = 200, .length_ms = 200, .midi_note = 1, .fret = 2, .string = 1},
-                            data::songs::Note{.start_timestamp_ms = 400, .length_ms = 200, .midi_note = 2, .fret = 4, .string = 2},
-                            data::songs::Note{.start_timestamp_ms = 600, .length_ms = 200, .midi_note = 3, .fret = 6, .string = 3},
-                    },
-    };
-    std::cout << "Inserting baby shark with notes: \n";
-    for (auto const& note: song.notes) {
-        note.print();
-    }
     try {
         SQLite::Database db(data::db_filename, SQLite::OPEN_READWRITE | SQLite::OPEN_CREATE);
-        data::songs::insert_new_song(db, song);
+        if (!data::songs::song_id_exists(db, 1)) {
+#ifdef DEBUG
+            std::cout << "Database does not have song ID 1! Adding basic song...\n";
+#endif
+            data::songs::insert_new_song(db, data::songs::ode_to_joy);
+        }
     } catch (std::exception& e) {
         std::cerr << "SQLite exception: " << e.what() << std::endl;
     }
-#endif
 
 #ifdef DEBUG
     std::cout << "Getting ID of song loaded on MCU...\n";
 #endif
-    try {
-        mcu::current_song_id = mcu::get_loaded_song_id();
-    } catch (mcu::NoACKException const& e) {
+    while (true) {
+        try {
+            mcu::current_song_id = mcu::get_loaded_song_id();
+            break;
+        } catch (mcu::NoACKException const& e) {
 #ifdef DEBUG
-        std::cerr << "Could not get ID of song loaded on MCU!\n";
+            std::cerr << e.what() << "\n";
+            break;
 #endif
+            std::cerr << "Repolling...\n";
+        }
+    }
+
+    if (mcu::current_song_id == 0) {
+        try {
+            mcu::send_song(data::songs::ode_to_joy);
+        } catch (mcu::NoACKException const& e) {
+#ifdef DEBUG
+            std::cerr << e.what() << "\n";
+#endif
+        }
     }
 
 #ifdef DEBUG

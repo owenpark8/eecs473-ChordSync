@@ -1,9 +1,8 @@
-#include <stdexcept>
 #ifdef DEBUG
 #include <iostream>
 #endif
 #include <filesystem>
-#include <sstream>
+#include <stdexcept>
 
 #include <fmt/format.h>
 
@@ -164,6 +163,19 @@ namespace data {
             }
 
             return songs;
+        }
+
+        auto song_id_exists(SQLite::Database& db, std::uint8_t song_id) -> bool {
+#ifdef DEBUG
+            std::cout << "Querying database for song id " << static_cast<int>(song_id) << "\n";
+#endif
+            SQLite::Statement query(db, "SELECT id, title, artist, bpm, length, notes FROM " + data::songs::song_table_name + " WHERE id = ?");
+            query.bind(1, song_id);
+
+            if (query.executeStep()) {
+                return true;
+            }
+            return false;
         }
 
         auto get_song_by_id(SQLite::Database& db, std::uint8_t song_id) -> SongInfo {
