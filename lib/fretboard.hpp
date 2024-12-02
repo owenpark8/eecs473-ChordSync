@@ -195,7 +195,11 @@ public:
         if (m_playing_song) {
         while (m_timestamp_idx < m_timestamps_size && m_timestamps[m_timestamp_idx].timestamp <= m_song_count_ms) {
             const auto& tempstamp = m_timestamps[m_timestamp_idx]; // LOL!!!!!!!!!!!!!
-            draw_note(tempstamp.note_loc, tempstamp.color);
+            if (tempstamp.note_loc.fret == 0) {
+                draw_string(tempstamp.note_loc.string, tempstamp.color);
+            } else { // fret should be > 0
+                draw_note({tempstamp.note_loc.fret-1, tempstamp.note_loc.string}, tempstamp.color);
+            }
             ++m_timestamp_idx;
         }
             ++m_song_count_ms;
