@@ -1,10 +1,15 @@
-<form class="max-w-sm mx-auto" hx-post="/submit-song-select" hx-trigger="submit" hx-swap="none">
+<form class="max-w-sm mx-auto" hx-post="/submit-song-select-form" hx-trigger="submit" hx-swap="none">
     <label for="song-select" class="block mb-2 text-sm font-medium text-gray-900">Select a song to
         play</label>
     <select id="song-select" name="song-id"
-        class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
+        class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
+        hx-get="/song-select-form-song-info" hx-trigger="load, change" hx-target="#song-info" hx-swap="innerHTML">
         {}
     </select>
+
+    <div id="song-info" class="mt-2">
+        <!-- Song info will be loaded here -->
+    </div>
 
     <button type="submit" class="mt-2 bg-blue-500 hover:bg-blue-700 py-1.5 px-3 rounded-md"
         hx-indicator="closest form #spinner">

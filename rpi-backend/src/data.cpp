@@ -9,8 +9,8 @@
 #include "data.hpp"
 
 namespace data {
-    std::string const data_directory = std::string(USER_HOME_DIR) + ".local/share/vsguitar/";
-    std::string const db_filename = data_directory + "vsguitar.db";
+    std::string const data_directory = std::string(USER_HOME_DIR) + ".local/share/ChordSync/";
+    std::string const db_filename = data_directory + "chordsync.db";
 
 
     auto init() -> bool {
@@ -169,11 +169,11 @@ namespace data {
 #ifdef DEBUG
             std::cout << "Querying database for song id " << static_cast<int>(song_id) << "\n";
 #endif
-            SQLite::Statement query(db, "SELECT id, title, artist, bpm, length, notes FROM " + data::songs::song_table_name + " WHERE id = ?");
+            SQLite::Statement query(db, "SELECT EXISTS (SELECT 1 FROM " + data::songs::song_table_name + " WHERE id = ?)");
             query.bind(1, song_id);
 
             if (query.executeStep()) {
-                return true;
+                return query.getColumn(0).getInt() == 1;
             }
             return false;
         }

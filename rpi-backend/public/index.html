@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>VSGuitar</title>
+    <title>ChordSync</title>
     <link rel="stylesheet" href="compiled.css">
     <script src="htmx.js"></script>
     <script src="htmx.sse.js"></script>
@@ -25,11 +25,11 @@
     <div class="maxwidthcontainer min-h-screen">
         <div id="error-popup" class="max-w-xl w-full fixed top-0.5 left-1/2 transform -translate-x-1/2 z-50"></div>
         <div class="mt-6 mx-auto flex flex-col text-center items-center">
-            <h1 class="text-3xl font-bold mb-8">VSGuitar</h1>
+            <h1 class="text-3xl font-bold mb-8">ChordSync</h1>
             <div>
                 <h2 class="text-xl font-semibold">Guitar Information</h2>
                 <div>
-                    <p class="font-medium">Current song:</p>
+                    <h3 class="font-medium">Current song:</p>
                     <div hx-ext="sse" sse-connect="/song-info" sse-swap="message"></div>
                 </div>
 

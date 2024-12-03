@@ -6,11 +6,11 @@
 
 #include <SQLiteCpp/SQLiteCpp.h>
 #include <ctre.hpp>
+#include <fmt/chrono.h>
 #include <fmt/format.h>
 #include <httplib.h>
 
 #include "data.hpp"
-#include "guitar.hpp"
 #include "mcu.hpp"
 #include "playerMode.hpp"
 #include "serial.hpp"
@@ -208,10 +208,12 @@ void web_server() {
         std::string options;
 
         SQLite::Database db(data::db_filename);
-        for (auto const& song_info: data::songs::get_all_songs(db)) {
-            options += fmt::format("<option value={}>{}</option>", song_info.id, song_info.title);
+        auto songs = data::songs::get_all_songs(db);
+        std::sort(songs.begin(), songs.end(), [](data::songs::SongInfo const& a, data::songs::SongInfo const& b) { return a.title < b.title; });
+        for (auto const& song: songs) {
+            options += fmt::format("<option value={}>{}</option>", song.id, song.title);
 #ifdef DEBUG
-            for (auto const& note: song_info.notes) {
+            for (auto const& note: song.notes) {
                 std::cout << "note: ";
                 note.print();
             }
@@ -223,7 +225,27 @@ void web_server() {
         res.set_content(song_select_form, web::html_type);
     });
 
-    svr.Post("/submit-song-select", [&](Request const& req, Response& res) {
+    svr.Get("/song-select-form-song-info", [](Request const& req, Response& res) {
+        using namespace ctre::literals;
+        constexpr auto uint8_t_pattern = ctll::fixed_string{R"(^[0-9]{1,2}|1[0-9]{2}|2[0-4][0-9]|25[0-5]$)"};
+        auto match = ctre::match<uint8_t_pattern>(req.get_param_value("song-id"));
+        if (!match) {
+            res.status = httplib::StatusCode::BadRequest_400;
+            return;
+        }
+        std::uint8_t song_id;
+        auto view = match.to_view();
+        auto [ptr, ec] = std::from_chars(view.data(), view.data() + view.size(), song_id);
+
+        SQLite::Database db(data::db_filename, SQLite::OPEN_READWRITE | SQLite::OPEN_CREATE);
+        data::songs::SongInfo song = data::songs::get_song_by_id(db, song_id);
+
+        std::string song_info = fmt::format(web::get_source_file(web::source_files_e::SONGINFO_HTML), song.title, song.artist, song.length, song.bpm);
+
+        res.set_content(song_info, web::html_type);
+    });
+
+    svr.Post("/submit-song-select-form", [&](Request const& req, Response& res) {
         using namespace ctre::literals;
         constexpr auto pattern = ctll::fixed_string{R"(^song-id=([0-9]{1,2}|1[0-9]{2}|2[0-4][0-9]|25[0-5])$)"};
 
@@ -402,6 +424,11 @@ auto main(int argc, char* args[]) -> int {
 #endif
             data::songs::insert_new_song(db, data::songs::ode_to_joy);
         }
+
+        // #ifdef DEBUG
+        //         data::songs::insert_new_song(db, data::songs::baby_shark);
+        // #endif
+
     } catch (std::exception& e) {
         std::cerr << "SQLite exception: " << e.what() << std::endl;
     }

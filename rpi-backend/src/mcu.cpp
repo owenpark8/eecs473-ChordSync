@@ -28,7 +28,7 @@ namespace mcu {
 
     [[nodiscard]] auto receive_ack() -> bool {
         ControlMessage msg{};
-        serial::receive(msg.data(), msg.size(), std::chrono::seconds(5));
+        serial::receive(msg.data(), msg.size(), ACK_TIMEOUT);
         return (msg == ACK_MESSAGE);
     }
 
