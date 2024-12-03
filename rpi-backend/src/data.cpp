@@ -53,10 +53,13 @@ namespace data {
         namespace fs = std::filesystem;
         if (!fs::exists(directory)) {
             try {
-                return fs::create_directories(directory);
+                fs::create_directories(directory);
+                return true;
             } catch (std::filesystem::filesystem_error const& e) {
+                std::cerr << "What";
                 return false;
             } catch (std::bad_alloc const& e) {
+                std::cerr << "bruh";
                 return false;
             }
         }
