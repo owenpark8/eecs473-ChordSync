@@ -2,7 +2,7 @@ import mido
 from collections import deque
 
 
-def getMessages(midi):
+"""def getMessages(midi):
 
   currNotes_deque = deque()
   time = -1
@@ -82,7 +82,167 @@ def getMessages(midi):
     if item not in unique_list:
         unique_list.append(item)
 
-  return unique_list
+  return unique_list"""
+
+
+
+"""def getMessages(midi):
+    currNotes_deque = deque()
+    time = -1
+    formattedNotes = []
+    time_offset = 0  # Cumulative time offset for removed notes
+
+    # Open the MIDI file
+    mid = mido.MidiFile(midi)
+
+    # Iterate over the messages in the file
+    for msg in mid:
+        if msg.type == 'note_on' and (msg.velocity > 0 or time == -1):
+            if msg.note < 52:
+                # Add time to offset for ignored notes
+                time_offset += msg.time
+            else:
+                # Process valid notes
+                if time == -1:
+                    time = 0
+                else:
+                    time += msg.time - time_offset
+                    time_offset = 0  # Reset the offset since time has been applied
+
+                currNotes_deque.append([msg.note, time, -1])
+
+        elif msg.type == 'pitchwheel':
+            # Treat pitchwheel as noise and add time
+            if time == -1:
+                time = 0
+            else:
+                time += msg.time - time_offset
+                time_offset = 0
+
+        elif msg.type == 'note_off' or (msg.type == 'note_on' and msg.velocity == 0):
+            if msg.note < 52:
+                # Add time to offset for ignored notes
+                time_offset += msg.time
+            else:
+                # Process note-off events for valid notes
+                time += msg.time - time_offset
+                time_offset = 0  # Reset the offset
+
+                if currNotes_deque and currNotes_deque[0][0] == msg.note:
+                    currNotes_deque[0][2] = time
+                    formattedNotes.append(currNotes_deque.popleft())
+                elif currNotes_deque and currNotes_deque[-1][0] == msg.note:
+                    currNotes_deque[-1][2] = time
+                    formattedNotes.append(currNotes_deque.pop())
+                else:
+                    # Handle middle notes
+                    for _ in range(len(currNotes_deque)):
+                        if currNotes_deque[0][0] == msg.note:
+                            currNotes_deque[0][2] = time
+                            formattedNotes.append(currNotes_deque.popleft())
+                            break
+                        else:
+                            currNotes_deque.append(currNotes_deque.popleft())
+        else:
+            # Other messages
+            continue
+
+    # Sort notes by start time
+    formattedNotes.sort(key=lambda x: x[1])
+
+    # Convert times to milliseconds and remove duplicates
+    unique_list = []
+    for note in formattedNotes:
+        note[1] = int(note[1] * 1000)
+        note[2] = int(note[2] * 1000)
+        if note not in unique_list:
+            unique_list.append(note)
+
+    return unique_list"""
+
+
+def getMessages(midi):
+    currNotes_deque = deque()
+    time = -1
+    formattedNotes = []
+    time_offset = 0  # Cumulative time offset for removed notes
+
+    # Open the MIDI file
+    mid = mido.MidiFile(midi)
+
+    # Iterate over the messages in the file
+    for msg in mid:
+        if msg.type == 'note_on' and (msg.velocity > 0 or time == -1):
+            if msg.note < 52:
+                # Add time to offset for ignored notes
+                time_offset += msg.time
+            else:
+                # Process valid notes
+                if time == -1:
+                    time = 0
+                else:
+                    time += msg.time - time_offset
+                    time_offset = 0  # Reset the offset since time has been applied
+
+                currNotes_deque.append([msg.note, time, -1])
+
+        elif msg.type == 'pitchwheel':
+            # Treat pitchwheel as noise and add time
+            if time == -1:
+                time = 0
+            else:
+                time += msg.time - time_offset
+                time_offset = 0
+
+        elif msg.type == 'note_off' or (msg.type == 'note_on' and msg.velocity == 0):
+            if msg.note < 52:
+                # Add time to offset for ignored notes
+                time_offset += msg.time
+            else:
+                # Process note-off events for valid notes
+                time += msg.time - time_offset
+                time_offset = 0  # Reset the offset
+
+                if currNotes_deque and currNotes_deque[0][0] == msg.note:
+                    currNotes_deque[0][2] = time
+                    formattedNotes.append(currNotes_deque.popleft())
+                elif currNotes_deque and currNotes_deque[-1][0] == msg.note:
+                    currNotes_deque[-1][2] = time
+                    formattedNotes.append(currNotes_deque.pop())
+                else:
+                    # Handle middle notes
+                    for _ in range(len(currNotes_deque)):
+                        if currNotes_deque[0][0] == msg.note:
+                            currNotes_deque[0][2] = time
+                            formattedNotes.append(currNotes_deque.popleft())
+                            break
+                        else:
+                            currNotes_deque.append(currNotes_deque.popleft())
+        else:
+            # Other messages
+            continue
+
+    # Sort notes by start time
+    formattedNotes.sort(key=lambda x: x[1])
+
+    # Convert times to milliseconds and remove duplicates
+    unique_list = []
+    for note in formattedNotes:
+        note[1] = int(note[1] * 1000)
+        note[2] = int(note[2] * 1000)
+        if note not in unique_list:
+            unique_list.append(note)
+
+    # Adjust times so the first note starts at 0
+    if unique_list:
+        first_start = unique_list[0][1]
+        for note in unique_list:
+            note[1] -= first_start
+            note[2] -= first_start
+
+    return unique_list
+
+
 
 
 def get_tempo_and_time_signature(midi_file):
