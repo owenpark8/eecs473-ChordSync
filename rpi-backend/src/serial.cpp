@@ -7,6 +7,7 @@
 #include <wiringSerial.hpp>
 
 #include "serial.hpp"
+#include "timing.hpp"
 
 namespace serial {
     std::string const dev_name = "/dev/ttyAMA0";
@@ -17,7 +18,7 @@ namespace serial {
         std::cout << "Initializing serial communication...\n";
         std::cout << "Opening serial on device \"" << dev_name << "\"...\n";
 #endif
-        if ((fd = serialOpen(dev_name, baudrate)) < 0) {
+        if ((fd = serialOpen(dev_name, timing::UART_BAUDRATE)) < 0) {
             return false;
         }
 #ifdef DEBUG

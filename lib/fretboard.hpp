@@ -6,7 +6,7 @@
 #include "guitar.hpp"
 #include "lcd.hpp"
 #include "messaging.hpp"
-
+#include "timing.hpp"
 
 /**
  * Class for controlling the entire fretboard of the guitar, which spans multiple LCD screens.
@@ -17,16 +17,16 @@ class Fretboard {
     static constexpr std::size_t NUM_FRETS = 23;
     static constexpr std::size_t NUM_STRINGS = 6;
     static constexpr uint16_t TOTAL_PIXEL_WIDTH = NUM_LCDS * ILI9486_TFTHEIGHT;
-    static constexpr uint32_t WARNING_DELAY = 2500; // Delay between green, yellow, red in ms
+    static constexpr uint32_t WARNING_DELAY = timing::NOTE_WARNING_DELAY.count(); // Delay between green, yellow, red in ms
 
-    struct note_location_rectangle_t {
+    struct NoteLocationRectangle {
         pixel_location_t pixel_loc;
         uint16_t w;
         uint16_t h;
     };
 
-    struct note_timestamps { // note to be played at timestamp x
-        note_location_t note_loc;
+    struct NoteTimestamp { // note to be played at timestamp x
+        NoteLocation note_loc;
         uint32_t timestamp;
         uint16_t color;
     };
@@ -40,10 +40,10 @@ class Fretboard {
 
     std::array<LCD, NUM_LCDS> m_lcds{};
     std::size_t m_song_size{};
-    std::array<NoteDataMessage, MAX_NOTES_IN_SONG> m_song{}; // elements in this array should be sorted
-    std::size_t m_timestamps_size{}; // total size of m_timestamps
-    std::size_t m_timestamp_idx{}; // index of next note to be displayed on the fretboard
-    std::array<note_timestamps, MAX_NOTES_IN_SONG*4> m_timestamps{}; // first display green, yellow, then clear with white (4 colors)
+    std::array<NoteDataMessage, MAX_NOTES_IN_SONG> m_song{};         // elements in this array should be sorted
+    std::size_t m_timestamps_size{};                                 // total size of m_timestamps
+    std::size_t m_timestamp_idx{};                                   // index of next note to be displayed on the fretboard
+    std::array<NoteTimestamp, MAX_NOTES_IN_SONG * 4> m_timestamps{}; // first display green, yellow, then clear with white (4 colors)
     UART_HandleTypeDef* m_huart;
     uint32_t m_song_count_ms; // keeps track of the amount of ms elapsed, incremented every 1 ms
     uint8_t m_uart_buf[sizeof(NoteDataMessage) + 1] = {0};
@@ -90,15 +90,15 @@ public:
      * @param fretboard_location coordinates of note on fretboard grid
      * @param color color of circle to be written
      */
-    auto draw_note(note_location_t note_location, uint16_t color) -> void {
-        note_location_rectangle_t note_location_rectangle = convert_note_to_pixels(note_location);
+    auto draw_note(NoteLocation note_location, uint16_t color) -> void {
+        NoteLocationRectangle note_location_rectangle = convert_note_to_pixels(note_location);
         // Find which lcd(s) will be selected to draw this note
         uint16_t lcd_index_1 = note_location_rectangle.pixel_loc.x / 480;                               // 480 is width of LCD screen in pixels
         uint16_t lcd_index_2 = (note_location_rectangle.pixel_loc.x + note_location_rectangle.w) / 480; // 480 is width of LCD screen in pixels
         // In both cases, we want to draw a rectangle on the first LCD, our
         // if condition will confine the set_addr_window to not go beyond the bounds of the screen
         if (lcd_index_1 < NUM_LCDS) {
-            m_lcds[lcd_index_1].draw_rectangle({note_location_rectangle.pixel_loc.x % 480, note_location_rectangle.pixel_loc.y},
+            m_lcds[lcd_index_1].draw_rectangle({static_cast<uint16_t>(note_location_rectangle.pixel_loc.x % 480), note_location_rectangle.pixel_loc.y},
                                                note_location_rectangle.w, note_location_rectangle.h, color);
         }
         if (lcd_index_1 != lcd_index_2) {
@@ -145,7 +145,7 @@ public:
                     HAL_UART_Receive_IT(m_huart, m_uart_buf, sizeof(StartSongLoadingDataMessage) + 1); // 1 byte for ID + 1 byte for header
                     break;
                 case MessageType::EndSongLoading:
-                	m_timestamps_size = 0;
+                    m_timestamps_size = 0;
                     process_loaded_song();
                     rec_new_msg();
                     break;
@@ -164,11 +164,11 @@ public:
                     rec_new_msg();
                     break;
                 case MessageType::RequestSongID: {
-                	send_ack();
+                    send_ack();
                     HAL_UART_Transmit(m_huart, LOADED_SONG_ID_MESSAGE.data(), sizeof(LOADED_SONG_ID_MESSAGE), 100);
                     // Receive ACK
                     HAL_UART_Receive(m_huart, m_uart_buf, sizeof(ACK_MESSAGE), HAL_MAX_DELAY);
-                    const uint8_t song_id_buf[2] = {MESSAGE_HEADER, m_song_id};
+                    uint8_t const song_id_buf[2] = {MESSAGE_HEADER, m_song_id};
                     HAL_UART_Transmit(m_huart, song_id_buf, sizeof(song_id_buf), 100);
                     // Receive another ACK
                     HAL_UART_Receive(m_huart, m_uart_buf, sizeof(ACK_MESSAGE), HAL_MAX_DELAY);
@@ -186,7 +186,7 @@ public:
                     rec_new_msg();
                     break;
                 default:
-                	rec_new_msg();
+                    rec_new_msg();
                     return;
             }
         } else if (m_uart_state == uart_state::SONG_ID) {
@@ -205,25 +205,26 @@ public:
      */
     auto handle_song_time() -> void {
         if (m_playing_song) {
-        while (m_timestamp_idx < m_timestamps_size && m_timestamps[m_timestamp_idx].timestamp <= m_song_count_ms) {
-            const auto& tempstamp = m_timestamps[m_timestamp_idx]; // LOL!!!!!!!!!!!!!
-            if (tempstamp.note_loc.fret == 0) {
-                draw_string(tempstamp.note_loc.string, tempstamp.color);
-            } else { // fret should be > 0
-                draw_note({tempstamp.note_loc.fret-1, tempstamp.note_loc.string}, tempstamp.color);
+            while (m_timestamp_idx < m_timestamps_size && m_timestamps[m_timestamp_idx].timestamp <= m_song_count_ms) {
+                auto const& tempstamp = m_timestamps[m_timestamp_idx]; // LOL!!!!!!!!!!!!!
+                if (tempstamp.note_loc.fret == 0) {
+                    draw_string(tempstamp.note_loc.string, tempstamp.color);
+                } else { // fret should be > 0
+                    draw_note({static_cast<fret_t>(tempstamp.note_loc.fret - 1), tempstamp.note_loc.string}, tempstamp.color);
+                }
+                ++m_timestamp_idx;
             }
-            ++m_timestamp_idx;
-        }
             ++m_song_count_ms;
         }
     }
 
     auto handle_uart_error() -> void {
-    	// Clear all error flags
-    	__HAL_UART_CLEAR_FLAG(m_huart, UART_CLEAR_FEF | UART_CLEAR_NEF | UART_CLEAR_OREF | UART_CLEAR_PEF);
-    	rec_new_msg();
-    	// send_ack();
+        // Clear all error flags
+        __HAL_UART_CLEAR_FLAG(m_huart, UART_CLEAR_FEF | UART_CLEAR_NEF | UART_CLEAR_OREF | UART_CLEAR_PEF);
+        rec_new_msg();
+        // send_ack();
     }
+
 private:
     /*----------------------BACKDOOR FUNCTIONS-------------------------- */
 
@@ -232,11 +233,11 @@ private:
      * @param note_location note location to be converted
      * @return pixel coordinate of note
      */
-    auto convert_note_to_pixels(note_location_t note_location) -> note_location_rectangle_t {
+    auto convert_note_to_pixels(NoteLocation note_location) -> NoteLocationRectangle {
         // TODO: replace these numbers with actual pixels after measuring with guitar
         static std::array<uint16_t, NUM_FRETS> const fret_pixel_array = {// keeps track of fret to pixel_location.x
-            0,    158,  378,  510,  705,  900,  995, 1166, 1315, 1440, 1520,
-            1650, 1775, 1900, 1934, 2040, 2137, 2233, 2315, 2393, 2405, 2476, 2551};
+                                                                         0,    158,  378,  510,  705,  900,  995,  1166, 1315, 1440, 1520, 1650,
+                                                                         1775, 1900, 1934, 2040, 2137, 2233, 2315, 2393, 2405, 2476, 2551};
 
         uint16_t pixel_x = fret_pixel_array[note_location.fret];
         uint16_t pixel_y = 0;
@@ -299,16 +300,24 @@ private:
      */
     auto process_loaded_song() -> void {
         for (size_t i = 0; i < m_song_size; ++i) { // parse through notedata and populated timestamps
-        	const auto &note_data = m_song[i];
-            m_timestamps[m_timestamps_size++] = {{static_cast<fret_t>(note_data.fret), static_cast<string_e>(note_data.string)}, note_data.timestamp_ms, GREEN};
-            m_timestamps[m_timestamps_size++] = {{static_cast<fret_t>(note_data.fret), static_cast<string_e>(note_data.string)}, note_data.timestamp_ms + WARNING_DELAY, YELLOW};
-            m_timestamps[m_timestamps_size++] = {{static_cast<fret_t>(note_data.fret), static_cast<string_e>(note_data.string)}, note_data.timestamp_ms + WARNING_DELAY*2, RED};
-            m_timestamps[m_timestamps_size++] = {{static_cast<fret_t>(note_data.fret), static_cast<string_e>(note_data.string)}, note_data.timestamp_ms + WARNING_DELAY*2 + note_data.length_ms, m_dark_mode ? BLACK : WHITE};
+            auto const& note_data = m_song[i];
+            m_timestamps[m_timestamps_size++] = {{static_cast<fret_t>(note_data.fret), static_cast<string_e>(note_data.string)},
+                                                 note_data.timestamp_ms,
+                                                 GREEN};
+            m_timestamps[m_timestamps_size++] = {{static_cast<fret_t>(note_data.fret), static_cast<string_e>(note_data.string)},
+                                                 note_data.timestamp_ms + WARNING_DELAY,
+                                                 YELLOW};
+            m_timestamps[m_timestamps_size++] = {{static_cast<fret_t>(note_data.fret), static_cast<string_e>(note_data.string)},
+                                                 note_data.timestamp_ms + WARNING_DELAY * 2,
+                                                 RED};
+            m_timestamps[m_timestamps_size++] = {{static_cast<fret_t>(note_data.fret), static_cast<string_e>(note_data.string)},
+                                                 note_data.timestamp_ms + WARNING_DELAY * 2 + note_data.length_ms,
+                                                 m_dark_mode ? BLACK : WHITE};
         }
         // Insertion sort since the array is already mostly sorted
         for (int i = 0; i < m_timestamps_size; ++i) {
             int swapped = i;
-            for(int j = i+1; j < m_timestamps_size; ++j) {
+            for (int j = i + 1; j < m_timestamps_size; ++j) {
                 if (m_timestamps[j].timestamp < m_timestamps[swapped].timestamp) swapped = j;
             }
             std::swap(m_timestamps[i], m_timestamps[swapped]);
@@ -323,7 +332,7 @@ private:
             if (m_dark_mode) {
                 if (m_timestamps[i].color == BLACK) return; // No work to be done, as m_timestamps already in dark mode
                 if (m_timestamps[i].color == WHITE) m_timestamps[i].color = BLACK;
-            } else { // light mode
+            } else {                                        // light mode
                 if (m_timestamps[i].color == WHITE) return; // No work to be done, as m_timestamps already in light mode
                 if (m_timestamps[i].color == BLACK) m_timestamps[i].color = WHITE;
             }

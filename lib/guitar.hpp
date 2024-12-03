@@ -28,10 +28,10 @@ enum class string_e : std::uint8_t {
 using fret_t = std::uint8_t;
 
 /**
- * @struct note_location_t
+ * @struct NoteLocation
  * @brief Represents a location on the guitar fretboard.
  */
-struct note_location_t {
+struct NoteLocation {
     fret_t fret;
     string_e string;
 };
