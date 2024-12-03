@@ -32,9 +32,9 @@ auto playerMode::recordtoMIDI(uint8_t song_id, uint8_t duration,
     }
     
 //add in cleanout function
-playerMode::playerMode(uint8_t song_id, uint8_t mode, std::string const& note, std::string const& title, std::string const& artist, uint8_t duration,
+playerMode::playerMode(uint8_t song_id, uint8_t duration,
                        uint8_t bpm)
-    : song{song_id, title, artist, std::chrono::seconds(duration), bpm}, mode(mode), note(note) {
+    : m_rec_song{song_id, "rec", "rec", std::chrono::seconds(duration), bpm} {
 
     //begin recording from Python.
     auto numbers = recordtoMIDI(song_id, duration, bpm);
@@ -45,105 +45,13 @@ playerMode::playerMode(uint8_t song_id, uint8_t mode, std::string const& note, s
         entry->midi_note = static_cast<uint8_t>(number[0]);
         entry->start_timestamp_ms = static_cast<uint32_t>(number[1]);
         entry->length_ms = static_cast<uint16_t>(number[2] - entry->start_timestamp_ms);
-        (this->song.notes).push_back(*entry);
+        (this->m_rec_song.notes).push_back(*entry);
         delete entry;
     }
-
-
-    //Check Database availaiblity, grab the reference song from the database, and re-structure it for our needs. 
-    try {
-        SQLite::Database db(data::db_filename, SQLite::OPEN_READWRITE | SQLite::OPEN_CREATE);
-        this->ref_data = this->organizeRef();
-        
-    } catch (std::exception& e) {
-        std::cerr << "SQLite exception: " << e.what() << std::endl;
-    }
-
-
     //need to figure out filtering. 
 }
 
-auto playerMode::dataParseRef(std::string const& filename) -> std::vector<std::vector<int>>{
-    py::scoped_interpreter guard{};
-
-    py::module sys = py::module::import("sys");
-    sys.attr("path").attr("insert")(0, PY_VENV_PATH);
-    sys.attr("path").attr("insert")(0, PY_MODULE_PATH);
-
-    //mode 1 and 2 are record song and single 
-    auto get_dataParse_module = py::module_::import("dataParse");
-    py::object get_Message = get_dataParse_module.attr("getMessages");
-    auto numbers = get_Message(filename).cast<std::vector<std::vector<int>>>();
-    return numbers;
-}
-
-
-//uint8_t song_id, uint8_t mode, std::string const& note, std::string const& title, std::string const artist, uint8_t duration,
-                       //uint8_t bpm)
-    //: song{song_id, title, artist, std::chrono::seconds(duration), bpm}, mode(mode), note(note) {
-
-auto playerMode::dataParseUpload(std::string const& filename, uint8_t song_id, std::string const& title, std::string const& artist, uint8_t duration, uint8_t bpm) -> void{
-    auto numbers = dataParseRef(filename);
-
-    data::songs::SongInfo song = {
-        .id = song_id,
-        .title = title,
-        .artist = artist,
-        .length = std::chrono::seconds(duration),
-        .bpm = bpm
-    };
-
-    for (auto& number: numbers) {
-        auto entry = new data::songs::Note;
-        entry->midi_note = static_cast<uint8_t>(number[0]);
-        entry->start_timestamp_ms = static_cast<uint32_t>(number[1]);
-        entry->length_ms = static_cast<uint16_t>(number[2] - entry->start_timestamp_ms);
-        (song.notes).push_back(*entry);
-        delete entry;
-    }
-
-    std::cout << "Inserting " << title << " with notes (but no information about string and fret number)" << "\n";
-
-    /*for (auto const& note: song.notes) {
-        note.print();
-    }*/
-
-    try {
-        SQLite::Database db(data::db_filename, SQLite::OPEN_READWRITE | SQLite::OPEN_CREATE);
-        data::songs::insert_new_song(db, song);
-    } catch (std::exception& e) {
-        std::cerr << "SQLite exception: " << e.what() << std::endl;
-    }
-}
-
-
-auto playerMode::get_mode() const -> std::string {
-    if (this->mode == 1) return "single note";
-    return "pls wait";
-}
-auto playerMode::get_bpm() const -> uint8_t { return this->song.bpm; }
-
-auto playerMode::get_resolution() const -> uint8_t { return 0; }
-
-
-auto playerMode::organizeRef() -> std::map<std::uint8_t, std::vector<noteEntry>>{
-    SQLite::Database db(data::db_filename, SQLite::OPEN_READWRITE | SQLite::OPEN_CREATE);
-    data::songs::SongInfo song = data::songs::get_song_by_id(db, 1);
-    
-    this->ref_size = song.notes.size();
-    std::map<std::uint8_t, std::vector<noteEntry>> ref;
-    for(int i = 0; i < song.notes.size(); i++){
-        auto entry = new noteEntry;
-        entry->start_time = static_cast<uint32_t>(song.notes[i].start_timestamp_ms);
-        entry->duration = static_cast<uint16_t>(song.notes[i].length_ms);
-        entry->orig_pos = static_cast<uint16_t>(i);
-        ref[song.notes[i].midi_note].push_back(*entry);
-        delete entry;
-    }
-
-    return ref;
-}
-
+auto playerMode::get_bpm() const -> uint8_t { return this->m_rec_song.bpm; }
 
 
 auto playerMode::compareByStartTime(const noteEntry& entry, std::uint32_t target)->bool {
@@ -156,7 +64,7 @@ auto playerMode::compareByStartTimeReverse(std::uint32_t target, const noteEntry
 }
 
 auto playerMode::checkSong() -> void {
-    for (auto note: this->song.notes){
+    for (auto note: this->m_rec_song.notes){
         checkNote(note);
     }
 }
@@ -216,7 +124,7 @@ auto playerMode::analysis(std::string const& note) -> bool {
 
     uint8_t maxCount = 0;
 
-    for (auto& note: this->song.notes) {
+    for (auto& note: this->m_rec_song.notes) {
         freq[note.midi_note]++;
     }
     //iterate through and check max freqeucy, then output if it is correct or note.
@@ -263,3 +171,112 @@ auto playerMode::noteToInt(std::string const& note) -> uint8_t {
 
     
 }*/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#ifndef PLAYERMODE_H
+#define PLAYERMODE_H
+
+
+#include <data.hpp>
+#include <string>
+#include <unordered_map>
+#include <vector>
+#include <map>
+#include <cmath>
+
+class playerMode {
+public:
+    //do the recording here
+    //potential modes: reference create, record and convert song, record and convert note.
+    //can pass in note to convert.
+    playerMode(uint8_t song_id, uint8_t duration,
+               uint8_t bpm);
+    // EFFECTS returns player's name
+    [[nodiscard]] auto get_mode() const -> std::string;
+
+    [[nodiscard]] auto get_bpm() const -> uint8_t;
+
+    [[nodiscard]] auto get_resolution() const -> uint8_t;
+
+    [[nodiscard]] auto performanceFeedback() const -> std::vector<std::string>;
+
+
+    //auto analysis() -> void;
+    //so need to have it so that they could either enter in song or 
+    
+    //call the user
+    auto analysis(std::vector<data::songs::Note>& ref) -> std::vector<bool>;
+    auto analysis() -> std::vector<bool>;
+
+    //this is analysis for note mode.
+    auto analysis(std::string const& note) -> bool;
+
+    //change this to note or overloaded. 
+    //auto dataParseRef(std::string const& filename) -> std::vector<std::vector<int>>;
+
+    //function that apploads midi to database.
+    //auto dataParseUpload(std::string const& filename, uint8_t song_id, std::string const& title, std::string const& artist, uint8_t duration, uint8_t bpm) -> void;
+
+    std::vector <std::vector<int > >  recording_numbers;
+    std::vector <std::vector<int > >  reference_numbers;
+    // Needed to avoid some compiler errors
+    ~playerMode();
+
+private:
+    //song struct has information about song, etc.
+    data::songs::SongInfo m_rec_song;
+
+    //map to help me convert between note to number.
+    std::unordered_map<std::string, uint8_t> semitoneOffsets = {{"C", 0},  {"C#", 1}, {"Db", 1},  {"D", 2},   {"D#", 3}, {"Eb", 3},
+                                                                {"E", 4},  {"F", 5},  {"F#", 6},  {"Gb", 6},  {"G", 7},  {"G#", 8},
+                                                                {"Ab", 8}, {"A", 9},  {"A#", 10}, {"Bb", 10}, {"B", 11}};
+    //used to convert Note
+    auto noteToInt(std::string const& note) -> uint8_t;
+    //this is analysis for song mode.
+
+    auto recordtoMIDI(uint8_t song_id, uint8_t duration,
+        uint8_t bpm) -> std::vector<std::vector<int>>;
+    
+    struct noteEntry {
+        uint32_t start_time;
+        uint16_t duration;
+        uint16_t orig_pos;
+        bool seen;
+    };
+
+    uint32_t ref_size; 
+
+    //ref data.
+    std::map<std::uint8_t, std::vector<noteEntry>> ref_data;
+
+    auto organizeRef() -> std::map<std::uint8_t, std::vector<noteEntry>>;
+
+    //checks seen
+    auto checkNote(data::songs::Note& ref_note) -> void;
+
+    auto checkSong() -> void;
+
+    //youtube
+   static auto compareByStartTime(const noteEntry& entry, std::uint32_t target)->bool;
+
+    // Comparator for reverse comparison, useful for certain cases
+    static auto compareByStartTimeReverse(std::uint32_t target, const noteEntry& entry)->bool;
+
+};
+#endif
+
+

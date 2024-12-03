@@ -14,7 +14,7 @@ public:
     //do the recording here
     //potential modes: reference create, record and convert song, record and convert note.
     //can pass in note to convert.
-    playerMode(uint8_t song_id, uint8_t mode, std::string const& note, std::string const& title, std::string const& artist, uint8_t duration,
+    playerMode(uint8_t song_id, uint8_t duration,
                uint8_t bpm);
     // EFFECTS returns player's name
     [[nodiscard]] auto get_mode() const -> std::string;
@@ -37,10 +37,10 @@ public:
     auto analysis(std::string const& note) -> bool;
 
     //change this to note or overloaded. 
-    auto dataParseRef(std::string const& filename) -> std::vector<std::vector<int>>;
+    //auto dataParseRef(std::string const& filename) -> std::vector<std::vector<int>>;
 
     //function that apploads midi to database.
-    auto dataParseUpload(std::string const& filename, uint8_t song_id, std::string const& title, std::string const& artist, uint8_t duration, uint8_t bpm) -> void;
+    //auto dataParseUpload(std::string const& filename, uint8_t song_id, std::string const& title, std::string const& artist, uint8_t duration, uint8_t bpm) -> void;
 
     std::vector <std::vector<int > >  recording_numbers;
     std::vector <std::vector<int > >  reference_numbers;
@@ -49,21 +49,12 @@ public:
 
 private:
     //song struct has information about song, etc.
-    data::songs::SongInfo song;
-
-    //record note based on mode.
-    uint8_t mode;
-
-    uint8_t resolution;
-
-    std::string note;
-
+    data::songs::SongInfo m_rec_song;
 
     //map to help me convert between note to number.
     std::unordered_map<std::string, uint8_t> semitoneOffsets = {{"C", 0},  {"C#", 1}, {"Db", 1},  {"D", 2},   {"D#", 3}, {"Eb", 3},
                                                                 {"E", 4},  {"F", 5},  {"F#", 6},  {"Gb", 6},  {"G", 7},  {"G#", 8},
                                                                 {"Ab", 8}, {"A", 9},  {"A#", 10}, {"Bb", 10}, {"B", 11}};
-
     //used to convert Note
     auto noteToInt(std::string const& note) -> uint8_t;
     //this is analysis for song mode.
