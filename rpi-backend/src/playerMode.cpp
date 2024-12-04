@@ -10,7 +10,6 @@ namespace py = pybind11;
 auto playerMode::m_recordtoMIDI(uint8_t song_id, uint16_t duration,
                uint8_t bpm) -> std::vector<std::vector<int>>{
     py::scoped_interpreter guard{};
-
     py::module sys = py::module::import("sys");
     sys.attr("path").attr("insert")(0, PY_VENV_PATH);
     sys.attr("path").attr("insert")(0, PY_MODULE_PATH);
@@ -43,8 +42,24 @@ auto playerMode::m_recordtoMIDI(uint8_t song_id, uint16_t duration,
 
     auto numbers = get_record_convert(song_id, duration, bpm).cast<std::vector<std::vector<int>>>();
 
+    this->m_delete_generated_files(song_id);
+
     return numbers;
     }
+
+
+
+auto playerMode::m_delete_generated_files(uint8_t song_id) -> void{
+    py::module sys = py::module::import("sys");
+    sys.attr("path").attr("insert")(0, PY_VENV_PATH);
+    sys.attr("path").attr("insert")(0, PY_MODULE_PATH);
+
+    auto get_record_convert_module = py::module_::import("record_convert");
+    py::object get_remove_files = get_record_convert_module.attr("remove_files");
+
+    get_remove_files(song_id);
+
+}
     
 
 auto playerMode::m_organizeRef() -> void{

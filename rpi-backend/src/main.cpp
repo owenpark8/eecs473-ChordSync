@@ -15,6 +15,7 @@
 #include "playerMode.hpp"
 #include "serial.hpp"
 #include "web.hpp"
+#include "process_gp4.hpp"
 
 
 static std::condition_variable song_id_cv;
@@ -375,15 +376,68 @@ auto main(int argc, char* args[]) -> int {
 
     //The constructor creates a RECORDING, and populates the internal structure with information from this recording. 
     //It also grabs the reference song from the database and populates our class with that.
-    auto* player = new playerMode(1, 1, "C4", "1", "1", 55, 95);
+
+
+
+
+    static data::songs::SongInfo ode_to_joy_1 =
+                {
+                        .title = "Ode To Joy",
+                        .artist = "ChordSync Basics",
+                        .length = std::chrono::seconds(13),
+                        .bpm = 144,
+                        .notes =
+                                {
+                                        data::songs::Note{.start_timestamp_ms = 0,
+                                             .length_ms = 417,
+                                             .midi_note = 0,
+                                             .fret = 0,
+                                             .string = static_cast<std::uint8_t>(string_e::HIGH_E)},
+                                        data::songs::Note{.start_timestamp_ms = 417,
+                                             .length_ms = 417,
+                                             .midi_note = 0,
+                                             .fret = 0,
+                                             .string = static_cast<std::uint8_t>(string_e::HIGH_E)},
+                                        data::songs::Note{.start_timestamp_ms = 834,
+                                             .length_ms = 417,
+                                             .midi_note = 0,
+                                             .fret = 1,
+                                             .string = static_cast<std::uint8_t>(string_e::HIGH_E)},
+                                        data::songs::Note{.start_timestamp_ms = 1251,
+                                             .length_ms = 417,
+                                             .midi_note = 0,
+                                             .fret = 3,
+                                             .string = static_cast<std::uint8_t>(string_e::HIGH_E)},
+                                        data::songs::Note{.start_timestamp_ms = 1668,
+                                             .length_ms = 417,
+                                             .midi_note = 0,
+                                             .fret = 3,
+                                             .string = static_cast<std::uint8_t>(string_e::HIGH_E)},
+                                        data::songs::Note{.start_timestamp_ms = 2085,
+                                             .length_ms = 417,
+                                             .midi_note = 0,
+                                             .fret = 1,
+                                             .string = static_cast<std::uint8_t>(string_e::HIGH_E)},
+                                        data::songs::Note{.start_timestamp_ms = 2502,
+                                             .length_ms = 417,
+                                             .midi_note = 0,
+                                             .fret = 0,
+                                             .string = static_cast<std::uint8_t>(string_e::HIGH_E)}
+
+                                }
+        };
+
+    
+    //process_gp4::dataParseUpload("./py/gp_files/twinkle_twinkle.gp5", )
+    auto* player = new playerMode(ode_to_joy_1);
 
     //dataParseUpload(std::string const& filename, uint8_t song_id, std::string const& title, std::string const& artist, uint8_t duration, uint8_t bpm) -> void;
    
     //upload reference midi to the database. 
-    player->dataParseUpload("twinkle.mid", 1, "twinkle-twinkle-ref", "unknown", 55, 95);
+    //player->dataParseUpload("twinkle.mid", 1, "twinkle-twinkle-ref", "unknown", 55, 95);
 
     //lets print the original
-    auto numbers = player->dataParseRef("twinkle.mid");
+    /*auto numbers = player->dataParseRef("twinkle.mid");
     std::cout << "REFERENCE:" << std::endl;
     for (int i = 0; i < numbers.size(); i++) {
         std::cout << "[" << numbers[i][0] << "," << numbers[i][1] << "," << numbers[i][2] << "]" << std::endl;

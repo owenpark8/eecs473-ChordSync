@@ -59,6 +59,8 @@ private:
 
     auto m_recordtoMIDI(uint8_t song_id, uint16_t duration,
         uint8_t bpm) -> std::vector<std::vector<int>>;
+
+    auto m_delete_generated_files(uint8_t song_id) -> void;
     
     struct m_noteEntry {
         uint32_t start_time;
