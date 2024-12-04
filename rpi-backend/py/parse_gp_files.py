@@ -10,12 +10,13 @@ def debug_print(message):
 # High E (64) to low E (40)
 string_dict = [64, 59, 55, 50, 45, 40]
 
-# parses gpx file and then outputs vector of ints [[note value, start_timestamp_ms, length_ms, int fret, int string]]
+# parses gpx file and then outputs vector of ints [[start_timestamp_ms, length_ms, note value, int fret, int string]]
 # fret == 0 means open string
 def parse_gp_file(gp_file_path):
     song = guitarpro.parse(gp_file_path)
 
     debug_print(f"Available tracks:")
+    debug_print(f"Song tempo: {song.tempo}")
     for track in song.tracks:
         debug_print(f"Track {track.number}: {track.name}")
     debug_print("----------------------------------------------") # empty line
@@ -33,12 +34,16 @@ def parse_gp_file(gp_file_path):
                     length = beat.duration.time
                     _, _, note_type = str(note.type).partition('.')
 
-                    debug_print(f"MidiNote val: {midi_note_val}, Start timestamp: {timestamp:.2f} ms, Length: {length}, Fret: {fret_number}, String: {string_number}, NoteType: {note_type}")
-                    song_info_out.append([midi_note_val, timestamp, length, fret_number, string_number])
+                    debug_print(f"Start timestamp: {timestamp:.2f} ms, Length: {length}, MidiNote val: {midi_note_val}, Fret: {fret_number}, String: {string_number}, NoteType: {note_type}")
+                    song_info_out.append([timestamp, length, midi_note_val, fret_number, string_number])
 
                 # Increment timestamp
                 timestamp += beat.duration.time
     return song_info_out
+
+def get_song_tempo(gp_file_path):
+    song = guitarpro.parse(gp_file_path)
+    return song.tempo
 
 if __name__ == '__main__':
     if len(sys.argv) != 2:
