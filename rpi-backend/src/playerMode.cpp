@@ -26,6 +26,21 @@ auto playerMode::m_recordtoMIDI(uint8_t song_id, uint16_t duration,
     py::object get_record_convert = get_record_convert_module.attr("record_convert");
 
 
+
+    std::string command = "arecord --duration=" + std::to_string(duration) +
+                          " --rate=88200 --format=S16_LE " + std::to_string(song_id) + "_rec.wav";
+
+    // Execute the command
+    int result = system(command.c_str());
+
+    // Check if the command was successful
+    if (result != 0) {
+        // Handle the error
+        std::cerr << "Error executing command: " << command << std::endl;
+    } else {
+        std::cout << "Recording completed successfully." << std::endl;
+    }
+
     auto numbers = get_record_convert(song_id, duration, bpm).cast<std::vector<std::vector<int>>>();
 
     return numbers;
@@ -63,6 +78,10 @@ playerMode::playerMode(data::songs::SongInfo& get_ref_song)
         (this->m_rec_song.notes).push_back(entry);
     }
     //need to figure out filtering. 
+
+    this->m_ref_song = get_ref_song;
+
+    this->m_organizeRef();
 }
 
 auto playerMode::get_bpm() const -> uint8_t { return this->m_rec_song.bpm; }
@@ -128,6 +147,25 @@ auto playerMode::analysis() -> std::vector<bool>{
 
     //returns result.
     return result;
+}
+
+auto playerMode::analyzeChord() -> bool{
+
+    int count = 0;
+    for (auto ref_note: this->m_ref_song.notes) {
+        for (auto note: this->m_rec_song.notes){
+            if (note.midi_note == ref_note.midi_note){
+                count++;
+                break;
+            } 
+        }
+    }
+
+    if(count == m_ref_song.notes.size() && count != 0){
+        return true;
+    }
+
+    return false;
 }
 
 /*auto playerMode::analysis(std::string const& note) -> bool {

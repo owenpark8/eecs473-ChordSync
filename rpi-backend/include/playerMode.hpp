@@ -14,22 +14,18 @@ public:
     //do the recording here
     //potential modes: reference create, record and convert song, record and convert note.
     //can pass in note to convert.
-    playerMode(uint8_t song_id, uint8_t duration,
-               uint8_t bpm);
+    playerMode(data::songs::SongInfo& get_ref_song);
     // EFFECTS returns player's name
-    [[nodiscard]] auto get_mode() const -> std::string;
 
     [[nodiscard]] auto get_bpm() const -> uint8_t;
-
-    [[nodiscard]] auto get_resolution() const -> uint8_t;
-
-    [[nodiscard]] auto performanceFeedback() const -> std::vector<std::string>;
-
 
     //auto analysis() -> void;
     //so need to have it so that they could either enter in song or 
     
     //call the user
+
+    auto analyzeChord() -> bool;
+    
     auto analysis(std::vector<data::songs::Note>& ref) -> std::vector<bool>;
     auto analysis() -> std::vector<bool>;
 
@@ -51,41 +47,43 @@ private:
     //song struct has information about song, etc.
     data::songs::SongInfo m_rec_song;
 
+    data::songs::SongInfo m_ref_song;
+
     //map to help me convert between note to number.
     std::unordered_map<std::string, uint8_t> semitoneOffsets = {{"C", 0},  {"C#", 1}, {"Db", 1},  {"D", 2},   {"D#", 3}, {"Eb", 3},
                                                                 {"E", 4},  {"F", 5},  {"F#", 6},  {"Gb", 6},  {"G", 7},  {"G#", 8},
                                                                 {"Ab", 8}, {"A", 9},  {"A#", 10}, {"Bb", 10}, {"B", 11}};
     //used to convert Note
-    auto noteToInt(std::string const& note) -> uint8_t;
+    auto m_noteToInt(std::string const& note) -> uint8_t;
     //this is analysis for song mode.
 
-    auto recordtoMIDI(uint8_t song_id, uint8_t duration,
+    auto m_recordtoMIDI(uint8_t song_id, uint16_t duration,
         uint8_t bpm) -> std::vector<std::vector<int>>;
     
-    struct noteEntry {
+    struct m_noteEntry {
         uint32_t start_time;
         uint16_t duration;
         uint16_t orig_pos;
         bool seen;
     };
 
-    uint32_t ref_size; 
+    uint32_t m_ref_size; 
 
     //ref data.
-    std::map<std::uint8_t, std::vector<noteEntry>> ref_data;
+    std::map<std::uint8_t, std::vector<m_noteEntry>> m_ref_data;
 
-    auto organizeRef() -> std::map<std::uint8_t, std::vector<noteEntry>>;
+    auto m_organizeRef() -> void;
 
     //checks seen
-    auto checkNote(data::songs::Note& ref_note) -> void;
+    auto m_checkNote(data::songs::Note& ref_note) -> void;
 
-    auto checkSong() -> void;
+    auto m_checkSong() -> void;
 
     //youtube
-   static auto compareByStartTime(const noteEntry& entry, std::uint32_t target)->bool;
+   static auto m_compareByStartTime(const m_noteEntry& entry, std::uint32_t target)->bool;
 
     // Comparator for reverse comparison, useful for certain cases
-    static auto compareByStartTimeReverse(std::uint32_t target, const noteEntry& entry)->bool;
+    static auto m_compareByStartTimeReverse(std::uint32_t target, const m_noteEntry& entry)->bool;
 
 };
 #endif
