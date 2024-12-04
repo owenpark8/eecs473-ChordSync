@@ -12,7 +12,8 @@ basic_pitch_model = Model(ICASSP_2022_MODEL_PATH)
 from basic_pitch.inference import predict_and_save
 
 
-def record_convert_no_offset(id, bpm_value):
+#this just runs once in the beginning
+def prediction(id, bpm_value):
     wav_name = f'{id}_rec.wav'
 
     predict_and_save(
@@ -30,8 +31,7 @@ def record_convert_no_offset(id, bpm_value):
         multiple_pitch_bends=False
     )
 
-
-
+def record_convert_no_offset(id, bpm_value):
     print("Running")
         
         
@@ -55,22 +55,7 @@ def record_convert_no_offset(id, bpm_value):
     return notes
 
 
-def record_convert_offset(id, bpm_value):
-    predict_and_save(
-        audio_path_list=[wav_name],
-        output_directory=".",
-        save_midi=True,
-        sonify_midi=True,
-        save_model_outputs=False,
-        save_notes=False,
-        model_or_model_path=basic_pitch_model,
-        onset_threshold=0.70,
-        frame_threshold=0.50,
-        minimum_note_length=11,
-        midi_tempo=int(bpm_value),
-        multiple_pitch_bends=False
-    )
-
+def record_convert_offset(id):
     print("Running")
         
         
@@ -96,27 +81,6 @@ def record_convert_offset(id, bpm_value):
 
 
 def record_convert(id, duration, bpm_value):
-    wav_name = f'{id}_rec.wav'
-
-    predict_and_save(
-        audio_path_list=[wav_name],
-        output_directory=".",
-        save_midi=True,
-        sonify_midi=True,
-        save_model_outputs=False,
-        save_notes=False,
-        model_or_model_path=basic_pitch_model,
-        onset_threshold=0.70,
-        frame_threshold=0.50,
-        minimum_note_length=11,
-        midi_tempo=int(bpm_value),
-        multiple_pitch_bends=False
-    )
-
-    print("Running")
-        
-        
-
     #convert data then figure out how you will push delete the midi files.
     #pybind stuff. 
     mid_basic = f'{id}_rec_basic_pitch.mid'

@@ -35,7 +35,7 @@ def parse_gp_file(gp_file_path):
                     _, _, note_type = str(note.type).partition('.')
 
                     debug_print(f"Start timestamp: {timestamp:.2f} ms, Length: {length}, MidiNote val: {midi_note_val}, Fret: {fret_number}, String: {string_number}, NoteType: {note_type}")
-                    song_info_out.append([timestamp, length, midi_note_val, fret_number, string_number])
+                    song_info_out.append([int(timestamp), int(length), int(midi_note_val), int(fret_number), int(string_number)])
 
                 # Increment timestamp
                 timestamp += beat.duration.time

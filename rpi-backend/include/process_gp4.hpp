@@ -20,7 +20,7 @@ namespace process_gp4 {
         py::object get_song_tempo = get_dataParse_module.attr("get_song_tempo");
         song_out.bpm = get_song_tempo(filename).cast<std::uint16_t>();
         // add last elements start timestamp and duration
-        int ms_duration_int = !song_ints.empty() ? song_ints.back()[1] + song_ints.back[2] : 0; 
+        int ms_duration_int = !song_ints.empty() ? song_ints.back()[1] + song_ints.back()[2] : 0; 
         
         std::chrono::milliseconds ms_duration(ms_duration_int);
         song_out.length = std::chrono::seconds((ms_duration.count() + 999) / 1000); // round up
@@ -37,5 +37,7 @@ namespace process_gp4 {
             
             (song_out.notes).push_back(temp_note);
         }
+
+        return song_out;
     }
 } // namespace process_gp4

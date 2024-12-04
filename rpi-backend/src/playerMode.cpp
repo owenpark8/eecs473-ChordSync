@@ -9,7 +9,6 @@ namespace py = pybind11;
 
 auto playerMode::m_recordtoMIDI(uint8_t song_id, uint16_t duration,
                uint8_t bpm) -> std::vector<std::vector<int>>{
-    py::scoped_interpreter guard{};
     py::module sys = py::module::import("sys");
     sys.attr("path").attr("insert")(0, PY_VENV_PATH);
     sys.attr("path").attr("insert")(0, PY_MODULE_PATH);
@@ -40,6 +39,8 @@ auto playerMode::m_recordtoMIDI(uint8_t song_id, uint16_t duration,
         std::cout << "Recording completed successfully." << std::endl;
     }
 
+    this->m_basic_pitch_prediction_run(song_id, bpm);
+
     auto numbers = get_record_convert(song_id, duration, bpm).cast<std::vector<std::vector<int>>>();
 
     this->m_delete_generated_files(song_id);
@@ -58,6 +59,19 @@ auto playerMode::m_delete_generated_files(uint8_t song_id) -> void{
     py::object get_remove_files = get_record_convert_module.attr("remove_files");
 
     get_remove_files(song_id);
+
+}
+
+
+auto playerMode::m_basic_pitch_prediction_run(uint8_t song_id, uint8_t bpm) -> void{
+     py::module sys = py::module::import("sys");
+    sys.attr("path").attr("insert")(0, PY_VENV_PATH);
+    sys.attr("path").attr("insert")(0, PY_MODULE_PATH);
+
+    auto get_record_convert_module = py::module_::import("record_convert");
+    py::object get_prediction = get_record_convert_module.attr("prediction");
+
+    get_prediction(song_id, bpm);
 
 }
     
@@ -80,7 +94,7 @@ auto playerMode::m_organizeRef() -> void{
 //add in cleanout function
 playerMode::playerMode(data::songs::SongInfo& get_ref_song)
     : m_rec_song{get_ref_song.id, "rec", "rec", get_ref_song.length, get_ref_song.bpm} {
-
+    py::scoped_interpreter guard{};
     //begin recording from Python.
     auto numbers = m_recordtoMIDI(get_ref_song.id, static_cast<uint16_t>(get_ref_song.length.count()), get_ref_song.bpm);
     this->recording_numbers = numbers;

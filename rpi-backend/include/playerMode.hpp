@@ -60,6 +60,7 @@ private:
     auto m_recordtoMIDI(uint8_t song_id, uint16_t duration,
         uint8_t bpm) -> std::vector<std::vector<int>>;
 
+    auto m_basic_pitch_prediction_run(uint8_t song_id, uint8_t bpm) -> void;
     auto m_delete_generated_files(uint8_t song_id) -> void;
     
     struct m_noteEntry {
