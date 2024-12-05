@@ -337,8 +337,11 @@ auto main(int argc, char* args[]) -> int {
         SQLite::Database db(data::db_filename, SQLite::OPEN_READWRITE | SQLite::OPEN_CREATE);
         if (!data::songs::song_id_exists(db, 1)) {
 #ifdef DEBUG
-            std::cout << "Database does not have song ID 1! Adding basic song...\n";
+            std::cout << "Database does not have song ID 1! Adding C major scale...\n";
 #endif
+            data::songs::insert_new_song(db, data::songs::scales::c_major_scale);
+        }
+        if (!data::songs::song_id_exists(db, 2)) {
             data::songs::insert_new_song(db, data::songs::ode_to_joy);
         }
 

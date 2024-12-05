@@ -35,24 +35,27 @@ if (ENABLE_WEB_SERVER_SCRIPTS)
     set(COMPILED_CSS_FILE ${WEB_SRC_DIR}/compiled.css)
     set(WEB_SOURCES_FILE ${INCLUDE_DIR}/web_sources.hpp)
 
-    add_custom_command(
-        OUTPUT ${COMPILED_CSS_FILE}
-        COMMAND ${CMAKE_COMMAND} -E echo "Compiling tailwind .css file..."
+    # Custom target to compile Tailwind CSS
+    add_custom_target(
+        compile_css ALL
+        COMMAND ${CMAKE_COMMAND} -E echo "Compiling Tailwind .css file..."
         COMMAND ${CMAKE_COMMAND} -E env bash ${CMAKE_CURRENT_SOURCE_DIR}/scripts/compile_tailwind.sh ${CMAKE_CURRENT_SOURCE_DIR}
-        DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/scripts/compile_tailwind.sh
         COMMENT "Generating compiled.css with Tailwind"
         VERBATIM
     )
 
-    add_custom_command(
-        OUTPUT ${WEB_SOURCES_FILE}
+    # Custom target to generate web sources
+    add_custom_target(
+        generate_web_sources ALL
         COMMAND ${CMAKE_COMMAND} -E echo "Generating source file strings..."
         COMMAND ${CMAKE_COMMAND} -E env bash ${CMAKE_CURRENT_SOURCE_DIR}/scripts/generate_web_sources.sh ${CMAKE_CURRENT_SOURCE_DIR}/public ${WEB_SOURCES_FILE}
-        DEPENDS ${COMPILED_CSS_FILE} ${CMAKE_CURRENT_SOURCE_DIR}/scripts/generate_web_sources.sh
+        DEPENDS compile_css
         COMMENT "Generating web_sources.hpp"
         VERBATIM
     )
 
+    # Add the generated file as a source for the target
+    add_dependencies(${RPI_BACKEND_TARGET} generate_web_sources)
     target_sources(${RPI_BACKEND_TARGET} PRIVATE ${WEB_SOURCES_FILE})
 endif()
 
