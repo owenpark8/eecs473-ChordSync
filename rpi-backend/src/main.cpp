@@ -25,7 +25,7 @@ static std::condition_variable playing_cv;
 static std::string const play_button_html_data = fmt::format(web::get_source_file(web::source_files_e::BUTTON_HTML), "/play-song", "Play song!");
 static std::string const stop_button_html_data = fmt::format(web::get_source_file(web::source_files_e::BUTTON_HTML), "/stop-song", "Stop song!");
 
-WaitUntilThread wait_playing_song_thread{};
+// WaitUntilThread wait_playing_song_thread{};
 
 void web_server() {
     using httplib::Request, httplib::Response;
@@ -211,11 +211,13 @@ void web_server() {
         mcu::playing = true;
         playing_cv.notify_all();
 
+        /*
         wait_playing_song_thread.start_thread(song.length + std::chrono::seconds(15), []() {
             std::unique_lock<std::mutex> mcu_lock(mcu::mut);
             mcu::playing = false;
             playing_cv.notify_all();
         });
+        */
 
         res.set_content(stop_button_html_data, web::html_type);
     });
@@ -233,7 +235,7 @@ void web_server() {
         mcu::playing = false;
         playing_cv.notify_all();
 
-        wait_playing_song_thread.stop_thread();
+        // wait_playing_song_thread.stop_thread();
 
         res.set_content(play_button_html_data, web::html_type);
     });

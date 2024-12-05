@@ -78,10 +78,11 @@ public:
         for (auto& lcd: m_lcds) {
             lcd.init();
         }
-        clear();
+        piano_tiles();
         m_playing_song = false;
         m_song_id = 0; // song id 0 means no song currently loaded
         // Initialize UART Protocol
+        HAL_Delay(10000);
         rec_new_msg();
     }
 
@@ -123,6 +124,27 @@ public:
         uint16_t height;
         convert_string_to_y(string, pixel_y, height); // Gives values to pixel_y and height
         m_lcds[0].draw_horizontal_line({0, pixel_y + height / 8}, height / 2, color);
+    }
+
+    auto piano_tiles() -> void {
+             for (int i = 0; i < 23; ++i) {
+                 draw_note({i, string_e::HIGH_E}, (i % 2 == 0) ? GREEN : BLACK);
+             }
+             for (int i = 0; i < 23; ++i) {
+                 draw_note({i, string_e::A}, (i % 2 == 1) ? GREEN : BLACK);
+             }
+             for (int i = 0; i < 23; ++i) {
+                 draw_note({i, string_e::D}, (i % 2 == 0) ? GREEN : BLACK);
+             }
+             for (int i = 0; i < 23; ++i) {
+                 draw_note({i, string_e::G}, (i % 2 == 1) ? GREEN : BLACK);
+             }
+             for (int i = 0; i < 23; ++i) {
+                 draw_note({i, string_e::B}, (i % 2 == 0) ? GREEN : BLACK);
+             }
+             for (int i = 0; i < 23; ++i) {
+                 draw_note({i, string_e::LOW_E}, (i % 2 == 1) ? GREEN : BLACK);
+             }
     }
 
 
@@ -170,7 +192,9 @@ public:
                 case MessageType::EndSong:
                     m_playing_song = false;
                     rec_new_msg();
-                    break;
+                    send_ack();
+                    piano_tiles();
+                    return;
                 case MessageType::RequestSongID: {
                     send_ack();
                     uint8_t const song_id_buf[2] = {MESSAGE_HEADER, m_song_id};

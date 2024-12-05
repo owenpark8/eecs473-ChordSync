@@ -2,24 +2,31 @@
 
 #include "hardware.hpp"
 
-namespace amp {
-    Pin AMP = Pin(AMP_AMP_GPIO_Port, AMP_AMP_Pin);
-    Pin MOD = Pin(AMP_MOD_GPIO_Port, AMP_MOD_Pin);
-    Pin DLY = Pin(AMP_DLY_GPIO_Port, AMP_DLY_Pin);
-    Pin RVB = Pin(AMP_RVB_GPIO_Port, AMP_RVB_Pin);
-    Pin PWR = Pin(AMP_PWR_GPIO_Port, AMP_PWR_Pin);
+class Amplifier {
+public:
+	Amplifier() = default;
 
-    auto power_on() -> void {
-        MOD.reset();
-        DLY.reset();
-        RVB.reset();
+    Amplifier(Pin amp, Pin mod, Pin dly, Pin rvb, Pin pwr)
+        : m_amp(amp), m_mod(mod), m_dly(dly), m_rvb(rvb), m_pwr(pwr) {}
 
-        PWR.set();
+    void power_on() {
+        m_mod.reset();
+        m_dly.reset();
+        m_rvb.reset();
+
+        m_pwr.set();
         HAL_Delay(2000);
-        PWR.reset();
+        m_pwr.reset();
 
-        AMP.set();
+        m_amp.set();
         HAL_Delay(2000);
-        AMP.reset();
+        m_amp.reset();
     }
-} // namespace amp
+
+private:
+    Pin m_amp;
+    Pin m_mod;
+    Pin m_dly;
+    Pin m_rvb;
+    Pin m_pwr;
+};

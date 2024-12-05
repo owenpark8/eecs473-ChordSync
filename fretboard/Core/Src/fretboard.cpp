@@ -1,5 +1,6 @@
 #include "fretboard.hpp"
 #include "timing.hpp"
+#include "amp.hpp"
 
 #include "main.h"
 
@@ -13,8 +14,18 @@ extern TIM_HandleTypeDef htim6;
 #define SONG_TIMER &htim6
 
 Fretboard fretboard;
+Amplifier amp;
 
 auto init() -> void {
+	Pin AMP(AMP_AMP_GPIO_Port, AMP_AMP_Pin);
+	Pin MOD(AMP_MOD_GPIO_Port, AMP_MOD_Pin);
+	Pin DLY(AMP_DLY_GPIO_Port, AMP_DLY_Pin);
+	Pin RVB(AMP_RVB_GPIO_Port, AMP_RVB_Pin);
+	Pin AMP_PWR(AMP_PWR_GPIO_Port, AMP_PWR_Pin);
+
+	amp = Amplifier{AMP, MOD, DLY, RVB, AMP_PWR};
+	amp.power_on();
+
     Pin CS_A = Pin(CSX_A_GPIO_Port, CSX_A_Pin);
     Pin CS_B = Pin(CSX_B_GPIO_Port, CSX_B_Pin);
     Pin CS_C = Pin(CSX_C_GPIO_Port, CSX_C_Pin);
