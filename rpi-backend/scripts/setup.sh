@@ -23,8 +23,7 @@ source .venv/bin/activate
 pip install -r requirements.txt
 
 # Systemd Service
-
-cd ~/.local/src/eecs473-ChordSync/rpi-backend
+cd ../scripts
 
 SERVICE_FILE="startup.service"
 sudo cp "$SERVICE_FILE" /etc/systemd/system/"$SERVICE_FILE"

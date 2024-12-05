@@ -3,9 +3,9 @@ Description=Startup Service
 
 [Service]
 Type=simple
-ExecStart=~/.local/src/eecs473-ChordSync/rpi-backend/rpi-backend
+ExecStart=~/.local/src/eecs473-ChordSync/rpi-backend/cmake-build/rpi-backend
 User=pi
-WorkingDirectory=~/.local/src/eecs473-ChordSync/rpi-backend
+WorkingDirectory=~/.local/src/eecs473-ChordSync/cmake-build/rpi-backend
 Restart=on-failure
 
 [Install]
