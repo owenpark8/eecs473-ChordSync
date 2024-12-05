@@ -15,6 +15,7 @@ fi
 
 cd "$CMAKE_DIR"
 cmake .. -DCMAKE_BUILD_TYPE=Release
+make
 
 # Python
 cd ../py

@@ -10,7 +10,7 @@ sudo apt install cmake node
 
 ```sh
 git clone https://github.com/owenpark8/eecs473-VSGuitar.git ~/.local/src/eecs473-ChordSync
-cd ~/.local/src/eecs473-ChordSync/rpi-backend
+cd ~/.local/src/eecs473-ChordSync
 git submodule init
 git submodule update
 ```
