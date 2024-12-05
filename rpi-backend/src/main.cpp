@@ -318,18 +318,10 @@ void web_server() {
 
 
 auto main(int argc, char* args[]) -> int {
-<<<<<<< HEAD
-=======
-
-
-    
->>>>>>> 1d603c6 (beat is playing)
     if (!data::init()) {
         return 1;
     }
 
-<<<<<<< HEAD
->>>>>>> 1d603c6 (beat is playing)
     if (!serial::init()) {
         return 1;
     }
