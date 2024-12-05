@@ -446,6 +446,15 @@ auto main(int argc, char* args[]) -> int {
             data::songs::insert_new_song(db, data::songs::scales::c_major_scale);
         }
         if (!data::songs::song_id_exists(db, 2)) {
+            data::songs::insert_new_song(db, data::songs::scales::d_major_scale);
+        }
+        if (!data::songs::song_id_exists(db, 3)) {
+            data::songs::insert_new_song(db, data::songs::scales::g_major_scale);
+        }
+        if (!data::songs::song_id_exists(db, 4)) {
+            data::songs::insert_new_song(db, data::songs::scales::f_major_scale);
+        }
+        if (!data::songs::song_id_exists(db, 5)) {
             data::songs::insert_new_song(db, data::songs::ode_to_joy);
         }
 
