@@ -327,8 +327,6 @@ auto main(int argc, char* args[]) -> int {
         return 1;
     }
 
-<<<<<<< HEAD
->>>>>>> 1d603c6 (beat is playing)
     if (!serial::init()) {
         return 1;
     }
