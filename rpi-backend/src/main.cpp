@@ -38,7 +38,6 @@ void web_server() {
     }
 
     svr.Get("/", [](Request const& req, Response& res) {
-        /*
         try {
             std::lock_guard<std::mutex> lock(mcu::mut);
             mcu::current_song_id = mcu::get_loaded_song_id();
@@ -46,7 +45,6 @@ void web_server() {
             res.set_content("<p>Error: Cannot communicate with MCU! Try refreshing...</p>", web::html_type);
             return;
         }
-        */
         // #ifdef DEBUG
         //         std::string index_html = web::get_source_file("index.html");
         //       if (index_html.empty()) index_html = "<p>Error: index.html not found</p>";
