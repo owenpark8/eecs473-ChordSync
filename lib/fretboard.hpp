@@ -98,8 +98,9 @@ public:
         // In both cases, we want to draw a rectangle on the first LCD, our
         // if condition will confine the set_addr_window to not go beyond the bounds of the screen
         if (lcd_index_1 < NUM_LCDS) {
-            m_lcds[lcd_index_1].draw_rectangle({static_cast<uint16_t>(note_location_rectangle.pixel_loc.x % 480), note_location_rectangle.pixel_loc.y},
-                                               note_location_rectangle.w, note_location_rectangle.h, color);
+            m_lcds[lcd_index_1].draw_rectangle(
+                    {static_cast<uint16_t>(note_location_rectangle.pixel_loc.x % 480), note_location_rectangle.pixel_loc.y},
+                    note_location_rectangle.w, note_location_rectangle.h, color);
         }
         if (lcd_index_1 != lcd_index_2) {
             // Note goes across screens
@@ -122,7 +123,7 @@ public:
         uint16_t height;
         convert_string_to_y(string, pixel_y, height); // Gives values to pixel_y and height
         for (auto& lcd: m_lcds) {
-            lcd.draw_horizontal_line({0, pixel_y}, height, color);
+            lcd.draw_horizontal_line({0, pixel_y + height / 4}, height / 2, color);
         }
     }
 
@@ -303,13 +304,13 @@ private:
             auto const& note_data = m_song[i];
             m_timestamps[m_timestamps_size++] = {{static_cast<fret_t>(note_data.fret), static_cast<string_e>(note_data.string)},
                                                  note_data.timestamp_ms,
-                                                 GREEN};
+                                                 RED};
             m_timestamps[m_timestamps_size++] = {{static_cast<fret_t>(note_data.fret), static_cast<string_e>(note_data.string)},
                                                  note_data.timestamp_ms + WARNING_DELAY,
                                                  YELLOW};
             m_timestamps[m_timestamps_size++] = {{static_cast<fret_t>(note_data.fret), static_cast<string_e>(note_data.string)},
                                                  note_data.timestamp_ms + WARNING_DELAY * 2,
-                                                 RED};
+                                                 GREEN};
             m_timestamps[m_timestamps_size++] = {{static_cast<fret_t>(note_data.fret), static_cast<string_e>(note_data.string)},
                                                  note_data.timestamp_ms + WARNING_DELAY * 2 + note_data.length_ms,
                                                  m_dark_mode ? BLACK : WHITE};
