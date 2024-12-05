@@ -325,12 +325,12 @@ void web_server() {
     ///////////////////////////////////////////
 
     svr.Get("/chord-select-form", [](Request const& req, Response& res) {
-        std::string const options = "<option value=A>A Major Cord</option>"
-                                    "<option value=C>C Major Cord</option>"
-                                    "<option value=D>D Major Cord</option>"
-                                    "<option value=E>E Major Cord</option>"
-                                    "<option value=F>F Major Cord</option>"
-                                    "<option value=G>G Major Cord</option>";
+        std::string const options = "<option value=A>A Major Chord</option>"
+                                    "<option value=C>C Major Chord</option>"
+                                    "<option value=D>D Major Chord</option>"
+                                    "<option value=E>E Major Chord</option>"
+                                    "<option value=F>F Major Chord</option>"
+                                    "<option value=G>G Major Chord</option>";
 
         std::string const chord_select_form = fmt::format(web::get_source_file(web::source_files_e::CHORDSELECTFORM_HTML), options);
 
