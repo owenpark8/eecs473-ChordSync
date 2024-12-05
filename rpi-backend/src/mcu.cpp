@@ -31,6 +31,19 @@ namespace mcu {
         serial::receive(msg.data(), msg.size(), ACK_TIMEOUT);
         return (msg == ACK_MESSAGE);
     }
+    auto send_reset() -> void {
+        send_control_message(CLEAR_MESSAGE);
+        if (!receive_ack()) {
+            throw NoACKException("Could not clear screens");
+        }
+    }
+
+    auto send_clear() -> void {
+        send_control_message(CLEAR_MESSAGE);
+        if (!receive_ack()) {
+            throw NoACKException("Could not clear screens");
+        }
+    }
 
     auto send_song(data::songs::SongInfo const& song) -> void {
         send_control_message(START_SONG_LOADING_MESSAGE);
@@ -94,6 +107,36 @@ namespace mcu {
             throw NoACKException("Could not end loaded song");
         }
     }
+
+    auto hold_major_chord(MessageType chord_message_type) -> void {
+        switch (chord_message_type) {
+            case MessageType::HoldAMajorChord: {
+                send_control_message(HOLD_A_MAJOR_CHORD_MESSAGE);
+            }
+            case MessageType::HoldCMajorChord: {
+                send_control_message(HOLD_C_MAJOR_CHORD_MESSAGE);
+            }
+            case MessageType::HoldDMajorChord: {
+                send_control_message(HOLD_D_MAJOR_CHORD_MESSAGE);
+            }
+            case MessageType::HoldGMajorChord: {
+                send_control_message(HOLD_G_MAJOR_CHORD_MESSAGE);
+            }
+            case MessageType::HoldEMajorChord: {
+                send_control_message(HOLD_E_MAJOR_CHORD_MESSAGE);
+            }
+            case MessageType::HoldFMajorChord: {
+                send_control_message(HOLD_F_MAJOR_CHORD_MESSAGE);
+            }
+            default: {
+                return;
+            }
+        }
+        if (!receive_ack()) {
+            throw NoACKException("Could not hold major chord");
+        }
+    }
+
     std::mutex mut{};
 
     std::mutex song_info_mut{};

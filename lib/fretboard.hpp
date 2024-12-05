@@ -141,6 +141,10 @@ public:
                     send_ack();
                     init();
                     return;
+                case MessageType::Clear:
+                    clear();
+                    rec_new_msg();
+                    break;
                 case MessageType::StartSongLoading:
                     m_song_size = 0;
                     m_uart_state = uart_state::SONG_ID;
@@ -163,10 +167,9 @@ public:
                     break;
                 case MessageType::EndSong:
                     m_playing_song = false;
-                    rec_new_msg();
-                    send_ack();
                     clear();
-                    return;
+                    rec_new_msg();
+                    break;
                 case MessageType::RequestSongID: {
                     send_ack();
                     uint8_t const song_id_buf[2] = {MESSAGE_HEADER, m_song_id};
@@ -185,46 +188,50 @@ public:
                     rec_new_msg();
                     break;
                 case MessageType::HoldAMajorChord:
-                    send_ack();
                     m_lcds[0].clear_screen(m_dark_mode);
                     for (auto const& note_location: A_MAJOR_CHORD) {
                         draw_note(note_location, GREEN);
                     }
+                    rec_new_msg();
                     break;
                 case MessageType::HoldCMajorChord:
-                    send_ack();
                     m_lcds[0].clear_screen(m_dark_mode);
+                    m_lcds[1].clear_screen(m_dark_mode);
                     for (auto const& note_location: C_MAJOR_CHORD) {
                         draw_note(note_location, GREEN);
                     }
+                    rec_new_msg();
                     break;
                 case MessageType::HoldDMajorChord:
-                    send_ack();
                     m_lcds[0].clear_screen(m_dark_mode);
+                    m_lcds[1].clear_screen(m_dark_mode);
                     for (auto const& note_location: D_MAJOR_CHORD) {
                         draw_note(note_location, GREEN);
                     }
+                    rec_new_msg();
                     break;
                 case MessageType::HoldEMajorChord:
-                    send_ack();
                     m_lcds[0].clear_screen(m_dark_mode);
                     for (auto const& note_location: E_MAJOR_CHORD) {
                         draw_note(note_location, GREEN);
                     }
+                    rec_new_msg();
                     break;
                 case MessageType::HoldFMajorChord:
-                    send_ack();
                     m_lcds[0].clear_screen(m_dark_mode);
+                    m_lcds[1].clear_screen(m_dark_mode);
                     for (auto const& note_location: F_MAJOR_CHORD) {
                         draw_note(note_location, GREEN);
                     }
+                    rec_new_msg();
                     break;
                 case MessageType::HoldGMajorChord:
-                    send_ack();
                     m_lcds[0].clear_screen(m_dark_mode);
+                    m_lcds[1].clear_screen(m_dark_mode);
                     for (auto const& note_location: G_MAJOR_CHORD) {
                         draw_note(note_location, GREEN);
                     }
+                    rec_new_msg();
                     break;
                 default:
                     rec_new_msg();

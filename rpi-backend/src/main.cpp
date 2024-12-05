@@ -12,6 +12,7 @@
 
 #include "data.hpp"
 #include "mcu.hpp"
+#include "messaging.hpp"
 #include "playerMode.hpp"
 #include "process_gp4.hpp"
 #include "serial.hpp"
@@ -353,6 +354,7 @@ auto main(int argc, char* args[]) -> int {
         std::cerr << "SQLite exception: " << e.what() << std::endl;
     }
 
+    mcu::hold_major_chord(MessageType::HoldAMajorChord);
 #ifdef DEBUG
     std::cout << "Starting web server thread...\n";
 #endif

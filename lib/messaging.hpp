@@ -17,17 +17,19 @@ enum class MessageType : std::uint8_t {
     // clang-format off
     None             = 0x00, ///< Default
     Reset            = 0x41, ///< Reset the device
+    Clear            = 0x42, ///< Clear the screens
 
-    StartSongLoading = 0x42, ///< Start loading a song with a Song ID
-    EndSongLoading   = 0x43, ///< End loading of the song
-    Note             = 0x44, ///< Send a note with timestamp, fret, and string
-    StartSong        = 0x45, ///< Start playing the loaded song
-    EndSong          = 0x46, ///< End playing the loaded song
-    RequestSongID    = 0x47, ///< Request the song ID
-    LoadedSongID     = 0x48, ///< Send the loaded song ID
+    StartSongLoading = 0x52, ///< Start loading a song with a Song ID
+    EndSongLoading   = 0x53, ///< End loading of the song
+    Note             = 0x54, ///< Send a note with timestamp, fret, and string
+    StartSong        = 0x55, ///< Start playing the loaded song
+    EndSong          = 0x56, ///< End playing the loaded song
+    RequestSongID    = 0x57, ///< Request the song ID
+    LoadedSongID     = 0x58, ///< Send the loaded song ID
 
-    DarkMode         = 0x49, ///< Set Dark Mode
-    LightMode        = 0x50, ///< Set Light Mode (default)
+    DarkMode         = 0x60, ///< Set Dark Mode
+    LightMode        = 0x61, ///< Set Light Mode (default)
+
 
 
 	HoldAMajorChord  = 0x80, ///< Display A Major Chord indefinitely
@@ -47,6 +49,7 @@ constexpr std::uint8_t MESSAGE_HEADER = 0x01;
 
 // clang-format off
 constexpr ControlMessage RESET_MESSAGE              = {MESSAGE_HEADER, static_cast<uint8_t>(MessageType::Reset)};
+constexpr ControlMessage CLEAR_MESSAGE              = {MESSAGE_HEADER, static_cast<uint8_t>(MessageType::Clear)};
 constexpr ControlMessage START_SONG_LOADING_MESSAGE = {MESSAGE_HEADER, static_cast<uint8_t>(MessageType::StartSongLoading)};
 constexpr ControlMessage END_SONG_LOADING_MESSAGE   = {MESSAGE_HEADER, static_cast<uint8_t>(MessageType::EndSongLoading)};
 constexpr ControlMessage NOTE_MESSAGE               = {MESSAGE_HEADER, static_cast<uint8_t>(MessageType::Note)};

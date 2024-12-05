@@ -44,10 +44,14 @@ namespace mcu {
         [[nodiscard]] auto what() const noexcept -> char const* override { return m_message.c_str(); }
     };
 
+    auto send_reset() -> void;
+    auto send_clear() -> void;
     auto send_song(data::songs::SongInfo const& song) -> void;
     [[nodiscard]] auto get_loaded_song_id() -> std::uint8_t;
     auto play_loaded_song() -> void;
     auto end_loaded_song() -> void;
+
+    auto hold_major_chord(MessageType chord_message_type) -> void;
 
     // Backdoor
     auto send_control_message(ControlMessage const& message) -> void;
