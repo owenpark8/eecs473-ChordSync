@@ -7,6 +7,7 @@
 #include <fmt/format.h>
 
 #include "data.hpp"
+#include "messaging.hpp"
 
 namespace mcu {
     using song_id_t = std::uint8_t;
@@ -47,6 +48,9 @@ namespace mcu {
     [[nodiscard]] auto get_loaded_song_id() -> std::uint8_t;
     auto play_loaded_song() -> void;
     auto end_loaded_song() -> void;
+
+    // Backdoor
+    auto send_control_message(ControlMessage const& message) -> void;
 
     extern std::mutex mut;
     extern song_id_t current_song_id;

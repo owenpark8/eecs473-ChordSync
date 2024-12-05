@@ -56,7 +56,12 @@ constexpr ControlMessage REQUEST_SONG_ID_MESSAGE    = {MESSAGE_HEADER, static_ca
 constexpr ControlMessage LOADED_SONG_ID_MESSAGE     = {MESSAGE_HEADER, static_cast<uint8_t>(MessageType::LoadedSongID)};
 constexpr ControlMessage DARK_MODE_MESSAGE          = {MESSAGE_HEADER, static_cast<uint8_t>(MessageType::DarkMode)};
 constexpr ControlMessage LIGHT_MODE_MESSAGE         = {MESSAGE_HEADER, static_cast<uint8_t>(MessageType::LightMode)};
-constexpr ControlMessage ACK_MESSAGE                = {MESSAGE_HEADER, static_cast<uint8_t>(MessageType::ACK)};
+constexpr ControlMessage HOLD_A_MAJOR_CHORD_MESSAGE = {MESSAGE_HEADER, static_cast<uint8_t>(MessageType::HoldAMajorChord)};
+constexpr ControlMessage HOLD_C_MAJOR_CHORD_MESSAGE = {MESSAGE_HEADER, static_cast<uint8_t>(MessageType::HoldCMajorChord)};
+constexpr ControlMessage HOLD_D_MAJOR_CHORD_MESSAGE = {MESSAGE_HEADER, static_cast<uint8_t>(MessageType::HoldDMajorChord)};
+constexpr ControlMessage HOLD_E_MAJOR_CHORD_MESSAGE = {MESSAGE_HEADER, static_cast<uint8_t>(MessageType::HoldEMajorChord)};
+constexpr ControlMessage HOLD_F_MAJOR_CHORD_MESSAGE = {MESSAGE_HEADER, static_cast<uint8_t>(MessageType::HoldFMajorChord)};
+constexpr ControlMessage HOLD_G_MAJOR_CHORD_MESSAGE = {MESSAGE_HEADER, static_cast<uint8_t>(MessageType::HoldGMajorChord)};
 // clang-format on
 
 struct StartSongLoadingDataMessage {
