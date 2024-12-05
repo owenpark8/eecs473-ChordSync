@@ -36,13 +36,19 @@ void web_server() {
     }
 
     svr.Get("/", [](Request const& req, Response& res) {
-#ifdef DEBUG
-        std::string index_html = web::get_source_file("index.html");
-        if (index_html.empty()) index_html = "<p>Error: index.html not found</p>";
-#else
+        try {
+            std::lock_guard<std::mutex> lock(mcu::mut);
+            mcu::current_song_id = mcu::get_loaded_song_id();
+        } catch (mcu::NoACKException const& e) {
+            res.set_content("<p>Error: Cannot communicate with MCU! Try refreshing...</p>", web::html_type);
+        }
+        // #ifdef DEBUG
+        //         std::string index_html = web::get_source_file("index.html");
+        //       if (index_html.empty()) index_html = "<p>Error: index.html not found</p>";
+        // #else
         char const* index_html = web::get_source_file(web::source_files_e::INDEX_HTML);
         if (index_html == nullptr) index_html = "<p>Error: index.html not found</p>";
-#endif
+        // #endif
         res.set_content(index_html, web::html_type);
     });
 
@@ -349,21 +355,6 @@ auto main(int argc, char* args[]) -> int {
 
     } catch (std::exception& e) {
         std::cerr << "SQLite exception: " << e.what() << std::endl;
-    }
-
-#ifdef DEBUG
-    std::cout << "Getting ID of song loaded on MCU...\n";
-#endif
-    while (true) {
-        try {
-            mcu::current_song_id = mcu::get_loaded_song_id();
-            break;
-        } catch (mcu::NoACKException const& e) {
-#ifdef DEBUG
-            std::cerr << e.what() << "\n";
-#endif
-            std::cerr << "Repolling...\n";
-        }
     }
 
 #ifdef DEBUG
