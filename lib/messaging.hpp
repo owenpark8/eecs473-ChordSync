@@ -62,6 +62,7 @@ constexpr ControlMessage HOLD_D_MAJOR_CHORD_MESSAGE = {MESSAGE_HEADER, static_ca
 constexpr ControlMessage HOLD_E_MAJOR_CHORD_MESSAGE = {MESSAGE_HEADER, static_cast<uint8_t>(MessageType::HoldEMajorChord)};
 constexpr ControlMessage HOLD_F_MAJOR_CHORD_MESSAGE = {MESSAGE_HEADER, static_cast<uint8_t>(MessageType::HoldFMajorChord)};
 constexpr ControlMessage HOLD_G_MAJOR_CHORD_MESSAGE = {MESSAGE_HEADER, static_cast<uint8_t>(MessageType::HoldGMajorChord)};
+constexpr ControlMessage ACK_MESSAGE                = {MESSAGE_HEADER, static_cast<uint8_t>(MessageType::ACK)};
 // clang-format on
 
 struct StartSongLoadingDataMessage {
