@@ -119,8 +119,8 @@ namespace data {
             song.id = query.getColumn(0).getUInt();
             song.title = query.getColumn(1).getString();
             song.artist = query.getColumn(2).getString();
-            song.bpm = query.getColumn(3).getUInt();
-            song.length = std::chrono::seconds(query.getColumn(4).getUInt());
+            song.length = std::chrono::seconds(query.getColumn(3).getUInt());
+            song.bpm = query.getColumn(4).getUInt();
 
             void const* blob = query.getColumn(5).getBlob();
             int blob_size = query.getColumn(5).getBytes();
@@ -143,7 +143,7 @@ namespace data {
 
         auto insert_new_song(SQLite::Database& db, SongInfo const& song) -> void {
             SQLite::Statement query(db,
-                                    "INSERT INTO " + data::songs::song_table_name + " (title, artist, bpm, length, notes) VALUES (?, ?, ?, ?, ?)");
+                                    "INSERT INTO " + data::songs::song_table_name + " (title, artist, length, bpm, notes) VALUES (?, ?, ?, ?, ?)");
             query.bind(1, song.title);
             query.bind(2, song.artist);
             query.bind(3, song.length.count());
@@ -157,7 +157,7 @@ namespace data {
         auto get_all_songs(SQLite::Database& db) -> std::vector<SongInfo> {
             std::vector<SongInfo> songs;
 
-            SQLite::Statement query(db, "SELECT id, title, artist, bpm, length, notes FROM " + data::songs::song_table_name);
+            SQLite::Statement query(db, "SELECT id, title, artist, length, bpm, notes FROM " + data::songs::song_table_name);
 
             while (query.executeStep()) {
                 songs.push_back(populate_song_info(query));
@@ -183,7 +183,7 @@ namespace data {
 #ifdef DEBUG
             std::cout << "Querying database for song id " << static_cast<int>(song_id) << "\n";
 #endif
-            SQLite::Statement query(db, "SELECT id, title, artist, bpm, length, notes FROM " + data::songs::song_table_name + " WHERE id = ?");
+            SQLite::Statement query(db, "SELECT id, title, artist, length, bpm, notes FROM " + data::songs::song_table_name + " WHERE id = ?");
             query.bind(1, song_id);
 
             if (query.executeStep()) {

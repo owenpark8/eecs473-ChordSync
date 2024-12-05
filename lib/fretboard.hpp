@@ -122,9 +122,7 @@ public:
         uint16_t pixel_y;
         uint16_t height;
         convert_string_to_y(string, pixel_y, height); // Gives values to pixel_y and height
-        for (auto& lcd: m_lcds) {
-            lcd.draw_horizontal_line({0, pixel_y + height / 4}, height / 2, color);
-        }
+        m_lcds[0].draw_horizontal_line({0, pixel_y + height / 8}, height / 2, color);
     }
 
 
