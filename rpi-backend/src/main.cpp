@@ -52,10 +52,6 @@ void web_server() {
         // #endif
         res.set_content(index_html, web::html_type);
     });
-
-#ifdef DEBUG
-    svr.set_mount_point("/", web::web_source_directory);
-#else
     svr.Get("/htmx.js", [](httplib::Request const& req, httplib::Response& res) {
         char const* htmx_js = web::get_source_file(web::source_files_e::HTMX_JS);
 
@@ -79,7 +75,6 @@ void web_server() {
         char const* style_css = web::get_source_file(web::source_files_e::COMPILED_CSS);
         res.set_content(style_css, web::css_type);
     });
-#endif
 
     svr.Get("/song-info", [&](Request const& /*req*/, Response& res) {
         res.set_chunked_content_provider("text/event-stream", [&](size_t /*offset*/, httplib::DataSink& sink) {

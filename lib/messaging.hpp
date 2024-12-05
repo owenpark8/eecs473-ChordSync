@@ -7,7 +7,7 @@
 constexpr std::size_t MAX_DATA_SIZE = 6;
 
 // Maximum number of notes in a song
-constexpr std::size_t MAX_NOTES_IN_SONG = 200;
+constexpr std::size_t MAX_NOTES_IN_SONG = 50;
 
 /**
  * @enum MessageType
@@ -17,6 +17,7 @@ enum class MessageType : std::uint8_t {
     // clang-format off
     None             = 0x00, ///< Default
     Reset            = 0x41, ///< Reset the device
+
     StartSongLoading = 0x42, ///< Start loading a song with a Song ID
     EndSongLoading   = 0x43, ///< End loading of the song
     Note             = 0x44, ///< Send a note with timestamp, fret, and string
@@ -24,8 +25,18 @@ enum class MessageType : std::uint8_t {
     EndSong          = 0x46, ///< End playing the loaded song
     RequestSongID    = 0x47, ///< Request the song ID
     LoadedSongID     = 0x48, ///< Send the loaded song ID
+
     DarkMode         = 0x49, ///< Set Dark Mode
     LightMode        = 0x50, ///< Set Light Mode (default)
+
+
+	HoldAMajorChord  = 0x80, ///< Display A Major Chord indefinitely
+	HoldCMajorChord  = 0x81, ///< Display C Major Chord indefinitely
+	HoldDMajorChord  = 0x82, ///< Display D Major Chord indefinitely
+	HoldEMajorChord  = 0x83, ///< Display E Major Chord indefinitely
+	HoldFMajorChord  = 0x84, ///< Display F Major Chord indefinitely
+	HoldGMajorChord  = 0x85, ///< Display G Major Chord indefinitely
+
     ACK              = 0x06  ///< Acknowledgment message
     // clang-format on
 };

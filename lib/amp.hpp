@@ -1,3 +1,5 @@
+#pragma once
+
 #include "hardware.hpp"
 
 namespace amp {

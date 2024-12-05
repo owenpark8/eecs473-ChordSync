@@ -3,6 +3,7 @@
 #include <array>
 #include <cstdint>
 
+#include "chords.hpp"
 #include "guitar.hpp"
 #include "lcd.hpp"
 #include "messaging.hpp"
@@ -168,13 +169,8 @@ public:
                     return;
                 case MessageType::RequestSongID: {
                     send_ack();
-                    HAL_UART_Transmit(m_huart, LOADED_SONG_ID_MESSAGE.data(), sizeof(LOADED_SONG_ID_MESSAGE), 100);
-                    // Receive ACK
-                    HAL_UART_Receive(m_huart, m_uart_buf, sizeof(ACK_MESSAGE), HAL_MAX_DELAY);
                     uint8_t const song_id_buf[2] = {MESSAGE_HEADER, m_song_id};
                     HAL_UART_Transmit(m_huart, song_id_buf, sizeof(song_id_buf), 100);
-                    // Receive another ACK
-                    HAL_UART_Receive(m_huart, m_uart_buf, sizeof(ACK_MESSAGE), HAL_MAX_DELAY);
                     rec_new_msg();
                     return;
                 }
@@ -187,6 +183,48 @@ public:
                     m_dark_mode = false;
                     process_color_mode();
                     rec_new_msg();
+                    break;
+                case MessageType::HoldAMajorChord:
+                    send_ack();
+                    m_lcds[0].clear_screen(m_dark_mode);
+                    for (auto const& note_location: A_MAJOR_CHORD) {
+                        draw_note(note_location, GREEN);
+                    }
+                    break;
+                case MessageType::HoldCMajorChord:
+                    send_ack();
+                    m_lcds[0].clear_screen(m_dark_mode);
+                    for (auto const& note_location: C_MAJOR_CHORD) {
+                        draw_note(note_location, GREEN);
+                    }
+                    break;
+                case MessageType::HoldDMajorChord:
+                    send_ack();
+                    m_lcds[0].clear_screen(m_dark_mode);
+                    for (auto const& note_location: D_MAJOR_CHORD) {
+                        draw_note(note_location, GREEN);
+                    }
+                    break;
+                case MessageType::HoldEMajorChord:
+                    send_ack();
+                    m_lcds[0].clear_screen(m_dark_mode);
+                    for (auto const& note_location: E_MAJOR_CHORD) {
+                        draw_note(note_location, GREEN);
+                    }
+                    break;
+                case MessageType::HoldFMajorChord:
+                    send_ack();
+                    m_lcds[0].clear_screen(m_dark_mode);
+                    for (auto const& note_location: F_MAJOR_CHORD) {
+                        draw_note(note_location, GREEN);
+                    }
+                    break;
+                case MessageType::HoldGMajorChord:
+                    send_ack();
+                    m_lcds[0].clear_screen(m_dark_mode);
+                    for (auto const& note_location: G_MAJOR_CHORD) {
+                        draw_note(note_location, GREEN);
+                    }
                     break;
                 default:
                     rec_new_msg();
@@ -236,7 +274,7 @@ private:
      * @param note_location note location to be converted
      * @return pixel coordinate of note
      */
-    auto convert_note_to_pixels(NoteLocation note_location) -> NoteLocationRectangle {
+    static auto convert_note_to_pixels(NoteLocation note_location) -> NoteLocationRectangle {
         // TODO: replace these numbers with actual pixels after measuring with guitar
         static std::array<uint16_t, NUM_FRETS> const fret_pixel_array = {// keeps track of fret to pixel_location.x
                                                                          0,    158,  378,  510,  705,  900,  995,  1166, 1315, 1440, 1520, 1650,
@@ -266,7 +304,7 @@ private:
      * @param pixel_y changes in this function, starting pixel location y
      * @param height changes in this function, height to next pixel
      */
-    auto convert_string_to_y(string_e y, uint16_t& pixel_y, uint16_t& height) -> void {
+    static auto convert_string_to_y(string_e y, uint16_t& pixel_y, uint16_t& height) -> void {
         switch (y) {
             // TODO: Check if these conversions are correct with guitar
             case string_e::HIGH_E:

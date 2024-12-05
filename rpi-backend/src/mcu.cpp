@@ -70,15 +70,6 @@ namespace mcu {
         if (!receive_ack()) {
             throw NoACKException("Could not request song ID");
         }
-        ControlMessage control_msg{};
-        if (!serial::receive(control_msg.data(), control_msg.size())) { // receive Loaded song control message
-            throw NoMsgException("Could not request Loaded song control message");
-        }
-        if (control_msg != LOADED_SONG_ID_MESSAGE) {
-            throw UnexpectedMsgException("Received incorrect message");
-        }
-        send_control_message(ACK_MESSAGE); // send ack
-
         std::array<std::uint8_t, 2> id_msg{};
         if (!serial::receive(id_msg.data(), id_msg.size())) {
             throw NoACKException("Could not request song ID");
@@ -86,7 +77,6 @@ namespace mcu {
         if (id_msg[0] != 0x01) {
             throw NoACKException("Could not request song ID");
         }
-        send_control_message(ACK_MESSAGE);
 
         return id_msg[1];
     }
