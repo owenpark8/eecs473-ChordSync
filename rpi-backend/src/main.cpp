@@ -15,7 +15,6 @@
 #include "messaging.hpp"
 #include "playerMode.hpp"
 #include "process_gp4.hpp"
-#include "serial.hpp"
 #include "web.hpp"
 
 
@@ -25,6 +24,7 @@ static std::condition_variable playing_cv;
 static std::string const play_button_html_data = fmt::format(web::get_source_file(web::source_files_e::BUTTON_HTML), "/play-song", "Play song!");
 static std::string const stop_button_html_data = fmt::format(web::get_source_file(web::source_files_e::BUTTON_HTML), "/stop-song", "Stop song!");
 
+WaitUntilThread wait_playing_song_thread{};
 
 void web_server() {
     using httplib::Request, httplib::Response;
@@ -37,6 +37,7 @@ void web_server() {
     }
 
     svr.Get("/", [](Request const& req, Response& res) {
+        /*
         try {
             std::lock_guard<std::mutex> lock(mcu::mut);
             mcu::current_song_id = mcu::get_loaded_song_id();
@@ -44,6 +45,7 @@ void web_server() {
             res.set_content("<p>Error: Cannot communicate with MCU! Try refreshing...</p>", web::html_type);
             return;
         }
+        */
         // #ifdef DEBUG
         //         std::string index_html = web::get_source_file("index.html");
         //       if (index_html.empty()) index_html = "<p>Error: index.html not found</p>";
@@ -138,8 +140,8 @@ void web_server() {
     });
 
     svr.Get("/play-stop-button", [&](Request const& /*req*/, Response& res) {
-        static std::string const play_button_stream_data = "data: " + play_button_html_data + "\n\n";
-        static std::string const stop_button_stream_data = "data: " + stop_button_html_data + "\n\n";
+        std::string const play_button_stream_data = "data: " + play_button_html_data + "\n\n";
+        std::string const stop_button_stream_data = "data: " + stop_button_html_data + "\n\n";
 
         res.set_chunked_content_provider("text/event-stream", [&](size_t /*offset*/, httplib::DataSink& sink) {
             bool last_playing;
@@ -190,17 +192,31 @@ void web_server() {
 
 
     svr.Post("/play-song", [&](Request const& req, Response& res) {
-        std::unique_lock<std::mutex> mcu_lock(mcu::mut);
-        if (mcu::current_song_id == 0) {
+        auto song_id = 0;
+        {
+            std::unique_lock<std::mutex> mcu_lock(mcu::mut);
+            song_id = mcu::current_song_id;
+        }
+        if (song_id == 0) {
             res.status = httplib::StatusCode::Conflict_409;
             res.set_header("Error", "No song loaded on guitar");
             return;
         }
 
+        SQLite::Database db(data::db_filename, SQLite::OPEN_READWRITE | SQLite::OPEN_CREATE);
+        data::songs::SongInfo song = data::songs::get_song_by_id(db, song_id);
+
         mcu::play_loaded_song();
 
+        std::unique_lock<std::mutex> mcu_lock(mcu::mut);
         mcu::playing = true;
         playing_cv.notify_all();
+
+        wait_playing_song_thread.start_thread(song.length + std::chrono::seconds(15), []() {
+            std::unique_lock<std::mutex> mcu_lock(mcu::mut);
+            mcu::playing = false;
+            playing_cv.notify_all();
+        });
 
         res.set_content(stop_button_html_data, web::html_type);
     });
@@ -217,6 +233,8 @@ void web_server() {
 
         mcu::playing = false;
         playing_cv.notify_all();
+
+        wait_playing_song_thread.stop_thread();
 
         res.set_content(play_button_html_data, web::html_type);
     });
@@ -302,6 +320,92 @@ void web_server() {
         playing_cv.notify_all();
     });
 
+    ///////////////////////////////////////////
+    ///////////// CHORDS //////////////////////
+    ///////////////////////////////////////////
+
+    svr.Get("/chord-select-form", [](Request const& req, Response& res) {
+        std::string const options = "<option value=A>A Major Cord</option>"
+                                    "<option value=C>C Major Cord</option>"
+                                    "<option value=D>D Major Cord</option>"
+                                    "<option value=E>E Major Cord</option>"
+                                    "<option value=F>F Major Cord</option>"
+                                    "<option value=G>G Major Cord</option>";
+
+        std::string const chord_select_form = fmt::format(web::get_source_file(web::source_files_e::CHORDSELECTFORM_HTML), options);
+
+        res.set_content(chord_select_form, web::html_type);
+    });
+
+
+    svr.Post("/submit-chord-select-form", [&](Request const& req, Response& res) {
+        using namespace ctre::literals;
+        constexpr auto pattern = ctll::fixed_string{R"(^chord=([ACDEFG])$)"};
+
+        auto match = ctre::match<pattern>(req.body);
+        if (!match) {
+            res.status = httplib::StatusCode::BadRequest_400;
+            return;
+        }
+
+        char chord = match.get<1>().to_view().front();
+
+
+#ifdef DEBUG
+        std::cout << "Chord select form submitted with chord: " << chord << "\n";
+#endif
+
+        playerMode practice_feedback;
+
+        {
+            std::unique_lock<std::mutex> mcu_lock(mcu::mut);
+
+            if (mcu::playing) {
+                mcu::end_loaded_song();
+                mcu::playing = false;
+                playing_cv.notify_all();
+            }
+
+            switch (chord) {
+                case 'A':
+                    mcu::hold_major_chord(MessageType::HoldAMajorChord);
+                    practice_feedback = playerMode(data::songs::chords::a_major_chord);
+                    break;
+                case 'C':
+                    mcu::hold_major_chord(MessageType::HoldCMajorChord);
+                    practice_feedback = playerMode(data::songs::chords::c_major_chord);
+                    break;
+                case 'D':
+                    mcu::hold_major_chord(MessageType::HoldDMajorChord);
+                    practice_feedback = playerMode(data::songs::chords::d_major_chord);
+                    break;
+                case 'E':
+                    mcu::hold_major_chord(MessageType::HoldEMajorChord);
+                    practice_feedback = playerMode(data::songs::chords::e_major_chord);
+                    break;
+                case 'F':
+                    mcu::hold_major_chord(MessageType::HoldFMajorChord);
+                    practice_feedback = playerMode(data::songs::chords::f_major_chord);
+                    break;
+                case 'G':
+                    mcu::hold_major_chord(MessageType::HoldGMajorChord);
+                    practice_feedback = playerMode(data::songs::chords::g_major_chord);
+                    break;
+                default:
+                    break;
+            }
+            mcu::send_clear();
+
+            bool const correct = practice_feedback.analyzeChord();
+            if (correct) {
+                res.set_content("<p>Correct! Good job!</p>", web::html_type);
+            } else {
+                res.set_content("<p>Not quite! Try again!</p>", web::html_type);
+            }
+        }
+    });
+
+
     svr.set_exception_handler([](httplib::Request const& req, httplib::Response& res, std::exception_ptr const& ep) {
         std::string error;
         try {
@@ -330,9 +434,11 @@ auto main(int argc, char* args[]) -> int {
         return 1;
     }
 
+    /*
     if (!serial::init()) {
         return 1;
     }
+    */
 
     try {
         SQLite::Database db(data::db_filename, SQLite::OPEN_READWRITE | SQLite::OPEN_CREATE);
@@ -354,7 +460,6 @@ auto main(int argc, char* args[]) -> int {
         std::cerr << "SQLite exception: " << e.what() << std::endl;
     }
 
-    mcu::hold_major_chord(MessageType::HoldAMajorChord);
 #ifdef DEBUG
     std::cout << "Starting web server thread...\n";
 #endif

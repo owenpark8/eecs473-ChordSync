@@ -51,7 +51,7 @@ class Fretboard {
     uart_state m_uart_state;
     uint8_t m_song_id;
     bool m_playing_song; // true iff we are currently playing a song on the fretboard
-    bool m_dark_mode = false;
+    bool m_dark_mode = true;
 
 
 public:
@@ -80,7 +80,6 @@ public:
         }
         clear();
         m_playing_song = false;
-        m_dark_mode = false;
         m_song_id = 0; // song id 0 means no song currently loaded
         // Initialize UART Protocol
         rec_new_msg();
@@ -142,9 +141,10 @@ public:
                     init();
                     return;
                 case MessageType::Clear:
-                    clear();
                     rec_new_msg();
-                    break;
+                    send_ack();
+                    clear();
+                    return;
                 case MessageType::StartSongLoading:
                     m_song_size = 0;
                     m_uart_state = uart_state::SONG_ID;
@@ -164,10 +164,11 @@ public:
                     m_song_count_ms = 0;
                     m_timestamp_idx = 0;
                     rec_new_msg();
-                    break;
+                    send_ack();
+                    clear();
+                    return;
                 case MessageType::EndSong:
                     m_playing_song = false;
-                    clear();
                     rec_new_msg();
                     break;
                 case MessageType::RequestSongID: {
@@ -188,51 +189,72 @@ public:
                     rec_new_msg();
                     break;
                 case MessageType::HoldAMajorChord:
-                    m_lcds[0].clear_screen(m_dark_mode);
+                    rec_new_msg();
+                	send_ack();
+                	clear();
                     for (auto const& note_location: A_MAJOR_CHORD) {
-                        draw_note(note_location, GREEN);
-                    }
-                    rec_new_msg();
-                    break;
+                    	if(note_location.fret == 0) {
+                    		draw_string(note_location.string, GREEN);
+                    	} else {
+                            draw_note(note_location, GREEN);
+                    	}                    }
+                    return;
                 case MessageType::HoldCMajorChord:
-                    m_lcds[0].clear_screen(m_dark_mode);
-                    m_lcds[1].clear_screen(m_dark_mode);
+                    rec_new_msg();
+                	send_ack();
+                	clear();
                     for (auto const& note_location: C_MAJOR_CHORD) {
-                        draw_note(note_location, GREEN);
+                    	if(note_location.fret == 0) {
+                    		draw_string(note_location.string, GREEN);
+                    	} else {
+                            draw_note(note_location, GREEN);
+                    	}
                     }
-                    rec_new_msg();
-                    break;
+                    return;
                 case MessageType::HoldDMajorChord:
-                    m_lcds[0].clear_screen(m_dark_mode);
-                    m_lcds[1].clear_screen(m_dark_mode);
+                    rec_new_msg();
+                	send_ack();
+                	clear();
                     for (auto const& note_location: D_MAJOR_CHORD) {
-                        draw_note(note_location, GREEN);
-                    }
-                    rec_new_msg();
-                    break;
+                    	if(note_location.fret == 0) {
+                    		draw_string(note_location.string, GREEN);
+                    	} else {
+                            draw_note(note_location, GREEN);
+                    	}                    }
+                    return;
                 case MessageType::HoldEMajorChord:
-                    m_lcds[0].clear_screen(m_dark_mode);
+                    rec_new_msg();
+                	send_ack();
+                	clear();
                     for (auto const& note_location: E_MAJOR_CHORD) {
-                        draw_note(note_location, GREEN);
-                    }
-                    rec_new_msg();
-                    break;
+                    	if(note_location.fret == 0) {
+                    		draw_string(note_location.string, GREEN);
+                    	} else {
+                            draw_note(note_location, GREEN);
+                    	}                    }
+                    return;
                 case MessageType::HoldFMajorChord:
-                    m_lcds[0].clear_screen(m_dark_mode);
-                    m_lcds[1].clear_screen(m_dark_mode);
+                    rec_new_msg();
+                	send_ack();
+                	clear();
                     for (auto const& note_location: F_MAJOR_CHORD) {
-                        draw_note(note_location, GREEN);
-                    }
-                    rec_new_msg();
-                    break;
+                    	if(note_location.fret == 0) {
+                    		draw_string(note_location.string, GREEN);
+                    	} else {
+                            draw_note(note_location, GREEN);
+                    	}                    }
+                    return;
                 case MessageType::HoldGMajorChord:
-                    m_lcds[0].clear_screen(m_dark_mode);
-                    m_lcds[1].clear_screen(m_dark_mode);
-                    for (auto const& note_location: G_MAJOR_CHORD) {
-                        draw_note(note_location, GREEN);
-                    }
                     rec_new_msg();
-                    break;
+                	send_ack();
+                	clear();
+                    for (auto const& note_location: G_MAJOR_CHORD) {
+                    	if(note_location.fret == 0) {
+                    		draw_string(note_location.string, GREEN);
+                    	} else {
+                            draw_note(note_location, GREEN);
+                    	}                    }
+                    return;
                 default:
                     rec_new_msg();
                     return;
@@ -318,19 +340,19 @@ private:
                 pixel_y = 0;
                 height = 52;
                 break;
-            case string_e::A:
+            case string_e::B:
                 pixel_y = 53;
                 height = 53;
                 break;
-            case string_e::D:
+            case string_e::G:
                 pixel_y = 107;
                 height = 53;
                 break;
-            case string_e::G:
+            case string_e::D:
                 pixel_y = 160;
                 height = 52;
                 break;
-            case string_e::B:
+            case string_e::A:
                 pixel_y = 213;
                 height = 53;
                 break;

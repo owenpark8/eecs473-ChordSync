@@ -112,21 +112,27 @@ namespace mcu {
         switch (chord_message_type) {
             case MessageType::HoldAMajorChord: {
                 send_control_message(HOLD_A_MAJOR_CHORD_MESSAGE);
+                break;
             }
             case MessageType::HoldCMajorChord: {
                 send_control_message(HOLD_C_MAJOR_CHORD_MESSAGE);
+                break;
             }
             case MessageType::HoldDMajorChord: {
                 send_control_message(HOLD_D_MAJOR_CHORD_MESSAGE);
+                break;
             }
             case MessageType::HoldGMajorChord: {
                 send_control_message(HOLD_G_MAJOR_CHORD_MESSAGE);
+                break;
             }
             case MessageType::HoldEMajorChord: {
                 send_control_message(HOLD_E_MAJOR_CHORD_MESSAGE);
+                break;
             }
             case MessageType::HoldFMajorChord: {
                 send_control_message(HOLD_F_MAJOR_CHORD_MESSAGE);
+                break;
             }
             default: {
                 return;

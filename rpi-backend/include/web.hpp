@@ -44,3 +44,54 @@ namespace web {
 #undef MAKE_SOURCE_FILES_CASES
     }
 } // namespace web
+
+
+class WaitUntilThread {
+public:
+    WaitUntilThread() : m_stop_flag(false), m_worker_thread() {}
+
+    void start_thread(std::chrono::seconds duration, std::function<void()> const& final_job) {
+        m_stop_flag = false;
+        m_final_job = final_job;
+        m_worker_thread = std::thread(&WaitUntilThread::worker_function, this, duration);
+    }
+
+    void stop_thread() {
+        {
+            std::lock_guard<std::mutex> lock(m_mutex);
+            m_stop_flag = true;
+        }
+        m_cv.notify_one();
+        if (m_worker_thread.joinable()) {
+            m_worker_thread.join();
+        }
+    }
+
+    ~WaitUntilThread() {
+        if (m_worker_thread.joinable()) {
+            stop_thread();
+        }
+    }
+
+private:
+    std::atomic<bool> m_stop_flag;
+    std::thread m_worker_thread;
+    std::mutex m_mutex;
+    std::condition_variable m_cv;
+    std::optional<std::function<void()>> m_final_job;
+
+    void worker_function(std::chrono::seconds duration) {
+        std::unique_lock<std::mutex> lock(m_mutex);
+
+        auto deadline = std::chrono::steady_clock::now() + duration;
+        while (!m_stop_flag && std::chrono::steady_clock::now() < deadline) {
+            m_cv.wait_until(lock, deadline, [this, deadline] { return m_stop_flag || std::chrono::steady_clock::now() >= deadline; });
+        }
+
+        if (!m_stop_flag && m_final_job.has_value()) {
+            m_final_job.value()();
+        }
+        m_stop_flag = true;
+    }
+};
+

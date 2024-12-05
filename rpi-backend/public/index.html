@@ -27,13 +27,25 @@
         <div class="mt-6 mx-auto flex flex-col text-center items-center">
             <h1 class="text-3xl font-bold mb-8">ChordSync</h1>
             <div>
-                <h2 class="text-xl font-semibold">Guitar Information</h2>
-                <div>
-                    <h3 class="font-medium">Current song:</p>
+                <h2 class="text-2xl font-semibold">Song Mode</h2>
+                <div class="mt-2">
+                    <h3 class="font-medium text-lg">Current song:</h3>
                     <div hx-ext="sse" sse-connect="/song-info" sse-swap="message"></div>
                 </div>
 
                 <div id="song-form-container" hx-get="/song-select-form" hx-trigger="load" class="mt-4"></div>
+            </div>
+
+            <div class="mt-12">
+                <h2 class="text-2xl font-semibold">Practice Mode</h2>
+                <div class="mt-2">
+                    <h3 class="font-medium text-lg">Feedback:</h3>
+                    <div id="practice-feedback">
+                        No feedback yet!
+                    </div>
+                </div>
+
+                <div id="chord-form-container" hx-get="/chord-select-form" hx-trigger="load" class="mt-2"></div>
             </div>
         </div>
     </div>
