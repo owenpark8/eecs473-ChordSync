@@ -49,8 +49,17 @@ void web_server() {
 #ifdef DEBUG
     svr.set_mount_point("/", web::web_source_directory);
 #else
-    svr.Get("/htmx.min.js", [](httplib::Request const& req, httplib::Response& res) {
-        char const* htmx_js = web::get_source_file(web::source_files_e::HTMX_MIN_JS);
+    svr.Get("/htmx.js", [](httplib::Request const& req, httplib::Response& res) {
+        char const* htmx_js = web::get_source_file(web::source_files_e::HTMX_JS);
+
+        if (htmx_js == nullptr) {
+            res.status = httplib::StatusCode::InternalServerError_500;
+        } else {
+            res.set_content(htmx_js, web::js_type);
+        }
+    });
+    svr.Get("/htmx.sse.js", [](httplib::Request const& req, httplib::Response& res) {
+        char const* htmx_js = web::get_source_file(web::source_files_e::HTMX_SSE_JS);
 
         if (htmx_js == nullptr) {
             res.status = httplib::StatusCode::InternalServerError_500;
@@ -60,7 +69,7 @@ void web_server() {
     });
 
     svr.Get("/compiled.css", [](httplib::Request const& req, httplib::Response& res) {
-        char const* style_css = web::get_source_file(web::source_files_e::STYLE_CSS);
+        char const* style_css = web::get_source_file(web::source_files_e::COMPILED_CSS);
         res.set_content(style_css, web::css_type);
     });
 #endif
@@ -349,7 +358,6 @@ auto main(int argc, char* args[]) -> int {
         } catch (mcu::NoACKException const& e) {
 #ifdef DEBUG
             std::cerr << e.what() << "\n";
-            break;
 #endif
             std::cerr << "Repolling...\n";
         }
