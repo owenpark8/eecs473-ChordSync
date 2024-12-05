@@ -308,11 +308,8 @@ void web_server() {
         res.set_header("Error", error);
         res.status = httplib::StatusCode::InternalServerError_500;
     });
-#ifdef DEBUG
+
     svr.listen("0.0.0.0", 8080);
-#else
-    svr.listen("0.0.0.0", 80);
-#endif
 }
 
 
@@ -355,16 +352,6 @@ auto main(int argc, char* args[]) -> int {
             break;
 #endif
             std::cerr << "Repolling...\n";
-        }
-    }
-
-    if (mcu::current_song_id == 0) {
-        try {
-            mcu::send_song(data::songs::ode_to_joy);
-        } catch (mcu::NoACKException const& e) {
-#ifdef DEBUG
-            std::cerr << e.what() << "\n";
-#endif
         }
     }
 
