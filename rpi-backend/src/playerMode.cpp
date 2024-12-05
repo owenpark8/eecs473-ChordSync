@@ -120,6 +120,7 @@ auto playerMode::m_organizeRef() -> void{
     }
 }
 
+
 //add in cleanout function
 playerMode::playerMode(data::songs::SongInfo& get_ref_song)
     : m_rec_song{get_ref_song.id, "rec", "rec", get_ref_song.length, get_ref_song.bpm} {
@@ -128,15 +129,30 @@ playerMode::playerMode(data::songs::SongInfo& get_ref_song)
     auto numbers = m_recordtoMIDI(get_ref_song.id, static_cast<uint16_t>(get_ref_song.length.count()), get_ref_song.bpm);
     this->recording_numbers = numbers;
     //Process each note in the RECORDING and add it our song vector
-    for (auto& number: numbers) {
+    bool startToneSeen = false;
+    uint16_t offset = 4000;
+    for (auto& number : numbers) {
+       
+        if (!startToneSeen && number[0] == 28 && number[2] - number[1] > 300) {
+            startToneSeen = true;
+            offset += number[1];
+        }
+
+        else if (startToneSeen) {
         data::songs::Note entry;
         entry.midi_note = static_cast<uint8_t>(number[0]);
-        entry.start_timestamp_ms = static_cast<uint32_t>(number[1]);
+        entry.start_timestamp_ms = static_cast<uint32_t>(number[1]) - offset;
         entry.length_ms = static_cast<uint16_t>(number[2] - entry.start_timestamp_ms);
         (this->m_rec_song.notes).push_back(entry);
+        }
     }
-    //need to figure out filtering. 
 
+    
+    
+
+
+
+    
     this->m_ref_song = get_ref_song;
 
     this->m_organizeRef();
@@ -146,12 +162,12 @@ auto playerMode::get_bpm() const -> uint8_t { return this->m_rec_song.bpm; }
 
 
 auto playerMode::m_compareByStartTime(const m_noteEntry& entry, std::uint32_t target)->bool {
-    return entry.start_time < target;
+    return (int32_t)entry.start_time < (int32_t)target;
 }
 
 // Comparator for reverse comparison, useful for certain cases
 auto playerMode::m_compareByStartTimeReverse(std::uint32_t target, const m_noteEntry& entry)->bool{
-    return target < entry.start_time;
+    return (int32_t)target < (int32_t)entry.start_time;
 }
 
 auto playerMode::m_checkSong() -> void {
@@ -175,7 +191,15 @@ auto playerMode::m_checkNote(data::songs::Note& rec_note) -> void{
         //std::cout << "Found lower at " << lower->start_time << " and higher at " << upper->start_time << " comparing " << rec_note.start_timestamp_ms << std::endl;
         auto closest = abs((int32_t)lower->start_time - (int32_t)rec_note.start_timestamp_ms) < abs((int32_t)upper->start_time - (int32_t)rec_note.start_timestamp_ms) ? lower : upper;
 
-        if(abs((int32_t)closest->start_time - (int32_t)rec_note.start_timestamp_ms) > 1000){
+
+        printf("%s%d\n", "This is rec note", rec_note.midi_note);
+        std::cout << "This is rec start time: " << rec_note.start_timestamp_ms << std::endl;
+        std::cout << "This is ref start time: " << closest->start_time << std::endl;
+        std::cout << "This is rec duration: " << rec_note.start_timestamp_ms << std::endl;
+        std::cout << "This is ref duration: " << closest->start_time << std::endl;
+
+
+        if(abs((int32_t)closest->start_time - (int32_t)rec_note.start_timestamp_ms) > 2000){
             closest->seen = false;
             return;
         }
