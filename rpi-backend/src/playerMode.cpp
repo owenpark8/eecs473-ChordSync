@@ -1,7 +1,7 @@
 #include "playerMode.hpp"
 #include <pybind11/embed.h>
 #include <pybind11/stl.h>
-
+#include <sys/wait.h>
 #include <iostream>
 
 namespace py = pybind11;
@@ -9,6 +9,50 @@ namespace py = pybind11;
 
 auto playerMode::m_recordtoMIDI(uint8_t song_id, uint16_t duration,
                uint8_t bpm) -> std::vector<std::vector<int>>{
+  
+ // Start recording player input
+    pid_t recordwav = fork();
+
+    if (recordwav == -1) {
+        // Fork failed
+        std::cerr << "Failed to fork a new process" << std::endl;
+    } else if (recordwav == 0) {
+        // Child process: execute the 'arecord' command
+        // Store strings in variables to avoid temporary destruction
+    std::string durationStr = std::to_string(duration + 10);
+    std::string fileName = std::to_string(song_id) + "_rec.wav";
+
+    execlp("arecord", "arecord", "--duration", durationStr.c_str(),
+           "--rate=88200", "--format=S16_LE", fileName.c_str(), (char *)NULL);
+        // If execlp fails
+        std::cerr << "Error executing arecord" << std::endl;
+        _exit(1);  // Exit child process with error status
+
+    }
+
+    pid_t playStartTone = fork();
+
+    if (playStartTone == -1) {
+        // Fork failed
+        std::cerr << "Failed to fork a new process" << std::endl;
+    } else if (playStartTone == 0) {
+        // Child process: execute the 'arecord' command
+        execlp("aplay", "aplay", "/home/zawad/Desktop/audio/START_TONE.wav", "-D", "plughw:1,0", (char *)NULL);
+
+        // If execlp fails
+        std::cerr << "Error executing aplay for start tone" << std::endl;
+        _exit(1);  // Exit child process with error status
+
+    }
+    int status;
+    waitpid(recordwav, &status, 0);
+  
+  
+  
+  
+  
+  
+  
     py::module sys = py::module::import("sys");
     sys.attr("path").attr("insert")(0, PY_VENV_PATH);
     sys.attr("path").attr("insert")(0, PY_MODULE_PATH);
@@ -21,27 +65,12 @@ auto playerMode::m_recordtoMIDI(uint8_t song_id, uint16_t duration,
     }
 
     auto get_record_convert_module = py::module_::import("record_convert");
-    py::object get_record_convert = get_record_convert_module.attr("record_convert");
+    py::object get_record_convert = get_record_convert_module.attr("record_convert_no_offset");
 
-
-
-    std::string command = "arecord --duration=" + std::to_string(duration) +
-                          " --rate=88200 --format=S16_LE " + std::to_string(song_id) + "_rec.wav";
-
-    // Execute the command
-    int result = system(command.c_str());
-
-    // Check if the command was successful
-    if (result != 0) {
-        // Handle the error
-        std::cerr << "Error executing command: " << command << std::endl;
-    } else {
-        std::cout << "Recording completed successfully." << std::endl;
-    }
 
     this->m_basic_pitch_prediction_run(song_id, bpm);
 
-    auto numbers = get_record_convert(song_id, duration, bpm).cast<std::vector<std::vector<int>>>();
+    auto numbers = get_record_convert(song_id, bpm).cast<std::vector<std::vector<int>>>();
 
     this->m_delete_generated_files(song_id);
 

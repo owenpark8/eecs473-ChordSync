@@ -21,6 +21,7 @@
 static std::condition_variable song_id_cv;
 static std::condition_variable playing_cv;
 
+
 void web_server() {
     using httplib::Request, httplib::Response;
 
@@ -313,10 +314,18 @@ void web_server() {
 
 
 auto main(int argc, char* args[]) -> int {
+<<<<<<< HEAD
+=======
+
+
+    
+>>>>>>> 1d603c6 (beat is playing)
     if (!data::init()) {
         return 1;
     }
 
+<<<<<<< HEAD
+>>>>>>> 1d603c6 (beat is playing)
     if (!serial::init()) {
         return 1;
     }

@@ -3,6 +3,7 @@ import os
 import sys
 from dataParse import get_tempo_and_time_signature
 from dataParse import getMessages
+from dataParse import getMessagesOrig
 
 from basic_pitch.inference import predict, Model
 from basic_pitch import ICASSP_2022_MODEL_PATH
@@ -47,7 +48,7 @@ def record_convert_no_offset(id, bpm_value):
     print(time_signature)
     print(ticks_per_beat)
 
-    notes = getMessages(mid_basic)
+    notes = getMessagesOrig(mid_basic)
     print(notes)
     print(len(notes))
 

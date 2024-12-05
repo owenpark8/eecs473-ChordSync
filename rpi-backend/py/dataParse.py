@@ -3,86 +3,84 @@ from collections import deque
 
 
 def getMessagesOrig(midi):
+    currNotes_deque = deque()
+    time = -1
+    formattedNotes = []
 
-  currNotes_deque = deque()
-  time = -1
-  formattedNotes = []
-
-  # Open the MIDI file
-  mid = mido.MidiFile(midi)
+    # Open the MIDI file
+    mid = mido.MidiFile(midi)
   
-  # Iterate over the messages in the file
-  for msg in mid:
-    if msg.type == 'note_on' and (msg.velocity > 0 or time == -1):
-      if time == -1:
-          time = 0
-      else:
-          #nothing should happen if immediate note.
-          time += msg.time
-      currNotes_deque.append([msg.note, time, -1])
-    elif msg.type=='pitchwheel':
+    # Iterate over the messages in the file
+    for msg in mid:
+        if msg.type == 'note_on' and (msg.velocity > 0 or time == -1):
+            if time == -1:
+                time = 0
+            else:
+                #nothing should happen if immediate note.
+                time += msg.time
+            currNotes_deque.append([msg.note, time, -1])
+        elif msg.type=='pitchwheel':
         #pitchwheel noise, so just add time
         #pitchwheel could be first.
-        if time == -1:
-          time = 0
-        else:
-          time += msg.time
-    elif msg.type == 'note_off' or (msg.type == 'note_on' and msg.velocity == 0):
-        #update time, nothing should happen if it is the same time as the previous.
-        time += msg.time
-
-        #first note in scope has now ended.
-        if currNotes_deque[0][0] == msg.note:
-          currNotes_deque[0][2] = time
-          formattedNotes.append(currNotes_deque[0])
-          currNotes_deque.popleft()
-
-        #now check if the last not in scope has ended; this means that the latest note is the shortest note.
-        elif currNotes_deque[-1][0] == msg.note:
-          currNotes_deque[-1][2] = time
-          formattedNotes.append(currNotes_deque[-1])
-          currNotes_deque.pop()
-
-        #if the note in scope is in the middle, we need to iterate through deque to find the one.
-        else:
-          idxLen = len(currNotes_deque)
-          for i in range(idxLen):
-            if currNotes_deque[0][0] == msg.note:
-              currNotes_deque[0][2] = time
-              formattedNotes.append(currNotes_deque[0])
-              currNotes_deque.popleft()
+            if time == -1:
+                time = 0
             else:
-              #append then pop front.
-              currNotes_deque.append(currNotes_deque[0])
-              currNotes_deque.popleft()
-    else:
-      continue
+                time += msg.time
+        elif msg.type == 'note_off' or (msg.type == 'note_on' and msg.velocity == 0):
+            #update time, nothing should happen if it is the same time as the previous.
+            time += msg.time
 
-  formattedNotes.sort(key=lambda x: x[1])
+            #first note in scope has now ended.
+            if currNotes_deque[0][0] == msg.note:
+                currNotes_deque[0][2] = time
+                formattedNotes.append(currNotes_deque[0])
+                currNotes_deque.popleft()
 
-  for i in range(len(formattedNotes)):
+            #now check if the last not in scope has ended; this means that the latest note is the shortest note.
+            elif currNotes_deque[-1][0] == msg.note:
+                currNotes_deque[-1][2] = time
+                formattedNotes.append(currNotes_deque[-1])
+                currNotes_deque.pop()
 
-    start = formattedNotes[i][1]
-    end = formattedNotes[i][2]
+            #if the note in scope is in the middle, we need to iterate through deque to find the one.
+            else:
+                idxLen = len(currNotes_deque)
+                for i in range(idxLen):
+                    if currNotes_deque[0][0] == msg.note:
+                        currNotes_deque[0][2] = time
+                        formattedNotes.append(currNotes_deque[0])
+                        currNotes_deque.popleft()
+                    else:
+                        #append then pop front.
+                        currNotes_deque.append(currNotes_deque[0])
+                        currNotes_deque.popleft()
+        else:
+            continue
 
-    start *= 1000
-    end *= 1000
+    formattedNotes.sort(key=lambda x: x[1])
+
+    for i in range(len(formattedNotes)):
+        start = formattedNotes[i][1]
+        end = formattedNotes[i][2]
+
+        start *= 1000
+        end *= 1000
 
 
-    formattedNotes[i][1] = int(start)
-    formattedNotes[i][2] = int(end)
+        formattedNotes[i][1] = int(start)
+        formattedNotes[i][2] = int(end)
 
 
     
-  #return formattedNotes
-  
+    #return formattedNotes
+    
 
-  unique_list = []
-  for item in formattedNotes:
-    if item not in unique_list:
-        unique_list.append(item)
+    unique_list = []
+    for item in formattedNotes:
+        if item not in unique_list:
+            unique_list.append(item)
 
-  return unique_list
+    return unique_list
 
 
 def getMessagesCutOutNoise(midi):
