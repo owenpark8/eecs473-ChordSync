@@ -39,38 +39,25 @@ auto init() -> void {
     LCD lcd_5 = LCD(SPI_E, reg_sel_in, reset_in);
     LCD lcd_6 = LCD(SPI_F, reg_sel_in, reset_in);
 
-
-//    fretboard = Fretboard{lcd_1, lcd_2, lcd_3, lcd_4, lcd_5, lcd_6, &huart1};
-//    fretboard.init();
     HAL_Delay(5000);
 
-    lcd_1.reset_lcd();
-//    lcd_2.reset_lcd();
+    fretboard = Fretboard{lcd_1, lcd_2, lcd_3, lcd_4, lcd_5, lcd_6, &huart1};
+    fretboard.init();
 
-    lcd_1.init();
-    lcd_2.init();
+    HAL_TIM_Base_Start_IT(SONG_TIMER);
 
-    lcd_1.fill_screen(GREEN);
-   	HAL_Delay(20);
-   	lcd_2.fill_screen(GREEN);
-   	HAL_Delay(20);
-
-
-    lcd_5.init();
-    lcd_6.init();
-
-   	lcd_5.fill_screen(GREEN);
-   	HAL_Delay(20);
-   	lcd_6.fill_screen(GREEN);
-   	HAL_Delay(20);
-
-    lcd_3.init();
-    lcd_4.init();
-
-    lcd_3.fill_screen(GREEN);
-   	HAL_Delay(20);
-   	lcd_4.fill_screen(GREEN);
-   	HAL_Delay(20);
+    // lcd_1.fill_screen(GREEN);
+   	// HAL_Delay(20);
+   	// lcd_2.fill_screen(GREEN);
+   	// HAL_Delay(20);
+   	// lcd_5.fill_screen(GREEN);
+   	// HAL_Delay(20);
+   	// lcd_6.fill_screen(GREEN);
+   	// HAL_Delay(20);
+    // lcd_3.fill_screen(GREEN);
+   	// HAL_Delay(20);
+   	// lcd_4.fill_screen(GREEN);
+   	// HAL_Delay(20);
 
     	while (true) {
     		      HAL_GPIO_WritePin(DEBUG_LED_GPIO_Port, DEBUG_LED_Pin, GPIO_PIN_SET);
@@ -116,6 +103,12 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
     if (htim == SONG_TIMER) {
         fretboard.handle_song_time();
     }
+}
+
+void HAL_UART_ErrorCallback(UART_HandleTypeDef *huart)
+{
+	fretboard.handle_uart_error();
+
 }
 
 
