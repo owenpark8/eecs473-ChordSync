@@ -13,9 +13,9 @@
 #include "data.hpp"
 #include "mcu.hpp"
 #include "playerMode.hpp"
+#include "process_gp4.hpp"
 #include "serial.hpp"
 #include "web.hpp"
-#include "process_gp4.hpp"
 
 
 static std::condition_variable song_id_cv;
@@ -313,158 +313,9 @@ void web_server() {
 
 
 auto main(int argc, char* args[]) -> int {
-// Create a pipe
-/*
-    int pipefd[2];
-    if (pipe(pipefd) == -1) {
-        std::cerr << "Pipe creation failed" << std::endl;
-        exit(EXIT_FAILURE);
-    }
-
-    // Fork the first child process for "arecord"
-    pid_t pid1 = fork();
-    if (pid1 == -1) {
-        std::cerr << "Fork failed for arecord" << std::endl;
-        exit(EXIT_FAILURE);
-    }
-
-    if (pid1 == 0) {
-        // In the first child process (arecord)
-        close(pipefd[0]); // Close reading end of the pipe
-
-        // Redirect stdout to the pipe's writing end
-        dup2(pipefd[1], STDOUT_FILENO);
-        close(pipefd[1]); // Close the original writing end after dup2
-
-        // Execute arecord command
-        execlp("arecord", "arecord", "-D", "plughw:3,0", "--rate=88200", "--format=S16_LE", "--buffer-time=1", "-", (char *)NULL);
-        // If execlp fails
-        std::cerr << "Failed to execute arecord" << std::endl;
-        exit(EXIT_FAILURE);
-    }
-
-    // Fork the second child process for "aplay"
-    pid_t pid2 = fork();
-    if (pid2 == -1) {
-        std::cerr << "Fork failed for aplay" << std::endl;
-        exit(EXIT_FAILURE);
-    }
-
-    if (pid2 == 0) {
-        // In the second child process (aplay)
-        close(pipefd[1]); // Close writing end of the pipe
-
-        // Redirect stdin to the pipe's reading end
-        dup2(pipefd[0], STDIN_FILENO);
-        close(pipefd[0]); // Close the original reading end after dup2
-
-        // Execute aplay command
-        execlp("aplay", "aplay", "-D", "plughw:2,0" "--buffer-time=1", "-", (char *)NULL);
-        // If execlp fails
-        std::cerr << "Failed to execute aplay" << std::endl;
-        exit(EXIT_FAILURE);
-    }*/
-
-    
     if (!data::init()) {
         return 1;
     }
-
-    
-    // playerMode(uint8_t song_id, uint8_t mode, std::string const& note, std::string const& title, std::string const& artist, uint8_t duration,
-    //uint8_t bpm);
-
-    //The constructor creates a RECORDING, and populates the internal structure with information from this recording. 
-    //It also grabs the reference song from the database and populates our class with that.
-
-
-
-
-    static data::songs::SongInfo ode_to_joy_1 =
-                {
-                        .title = "Ode To Joy",
-                        .artist = "ChordSync Basics",
-                        .length = std::chrono::seconds(13),
-                        .bpm = 144,
-                        .notes =
-                                {
-                                        data::songs::Note{.start_timestamp_ms = 0,
-                                             .length_ms = 417,
-                                             .midi_note = 0,
-                                             .fret = 0,
-                                             .string = static_cast<std::uint8_t>(string_e::HIGH_E)},
-                                        data::songs::Note{.start_timestamp_ms = 417,
-                                             .length_ms = 417,
-                                             .midi_note = 0,
-                                             .fret = 0,
-                                             .string = static_cast<std::uint8_t>(string_e::HIGH_E)},
-                                        data::songs::Note{.start_timestamp_ms = 834,
-                                             .length_ms = 417,
-                                             .midi_note = 0,
-                                             .fret = 1,
-                                             .string = static_cast<std::uint8_t>(string_e::HIGH_E)},
-                                        data::songs::Note{.start_timestamp_ms = 1251,
-                                             .length_ms = 417,
-                                             .midi_note = 0,
-                                             .fret = 3,
-                                             .string = static_cast<std::uint8_t>(string_e::HIGH_E)},
-                                        data::songs::Note{.start_timestamp_ms = 1668,
-                                             .length_ms = 417,
-                                             .midi_note = 0,
-                                             .fret = 3,
-                                             .string = static_cast<std::uint8_t>(string_e::HIGH_E)},
-                                        data::songs::Note{.start_timestamp_ms = 2085,
-                                             .length_ms = 417,
-                                             .midi_note = 0,
-                                             .fret = 1,
-                                             .string = static_cast<std::uint8_t>(string_e::HIGH_E)},
-                                        data::songs::Note{.start_timestamp_ms = 2502,
-                                             .length_ms = 417,
-                                             .midi_note = 0,
-                                             .fret = 0,
-                                             .string = static_cast<std::uint8_t>(string_e::HIGH_E)}
-
-                                }
-        };
-
-    
-    //process_gp4::dataParseUpload("./py/gp_files/twinkle_twinkle.gp5", )
-    auto* player = new playerMode(ode_to_joy_1);
-
-    //dataParseUpload(std::string const& filename, uint8_t song_id, std::string const& title, std::string const& artist, uint8_t duration, uint8_t bpm) -> void;
-   
-    //upload reference midi to the database. 
-    //player->dataParseUpload("twinkle.mid", 1, "twinkle-twinkle-ref", "unknown", 55, 95);
-
-    //lets print the original
-    /*auto numbers = player->dataParseRef("twinkle.mid");
-    std::cout << "REFERENCE:" << std::endl;
-    for (int i = 0; i < numbers.size(); i++) {
-        std::cout << "[" << numbers[i][0] << "," << numbers[i][1] << "," << numbers[i][2] << "]" << std::endl;
-    }
-
-    //lets print the recording
-    std::cout << "RECORDING:" << std::endl;
-    for (int i = 0; i < player->recording_numbers.size(); i++) {
-        std::cout << "[" << player->recording_numbers [i][0] << "," << player->recording_numbers[i][1] << "," << player->recording_numbers[i][2] << "]" << std::endl;
-    }
-
-    //player->analysis();
-    auto results = player->analysis();
-
-    for(auto result : results){
-        std::cout << result << std::endl;
-    }
-    /*
-    bool outcome = player->analysis("C4");
-
-    if (outcome == false) {
-        std::cout << "Wrong!" << std::endl;
-    }
-    else {
-        std::cout << "Correct!" << std::endl;
-    }
-    */
 
     if (!serial::init()) {
         return 1;

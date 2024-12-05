@@ -70,23 +70,25 @@ namespace mcu {
         if (!receive_ack()) {
             throw NoACKException("Could not request song ID");
         }
-        std::uint8_t buf[2] = {0};
-        if (!serial::receive(buf, 2)) { // receive Loaded song control message
+        ControlMessage control_msg{};
+        if (!serial::receive(control_msg.data(), control_msg.size())) { // receive Loaded song control message
             throw NoMsgException("Could not request Loaded song control message");
         }
-        if (buf != LOADED_SONG_ID_MESSAGE) {
+        if (control_msg != LOADED_SONG_ID_MESSAGE) {
             throw UnexpectedMsgException("Received incorrect message");
         }
         send_control_message(ACK_MESSAGE); // send ack
-        if (!serial::receive(buf, 2)) {
+
+        std::array<std::uint8_t, 2> id_msg{};
+        if (!serial::receive(id_msg.data(), id_msg.size())) {
             throw NoACKException("Could not request song ID");
         }
-        if (buf[0] != 0x01) {
+        if (id_msg[0] != 0x01) {
             throw NoACKException("Could not request song ID");
         }
         send_control_message(ACK_MESSAGE);
 
-        return buf[1];
+        return id_msg[1];
     }
 
     auto play_loaded_song() -> void {
