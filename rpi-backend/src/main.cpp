@@ -190,6 +190,8 @@ void web_server() {
 
         mcu::playing = true;
         playing_cv.notify_all();
+
+        res.set_header("HX-Reswap", "none");
     });
 
     svr.Post("/stop-song", [&](Request const& req, Response& res) {
@@ -204,6 +206,8 @@ void web_server() {
 
         mcu::playing = false;
         playing_cv.notify_all();
+
+        res.set_header("HX-Reswap", "none");
     });
 
     svr.Get("/song-select-form", [](Request const& req, Response& res) {

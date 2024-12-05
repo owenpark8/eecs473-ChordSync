@@ -162,6 +162,7 @@ public:
                     break;
                 case MessageType::EndSong:
                     m_playing_song = false;
+                    clear();
                     rec_new_msg();
                     break;
                 case MessageType::RequestSongID: {
