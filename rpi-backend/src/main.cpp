@@ -395,13 +395,13 @@ void web_server() {
                     break;
             }
             mcu::send_clear();
+        }
 
-            bool const correct = practice_feedback.analyzeChord();
-            if (correct) {
-                res.set_content("<p>Correct! Good job!</p>", web::html_type);
-            } else {
-                res.set_content("<p>Not quite! Try again!</p>", web::html_type);
-            }
+        bool const correct = practice_feedback.analyzeChord();
+        if (correct) {
+            res.set_content("<p>Correct! Good job!</p>", web::html_type);
+        } else {
+            res.set_content("<p>Not quite! Try again!</p>", web::html_type);
         }
     });
 
