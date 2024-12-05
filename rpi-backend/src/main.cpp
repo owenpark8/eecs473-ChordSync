@@ -21,11 +21,8 @@
 static std::condition_variable song_id_cv;
 static std::condition_variable playing_cv;
 
-static std::string const play_button_html_data =
-        "data: " + fmt::format(web::get_source_file(web::source_files_e::BUTTON_HTML), "/play-song", "Play song!") + "\n\n";
-
-static std::string const stop_button_html_data =
-        "data: " + fmt::format(web::get_source_file(web::source_files_e::BUTTON_HTML), "/stop-song", "Stop song!") + "\n\n";
+static std::string const play_button_html_data = fmt::format(web::get_source_file(web::source_files_e::BUTTON_HTML), "/play-song", "Play song!");
+static std::string const stop_button_html_data = fmt::format(web::get_source_file(web::source_files_e::BUTTON_HTML), "/stop-song", "Stop song!");
 
 
 void web_server() {
@@ -129,6 +126,9 @@ void web_server() {
     });
 
     svr.Get("/play-stop-button", [&](Request const& /*req*/, Response& res) {
+        static std::string const play_button_stream_data = "data: " + play_button_html_data + "\n\n";
+        static std::string const stop_button_stream_data = "data: " + stop_button_html_data + "\n\n";
+
         res.set_chunked_content_provider("text/event-stream", [&](size_t /*offset*/, httplib::DataSink& sink) {
             bool last_playing;
 
@@ -138,11 +138,11 @@ void web_server() {
             }
 
             if (last_playing) {
-                if (!sink.write(stop_button_html_data.data(), stop_button_html_data.size())) {
+                if (!sink.write(stop_button_stream_data.data(), stop_button_stream_data.size())) {
                     return false;
                 }
             } else {
-                if (!sink.write(play_button_html_data.data(), play_button_html_data.size())) {
+                if (!sink.write(play_button_stream_data.data(), play_button_stream_data.size())) {
                     return false;
                 }
             }
@@ -162,11 +162,11 @@ void web_server() {
                 lock.unlock();
 
                 if (last_playing) {
-                    if (!sink.write(stop_button_html_data.data(), stop_button_html_data.size())) {
+                    if (!sink.write(stop_button_stream_data.data(), stop_button_stream_data.size())) {
                         return false;
                     }
                 } else {
-                    if (!sink.write(play_button_html_data.data(), play_button_html_data.size())) {
+                    if (!sink.write(play_button_stream_data.data(), play_button_stream_data.size())) {
                         return false;
                     }
                 }
