@@ -11,7 +11,7 @@
 namespace mcu {
     using song_id_t = std::uint8_t;
 
-    constexpr std::chrono::seconds ACK_TIMEOUT = std::chrono::seconds(2);
+    constexpr std::chrono::seconds ACK_TIMEOUT = std::chrono::seconds(5);
 
     class NoACKException : public std::exception {
     private:

@@ -41,75 +41,60 @@ auto init() -> void {
 
     HAL_Delay(5000);
 
-    fretboard = Fretboard{lcd_1, lcd_2, lcd_3, lcd_4, lcd_5, lcd_6, &huart1};
+    fretboard = Fretboard{lcd_6, lcd_5, lcd_4, lcd_3, lcd_2, lcd_1, &huart1};
     fretboard.init();
 
     HAL_TIM_Base_Start_IT(SONG_TIMER);
 
-    // lcd_1.fill_screen(GREEN);
-   	// HAL_Delay(20);
-   	// lcd_2.fill_screen(GREEN);
-   	// HAL_Delay(20);
-   	// lcd_5.fill_screen(GREEN);
-   	// HAL_Delay(20);
-   	// lcd_6.fill_screen(GREEN);
-   	// HAL_Delay(20);
-    // lcd_3.fill_screen(GREEN);
-   	// HAL_Delay(20);
-   	// lcd_4.fill_screen(GREEN);
-   	// HAL_Delay(20);
+    // Checkerboard debug code
+    // while (true) {
+    //     for (int i = 0; i < 23; ++i) {
+    //         fretboard.draw_note({i, string_e::HIGH_E}, (i % 2 == 0) ? GREEN : WHITE);
+    //         HAL_Delay(20);
+    //     }
+    //     for (int i = 0; i < 23; ++i) {
+    //         fretboard.draw_note({i, string_e::A}, (i % 2 == 1) ? GREEN : WHITE);
+    //         HAL_Delay(20);
+    //     }
+    //     for (int i = 0; i < 23; ++i) {
+    //         fretboard.draw_note({i, string_e::D}, (i % 2 == 0) ? GREEN : WHITE);
+    //         HAL_Delay(20);
+    //     }
+    //     for (int i = 0; i < 23; ++i) {
+    //         fretboard.draw_note({i, string_e::G}, (i % 2 == 1) ? GREEN : WHITE);
+    //         HAL_Delay(20);
+    //     }
+    //     for (int i = 0; i < 23; ++i) {
+    //         fretboard.draw_note({i, string_e::B}, (i % 2 == 0) ? GREEN : WHITE);
+    //         HAL_Delay(20);
+    //     }
+    //     for (int i = 0; i < 23; ++i) {
+    //         fretboard.draw_note({i, string_e::LOW_E}, (i % 2 == 1) ? GREEN : WHITE);
+    //         HAL_Delay(20);
+    //     }
+    //     fretboard.draw_string(string_e::HIGH_E, BLACK);
+    //     fretboard.draw_string(string_e::A, BLACK);
+    //     fretboard.draw_string(string_e::D, BLACK);
+    //     fretboard.draw_string(string_e::G, BLACK);
+    //     fretboard.draw_string(string_e::B, BLACK);
+    //     fretboard.draw_string(string_e::LOW_E, BLACK);
 
-    	while (true) {
-    		      HAL_GPIO_WritePin(DEBUG_LED_GPIO_Port, DEBUG_LED_Pin, GPIO_PIN_SET);
-    		      HAL_Delay(500);
-    		      HAL_GPIO_WritePin(DEBUG_LED_GPIO_Port, DEBUG_LED_Pin, GPIO_PIN_RESET);
-    		      HAL_Delay(500);
-    	}
-//    while (true) {
-//        for (int i = 0; i < 23; ++i) {
-//            fretboard.draw_note({i, string_e::HIGH_E}, (i % 2 == 0) ? GREEN : WHITE);
-//            HAL_Delay(20);
-//        }
-//        for (int i = 0; i < 23; ++i) {
-//            fretboard.draw_note({i, string_e::A}, (i % 2 == 1) ? GREEN : WHITE);
-//            HAL_Delay(20);
-//        }
-//        for (int i = 0; i < 23; ++i) {
-//            fretboard.draw_note({i, string_e::D}, (i % 2 == 0) ? GREEN : WHITE);
-//            HAL_Delay(20);
-//        }
-//        for (int i = 0; i < 23; ++i) {
-//            fretboard.draw_note({i, string_e::G}, (i % 2 == 1) ? GREEN : WHITE);
-//            HAL_Delay(20);
-//        }
-//        for (int i = 0; i < 23; ++i) {
-//            fretboard.draw_note({i, string_e::B}, (i % 2 == 0) ? GREEN : WHITE);
-//            HAL_Delay(20);
-//        }
-//        for (int i = 0; i < 23; ++i) {
-//            fretboard.draw_note({i, string_e::LOW_E}, (i % 2 == 1) ? GREEN : WHITE);
-//            HAL_Delay(20);
-//        }
-//        HAL_GPIO_WritePin(DEBUG_LED_GPIO_Port, DEBUG_LED_Pin, GPIO_PIN_SET);
-//        HAL_Delay(500);
-//        HAL_GPIO_WritePin(DEBUG_LED_GPIO_Port, DEBUG_LED_Pin, GPIO_PIN_RESET);
-//        HAL_Delay(500);
-//    }
+    //     HAL_GPIO_WritePin(DEBUG_LED_GPIO_Port, DEBUG_LED_Pin, GPIO_PIN_SET);
+    //     HAL_Delay(500);
+    //     HAL_GPIO_WritePin(DEBUG_LED_GPIO_Port, DEBUG_LED_Pin, GPIO_PIN_RESET);
+    //     HAL_Delay(500);
+    // }
 }
 
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef* huart) { fretboard.handle_uart_message(); }
 
-void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
+void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef* htim) {
     if (htim == SONG_TIMER) {
         fretboard.handle_song_time();
     }
 }
 
-void HAL_UART_ErrorCallback(UART_HandleTypeDef *huart)
-{
-	fretboard.handle_uart_error();
-
-}
+void HAL_UART_ErrorCallback(UART_HandleTypeDef* huart) { fretboard.handle_uart_error(); }
 
 
 extern "C" {
