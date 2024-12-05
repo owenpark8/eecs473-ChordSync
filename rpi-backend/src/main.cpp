@@ -41,6 +41,7 @@ void web_server() {
             mcu::current_song_id = mcu::get_loaded_song_id();
         } catch (mcu::NoACKException const& e) {
             res.set_content("<p>Error: Cannot communicate with MCU! Try refreshing...</p>", web::html_type);
+            return;
         }
         // #ifdef DEBUG
         //         std::string index_html = web::get_source_file("index.html");
