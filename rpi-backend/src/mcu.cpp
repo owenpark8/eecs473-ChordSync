@@ -71,6 +71,13 @@ namespace mcu {
             throw NoACKException("Could not request song ID");
         }
         std::uint8_t buf[2] = {0};
+        if (!serial::receive(buf, 2)) { // receive Loaded song control message
+            throw NoMsgException("Could not request Loaded song control message");
+        }
+        if (buf != LOADED_SONG_ID_MESSAGE) {
+            throw UnexpectedMsgException("Received incorrect message");
+        }
+        send_control_message(ACK_MESSAGE); // send ack
         if (!serial::receive(buf, 2)) {
             throw NoACKException("Could not request song ID");
         }

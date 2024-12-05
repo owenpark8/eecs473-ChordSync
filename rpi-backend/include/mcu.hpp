@@ -23,6 +23,26 @@ namespace mcu {
         [[nodiscard]] auto what() const noexcept -> char const* override { return m_message.c_str(); }
     };
 
+    class NoMsgException : public std::exception {
+    private:
+        std::string m_message;
+
+    public:
+        explicit NoMsgException(std::string const& details) : m_message(fmt::format("Did not receive message! {}", details)) {}
+
+        [[nodiscard]] auto what() const noexcept -> char const* override { return m_message.c_str(); }
+    };
+
+    class UnexpectedMsgException : public std::exception {
+    private:
+        std::string m_message;
+
+    public:
+        explicit UnexpectedMsgException(std::string const& details) : m_message(fmt::format("Received Unexpected message! {}", details)) {}
+
+        [[nodiscard]] auto what() const noexcept -> char const* override { return m_message.c_str(); }
+    };
+
     auto send_song(data::songs::SongInfo const& song) -> void;
     [[nodiscard]] auto get_loaded_song_id() -> std::uint8_t;
     auto play_loaded_song() -> void;
