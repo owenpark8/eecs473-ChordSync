@@ -20,7 +20,47 @@ target_sources(${RPI_BACKEND_TARGET} PRIVATE
     src/playerMode.cpp
 )
 
-target_include_directories(${RPI_BACKEND_TARGET} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
+set(INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/include)
+set(WEB_SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/public)
+
+
+target_compile_definitions(${RPI_BACKEND_TARGET} PRIVATE
+    WEB_SRC_DIR="${WEB_SRC_DIR}"
+    USER_HOME_DIR="$ENV{HOME}"
+)
+
+# option(ENABLE_WEB_SERVER_SCRIPTS "Enable running web server scripts during the build" ON)
+
+if (ENABLE_WEB_SERVER_SCRIPTS)
+    set(COMPILED_CSS_FILE ${WEB_SRC_DIR}/compiled.css)
+    set(WEB_SOURCES_FILE ${INCLUDE_DIR}/web_sources.hpp)
+
+    add_custom_command(
+        OUTPUT ${COMPILED_CSS_FILE}
+        COMMAND ${CMAKE_COMMAND} -E echo "Compiling tailwind .css file..."
+        COMMAND ${CMAKE_COMMAND} -E env bash ${CMAKE_CURRENT_SOURCE_DIR}/scripts/compile_tailwind.sh ${CMAKE_CURRENT_SOURCE_DIR}
+        DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/scripts/compile_tailwind.sh
+        COMMENT "Generating compiled.css with Tailwind"
+        VERBATIM
+    )
+
+    add_custom_command(
+        OUTPUT ${WEB_SOURCES_FILE}
+        COMMAND ${CMAKE_COMMAND} -E echo "Generating source file strings..."
+        COMMAND ${CMAKE_COMMAND} -E env bash ${CMAKE_CURRENT_SOURCE_DIR}/scripts/generate_web_sources.sh ${CMAKE_CURRENT_SOURCE_DIR}/public ${WEB_SOURCES_FILE}
+        DEPENDS ${COMPILED_CSS_FILE} ${CMAKE_CURRENT_SOURCE_DIR}/scripts/generate_web_sources.sh
+        COMMENT "Generating web_sources.hpp"
+        VERBATIM
+    )
+
+    target_sources(${RPI_BACKEND_TARGET} PRIVATE ${WEB_SOURCES_FILE})
+endif()
+
+target_include_directories(${RPI_BACKEND_TARGET} PUBLIC ${INCLUDE_DIR})
+
+# external dependencies
+add_subdirectory(extern)
+target_link_libraries(${RPI_BACKEND_TARGET} PRIVATE extern)
 
 # pybind11
 set(PYTHON_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/py")
@@ -29,23 +69,6 @@ target_compile_definitions(${RPI_BACKEND_TARGET} PRIVATE
     PY_MODULE_PATH="${PYTHON_MODULE_PATH}"
     PY_VENV_PATH="${PYTHON_VENV_PATH}"
 )
-
-add_subdirectory(extern)
-target_link_libraries(${RPI_BACKEND_TARGET} PRIVATE extern)
-
-target_compile_definitions(${RPI_BACKEND_TARGET} PRIVATE
-    WEB_SRC_DIR="${CMAKE_CURRENT_SOURCE_DIR}/public/"
-    USER_HOME_DIR="$ENV{HOME}/"
-)
-
-add_custom_target(run_web_server_scripts ALL
-        COMMAND ${CMAKE_COMMAND} -E echo "Compiling tailwind .css file..."
-        COMMAND ${CMAKE_COMMAND} -E env bash ${CMAKE_CURRENT_SOURCE_DIR}/scripts/compile_tailwind.sh ${CMAKE_CURRENT_SOURCE_DIR}
-        COMMAND ${CMAKE_COMMAND} -E echo "Generating source file strings..."
-        COMMAND ${CMAKE_COMMAND} -E env bash ${CMAKE_CURRENT_SOURCE_DIR}/scripts/generate_web_sources.sh ${CMAKE_CURRENT_SOURCE_DIR}/public ${CMAKE_CURRENT_SOURCE_DIR}/include/web_sources.hpp
-        COMMENT "Running web server scripts"
-)
-add_dependencies(${RPI_BACKEND_TARGET} run_web_server_scripts)
 
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")
     add_compile_definitions(DEBUG)

@@ -9,7 +9,7 @@
 #include "data.hpp"
 
 namespace data {
-    std::string const data_directory = std::string(USER_HOME_DIR) + ".local/share/ChordSync/";
+    std::string const data_directory = std::string(USER_HOME_DIR) + "/.local/share/ChordSync/";
     std::string const db_filename = data_directory + "chordsync.db";
 
 
@@ -56,10 +56,8 @@ namespace data {
                 fs::create_directories(directory);
                 return true;
             } catch (std::filesystem::filesystem_error const& e) {
-                std::cerr << "What";
                 return false;
             } catch (std::bad_alloc const& e) {
-                std::cerr << "bruh";
                 return false;
             }
         }

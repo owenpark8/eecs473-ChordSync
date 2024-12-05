@@ -21,11 +21,12 @@ generate_content_constexpr() {
 
 generate_iter_macro() {
     local lc_name=$1
+    local file_name=$2
     local uc_name=$(echo "$lc_name" | tr 'a-z' 'A-Z')
 
     local content_name=${lc_name}_content
 
-    echo "_F($uc_name, $content_name, __VA_ARGS__)\\"
+    echo "_F($uc_name, $content_name, \"$file_name\", __VA_ARGS__)\\"
 }
 
 # Clear the output file
@@ -59,7 +60,7 @@ done
         file_name=$(basename "$file_path")
         formatted_name=$(echo "$file_name" | sed -e 's/[^a-zA-Z0-9]/_/g')
 
-        generate_iter_macro "$formatted_name"
+        generate_iter_macro "$formatted_name" "$file_name" 
     done
 
     echo ""
