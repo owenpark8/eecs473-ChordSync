@@ -21,6 +21,12 @@
 static std::condition_variable song_id_cv;
 static std::condition_variable playing_cv;
 
+static std::string const play_button_html_data =
+        "data: " + fmt::format(web::get_source_file(web::source_files_e::BUTTON_HTML), "/play-song", "Play song!") + "\n\n";
+
+static std::string const stop_button_html_data =
+        "data: " + fmt::format(web::get_source_file(web::source_files_e::BUTTON_HTML), "/stop-song", "Stop song!") + "\n\n";
+
 
 void web_server() {
     using httplib::Request, httplib::Response;
@@ -123,13 +129,6 @@ void web_server() {
     });
 
     svr.Get("/play-stop-button", [&](Request const& /*req*/, Response& res) {
-        static std::string const play_button_html_data =
-                "data: " + fmt::format(web::get_source_file(web::source_files_e::BUTTON_HTML), "/play-song", "Play song!") + "\n\n";
-
-        static std::string const stop_button_html_data =
-                "data: " + fmt::format(web::get_source_file(web::source_files_e::BUTTON_HTML), "/stop-song", "Stop song!") + "\n\n";
-
-
         res.set_chunked_content_provider("text/event-stream", [&](size_t /*offset*/, httplib::DataSink& sink) {
             bool last_playing;
 
@@ -191,7 +190,7 @@ void web_server() {
         mcu::playing = true;
         playing_cv.notify_all();
 
-        res.set_header("HX-Reswap", "none");
+        res.set_content(stop_button_html_data, web::html_type);
     });
 
     svr.Post("/stop-song", [&](Request const& req, Response& res) {
@@ -207,7 +206,7 @@ void web_server() {
         mcu::playing = false;
         playing_cv.notify_all();
 
-        res.set_header("HX-Reswap", "none");
+        res.set_content(play_button_html_data, web::html_type);
     });
 
     svr.Get("/song-select-form", [](Request const& req, Response& res) {

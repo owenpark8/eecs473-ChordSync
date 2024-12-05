@@ -1,4 +1,5 @@
 #include "fretboard.hpp"
+#include "timing.hpp"
 
 #include "main.h"
 
@@ -39,7 +40,7 @@ auto init() -> void {
     LCD lcd_5 = LCD(SPI_E, reg_sel_in, reset_in);
     LCD lcd_6 = LCD(SPI_F, reg_sel_in, reset_in);
 
-    HAL_Delay(5000);
+    HAL_Delay(timing::LCD_BOOTUP_TIME.count());
 
     fretboard = Fretboard{lcd_6, lcd_5, lcd_4, lcd_3, lcd_2, lcd_1, &huart1};
     fretboard.init();

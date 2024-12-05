@@ -138,8 +138,10 @@ public:
             uint8_t& message = m_uart_buf[1]; // Header is byte 0, msg is byte 1
             switch (static_cast<MessageType>(message)) {
                 case MessageType::Reset:
+                    rec_new_msg();
+                    send_ack();
                     init();
-                    break;
+                    return;
                 case MessageType::StartSongLoading:
                     m_song_size = 0;
                     m_uart_state = uart_state::SONG_ID;
@@ -162,9 +164,10 @@ public:
                     break;
                 case MessageType::EndSong:
                     m_playing_song = false;
-                    clear();
                     rec_new_msg();
-                    break;
+                    send_ack();
+                    clear();
+                    return;
                 case MessageType::RequestSongID: {
                     send_ack();
                     HAL_UART_Transmit(m_huart, LOADED_SONG_ID_MESSAGE.data(), sizeof(LOADED_SONG_ID_MESSAGE), 100);
