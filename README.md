@@ -5,7 +5,7 @@
 Flash the Raspberry Pi with Raspberry Pi OS (64-bit)
 
 ```sh
-sudo apt install cmake
+sudo apt install cmake node
 ```
 
 ```sh
