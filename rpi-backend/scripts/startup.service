@@ -1,11 +1,12 @@
 [Unit]
-Description=Startup Service
+Description=ChordSync Startup Service
+After=network.target
 
 [Service]
 Type=simple
-ExecStart=~/.local/src/eecs473-ChordSync/rpi-backend/cmake-build/rpi-backend
-User=pi
-WorkingDirectory=~/.local/src/eecs473-ChordSync/cmake-build/rpi-backend
+User=chordsync
+WorkingDirectory=/home/chordsync/.local/src/eecs473-ChordSync/rpi-backend/cmake-build-debug
+ExecStart=/home/chordsync/.local/src/eecs473-ChordSync/rpi-backend/cmake-build-debug/rpi-backend
 Restart=on-failure
 
 [Install]

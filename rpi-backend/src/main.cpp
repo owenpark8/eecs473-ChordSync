@@ -15,6 +15,7 @@
 #include "messaging.hpp"
 #include "playerMode.hpp"
 #include "process_gp4.hpp"
+#include "serial.hpp"
 #include "web.hpp"
 
 
@@ -434,11 +435,9 @@ auto main(int argc, char* args[]) -> int {
         return 1;
     }
 
-    /*
     if (!serial::init()) {
         return 1;
     }
-    */
 
     try {
         SQLite::Database db(data::db_filename, SQLite::OPEN_READWRITE | SQLite::OPEN_CREATE);

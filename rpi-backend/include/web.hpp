@@ -2,6 +2,7 @@
 
 #include <condition_variable>
 #include <mutex>
+#include <optional>
 #include <string>
 #include <unordered_set>
 
@@ -94,4 +95,3 @@ private:
         m_stop_flag = true;
     }
 };
-
