@@ -4,6 +4,7 @@ import sys
 from dataParse import get_tempo_and_time_signature
 from dataParse import getMessages
 from dataParse import getMessagesOrig
+from dataParse import getMessagesCutOutNoise
 
 from basic_pitch.inference import predict, Model
 from basic_pitch import ICASSP_2022_MODEL_PATH
@@ -32,7 +33,7 @@ def prediction(id, bpm_value):
         multiple_pitch_bends=False
     )
 
-def record_convert_no_offset(id, bpm_value):
+def record_convert_no_offset(id):
     print("Running")
         
         
@@ -72,7 +73,7 @@ def record_convert_offset(id):
     print(time_signature)
     print(ticks_per_beat)
 
-    notes = getMessages(mid_basic)
+    notes = getMessagesCutOutNoise(mid_basic)
     print(notes)
     print(len(notes))
 

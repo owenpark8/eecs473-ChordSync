@@ -10,7 +10,7 @@ namespace py = pybind11;
 auto playerMode::m_recordtoMIDI(uint8_t song_id, uint16_t duration, uint8_t bpm) -> std::vector<std::vector<int>> {
 
     // Start recording player input
-    pid_t recordwav = fork();
+    /*pid_t recordwav = fork();
 
     if (recordwav == -1) {
         // Fork failed
@@ -27,19 +27,7 @@ auto playerMode::m_recordtoMIDI(uint8_t song_id, uint16_t duration, uint8_t bpm)
         _exit(1); // Exit child process with error status
     }
 
-    pid_t playStartTone = fork();
 
-    if (playStartTone == -1) {
-        // Fork failed
-        std::cerr << "Failed to fork a new process" << std::endl;
-    } else if (playStartTone == 0) {
-        // Child process: execute the 'arecord' command
-        execlp("aplay", "aplay", "/home/zawad/Desktop/audio/START_TONE.wav", "-D", "plughw:1,0", (char*) NULL);
-
-        // If execlp fails
-        std::cerr << "Error executing aplay for start tone" << std::endl;
-        _exit(1); // Exit child process with error status
-    }
     int status;
     waitpid(recordwav, &status, 0);
 
@@ -62,6 +50,44 @@ auto playerMode::m_recordtoMIDI(uint8_t song_id, uint16_t duration, uint8_t bpm)
     this->m_basic_pitch_prediction_run(song_id, bpm);
 
     auto numbers = get_record_convert(song_id, bpm).cast<std::vector<std::vector<int>>>();
+
+    this->m_delete_generated_files(song_id);
+
+    return numbers;*/
+
+
+    py::module sys = py::module::import("sys");
+    sys.attr("path").attr("insert")(0, PY_VENV_PATH);
+    sys.attr("path").attr("insert")(0, PY_MODULE_PATH);
+
+    try {
+        py::module pybind_module = py::module::import("basic_pitch");
+        std::cout << "Module imported successfully!" << std::endl;
+    } catch (py::error_already_set const& e) {
+        std::cerr << "Error: " << e.what() << std::endl;
+    }
+
+    auto get_record_convert_module = py::module_::import("record_convert");
+    py::object get_record_convert = get_record_convert_module.attr("record_convert_offset");
+
+
+
+    std::string command = "arecord --duration=" + std::to_string(duration) +
+                          " --rate=88200 --format=S16_LE " + std::to_string(song_id) + "_rec.wav";
+
+    // Execute the command
+    int result = system(command.c_str());
+
+    // Check if the command was successful
+    if (result != 0) {
+        // Handle the error
+        std::cerr << "Error executing command: " << command << std::endl;
+    } else {
+        std::cout << "Recording completed successfully." << std::endl;
+    }
+
+    this->m_basic_pitch_prediction_run(song_id, bpm);
+    auto numbers = get_record_convert(song_id).cast<std::vector<std::vector<int>>>();
 
     this->m_delete_generated_files(song_id);
 
@@ -109,27 +135,18 @@ auto playerMode::m_organizeRef() -> void {
 playerMode::playerMode(data::songs::SongInfo const& get_ref_song) : m_rec_song{get_ref_song.id, "rec", "rec", get_ref_song.length, get_ref_song.bpm} {
     py::scoped_interpreter guard{};
     //begin recording from Python.
+   
     auto numbers = m_recordtoMIDI(get_ref_song.id, static_cast<uint16_t>(get_ref_song.length.count()), get_ref_song.bpm);
     this->recording_numbers = numbers;
     //Process each note in the RECORDING and add it our song vector
-    bool startToneSeen = false;
-    uint16_t offset = 4000;
     for (auto& number: numbers) {
-
-        if (!startToneSeen && number[0] == 28 && number[2] - number[1] > 300) {
-            startToneSeen = true;
-            offset += number[1];
-        }
-
-        else if (startToneSeen) {
-            data::songs::Note entry;
-            entry.midi_note = static_cast<uint8_t>(number[0]);
-            entry.start_timestamp_ms = static_cast<uint32_t>(number[1]) - offset;
-            entry.length_ms = static_cast<uint16_t>(number[2] - entry.start_timestamp_ms);
-            (this->m_rec_song.notes).push_back(entry);
-        }
+        data::songs::Note entry;
+        entry.midi_note = static_cast<uint8_t>(number[0]);
+        entry.start_timestamp_ms = static_cast<uint32_t>(number[1]);
+        entry.length_ms = static_cast<uint16_t>(number[2] - entry.start_timestamp_ms);
+        (this->m_rec_song.notes).push_back(entry);
     }
-
+    //need to figure out filtering. 
 
     this->m_ref_song = get_ref_song;
 
@@ -178,7 +195,7 @@ auto playerMode::m_checkNote(data::songs::Note& rec_note) -> void {
         std::cout << "This is ref start time: " << closest->start_time << std::endl;
         std::cout << "This is rec duration: " << rec_note.start_timestamp_ms << std::endl;
         std::cout << "This is ref duration: " << closest->start_time << std::endl;
-
+\
 
         if (abs((int32_t) closest->start_time - (int32_t) rec_note.start_timestamp_ms) > 2000) {
             closest->seen = false;
