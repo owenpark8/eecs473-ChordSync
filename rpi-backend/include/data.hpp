@@ -236,7 +236,7 @@ namespace data {
         };
 
         namespace chords {
-            static SongInfo const a_major_chord = {
+            SongInfo const a_major_chord = {
                     .title = "A Major Chord",
                     .artist = "Chords",
                     .length = std::chrono::seconds(10),
@@ -271,7 +271,7 @@ namespace data {
                             },
             };
 
-            static SongInfo const c_major_chord = {
+            SongInfo const c_major_chord = {
                     .title = "C Major Chord",
                     .artist = "Chords",
                     .length = std::chrono::seconds(10),
@@ -306,7 +306,7 @@ namespace data {
                             },
             };
 
-            static SongInfo const d_major_chord = {
+            SongInfo const d_major_chord = {
                     .title = "D Major Chord",
                     .artist = "Chords",
                     .length = std::chrono::seconds(10),

@@ -65,4 +65,6 @@ namespace serial {
         return true;
     }
 
+    auto flush() -> void { serialFlush(fd); }
+
 } // namespace serial

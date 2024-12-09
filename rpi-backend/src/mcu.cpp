@@ -34,6 +34,7 @@ namespace mcu {
     auto send_reset() -> void {
         send_control_message(CLEAR_MESSAGE);
         if (!receive_ack()) {
+            serial::flush();
             throw NoACKException("Could not clear screens");
         }
     }
@@ -41,6 +42,7 @@ namespace mcu {
     auto send_clear() -> void {
         send_control_message(CLEAR_MESSAGE);
         if (!receive_ack()) {
+            serial::flush();
             throw NoACKException("Could not clear screens");
         }
     }
@@ -48,10 +50,12 @@ namespace mcu {
     auto send_song(data::songs::SongInfo const& song) -> void {
         send_control_message(START_SONG_LOADING_MESSAGE);
         if (!receive_ack()) {
+            serial::flush();
             throw NoACKException("Could not start song loading");
         }
         send_data_message(StartSongLoadingDataMessage{song.id});
         if (!receive_ack()) {
+            serial::flush();
             throw NoACKException("Could not start song loading");
         }
 
@@ -64,16 +68,19 @@ namespace mcu {
             };
             send_control_message(NOTE_MESSAGE);
             if (!receive_ack()) {
+                serial::flush();
                 throw NoACKException("Could not send note");
             }
             send_data_message(msg);
             if (!receive_ack()) {
+                serial::flush();
                 throw NoACKException("Could not send note");
             }
         }
 
         send_control_message(END_SONG_LOADING_MESSAGE);
         if (!receive_ack()) {
+            serial::flush();
             throw NoACKException("Could not end song loading");
         }
     }
@@ -81,13 +88,16 @@ namespace mcu {
     [[nodiscard]] auto get_loaded_song_id() -> std::uint8_t {
         send_control_message(REQUEST_SONG_ID_MESSAGE);
         if (!receive_ack()) {
+            serial::flush();
             throw NoACKException("Could not request song ID");
         }
         std::array<std::uint8_t, 2> id_msg{};
         if (!serial::receive(id_msg.data(), id_msg.size())) {
+            serial::flush();
             throw NoACKException("Could not request song ID");
         }
         if (id_msg[0] != 0x01) {
+            serial::flush();
             throw NoACKException("Could not request song ID");
         }
 
@@ -97,6 +107,7 @@ namespace mcu {
     auto play_loaded_song() -> void {
         send_control_message(START_SONG_MESSAGE);
         if (!receive_ack()) {
+            serial::flush();
             throw NoACKException("Could not play loaded song");
         }
     }
@@ -104,6 +115,7 @@ namespace mcu {
     auto end_loaded_song() -> void {
         send_control_message(END_SONG_MESSAGE);
         if (!receive_ack()) {
+            serial::flush();
             throw NoACKException("Could not end loaded song");
         }
     }
@@ -139,6 +151,7 @@ namespace mcu {
             }
         }
         if (!receive_ack()) {
+            serial::flush();
             throw NoACKException("Could not hold major chord");
         }
     }
