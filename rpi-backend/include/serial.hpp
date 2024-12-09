@@ -1,5 +1,8 @@
 #pragma once
 
+#ifdef DEBUG
+#include <iostream>
+#endif
 #include <chrono>
 #include <cstddef>
 #include <cstdint>
@@ -13,6 +16,7 @@ public:
     Serial() = default;
     ~Serial() {
         if (m_fd != -1) {
+            flush();
             serialClose(m_fd);
         }
     }
@@ -25,6 +29,7 @@ public:
         if ((m_fd = serialOpen(m_dev_name, timing::UART_BAUDRATE)) < 0) {
             return false;
         }
+        flush();
 #ifdef DEBUG
         std::cout << "Setting up wiringPi library...\n";
 #endif

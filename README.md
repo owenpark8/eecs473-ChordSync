@@ -5,7 +5,7 @@
 Flash the Raspberry Pi with Raspberry Pi OS (64-bit)
 
 ```sh
-sudo apt install cmake node
+sudo apt install cmake npm
 ```
 
 ```sh
@@ -16,5 +16,5 @@ git submodule update
 ```
 
 ```sh
-./scripts/setup.sh
+.rpi-backend/scripts/setup.sh
 ```
