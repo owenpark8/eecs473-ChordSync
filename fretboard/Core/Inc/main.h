@@ -54,6 +54,7 @@ void Error_Handler(void);
 
 /* USER CODE BEGIN EFP */
 void HAL_Post_Init();
+// void MX_USART1_UART_Init();
 
 /* USER CODE END EFP */
 

@@ -240,7 +240,7 @@ namespace data {
                     .title = "A Major Chord",
                     .artist = "Chords",
                     .length = std::chrono::seconds(10),
-                    .bpm = 0,
+                    .bpm = 120,
                     .notes =
                             {
                                     Note{.start_timestamp_ms = 0,
@@ -275,7 +275,7 @@ namespace data {
                     .title = "C Major Chord",
                     .artist = "Chords",
                     .length = std::chrono::seconds(10),
-                    .bpm = 0,
+                    .bpm = 120,
                     .notes =
                             {
                                     Note{.start_timestamp_ms = 0,
@@ -310,7 +310,7 @@ namespace data {
                     .title = "D Major Chord",
                     .artist = "Chords",
                     .length = std::chrono::seconds(10),
-                    .bpm = 0,
+                    .bpm = 120,
                     .notes =
                             {
                                     Note{.start_timestamp_ms = 0,
@@ -340,7 +340,7 @@ namespace data {
                     .title = "E Major Chord",
                     .artist = "Chords",
                     .length = std::chrono::seconds(10),
-                    .bpm = 0,
+                    .bpm = 120,
                     .notes =
                             {
                                     Note{.start_timestamp_ms = 0,
@@ -380,7 +380,7 @@ namespace data {
                     .title = "F Major Chord",
                     .artist = "Chords",
                     .length = std::chrono::seconds(10),
-                    .bpm = 0,
+                    .bpm = 120,
                     .notes =
                             {
                                     Note{.start_timestamp_ms = 0,
@@ -410,7 +410,7 @@ namespace data {
                     .title = "G Major Chord",
                     .artist = "Chords",
                     .length = std::chrono::seconds(10),
-                    .bpm = 0,
+                    .bpm = 120,
                     .notes =
                             {
                                     Note{.start_timestamp_ms = 0,

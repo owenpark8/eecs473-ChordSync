@@ -357,8 +357,8 @@ void web_server() {
 
         playerMode practice_feedback;
 
-        {
-            std::unique_lock<std::mutex> mcu_lock(mcu::mut);
+	{
+//            std::unique_lock<std::mutex> mcu_lock(mcu::mut);
 
             if (mcu::playing) {
                 mcu::end_loaded_song();
@@ -367,42 +367,50 @@ void web_server() {
             }
 
             switch (chord) {
-                case 'A':
+                case 'A': {
                     mcu::hold_major_chord(MessageType::HoldAMajorChord);
-                    practice_feedback = playerMode(data::songs::chords::a_major_chord);
+		    practice_feedback = playerMode(data::songs::chords::a_major_chord);
                     break;
-                case 'C':
+		}
+                case 'C': {
                     mcu::hold_major_chord(MessageType::HoldCMajorChord);
                     practice_feedback = playerMode(data::songs::chords::c_major_chord);
                     break;
-                case 'D':
+		}
+                case 'D': {
                     mcu::hold_major_chord(MessageType::HoldDMajorChord);
                     practice_feedback = playerMode(data::songs::chords::d_major_chord);
                     break;
-                case 'E':
+		}
+                case 'E': {
                     mcu::hold_major_chord(MessageType::HoldEMajorChord);
                     practice_feedback = playerMode(data::songs::chords::e_major_chord);
                     break;
-                case 'F':
+		}
+                case 'F': {
                     mcu::hold_major_chord(MessageType::HoldFMajorChord);
                     practice_feedback = playerMode(data::songs::chords::f_major_chord);
                     break;
-                case 'G':
+		}
+                case 'G': {
                     mcu::hold_major_chord(MessageType::HoldGMajorChord);
                     practice_feedback = playerMode(data::songs::chords::g_major_chord);
                     break;
-                default:
+		}
+                default: {
                     break;
+		}
             }
             mcu::send_clear();
+            
+	    bool const correct = practice_feedback.analyzeChord();
+            if (correct) {
+        	res.set_content("<p>Correct! Good job!</p>", web::html_type);
+            } else {
+                res.set_content("<p>Not quite! Try again!</p>", web::html_type);
+            }
         }
 
-        bool const correct = practice_feedback.analyzeChord();
-        if (correct) {
-            res.set_content("<p>Correct! Good job!</p>", web::html_type);
-        } else {
-            res.set_content("<p>Not quite! Try again!</p>", web::html_type);
-        }
     });
 
 

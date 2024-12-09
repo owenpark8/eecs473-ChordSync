@@ -9,6 +9,8 @@
 #include "messaging.hpp"
 #include "timing.hpp"
 
+#include "main.h"
+
 /**
  * Class for controlling the entire fretboard of the guitar, which spans multiple LCD screens.
  * Interfaced with coordinates on both "fretboard grid" or "pixel grid" as continous grids across LCD screens
@@ -78,11 +80,11 @@ public:
         for (auto& lcd: m_lcds) {
             lcd.init();
         }
-        piano_tiles();
+         piano_tiles();
         m_playing_song = false;
         m_song_id = 0; // song id 0 means no song currently loaded
         // Initialize UART Protocol
-        HAL_Delay(10000);
+        // MX_USART1_UART_Init();
         rec_new_msg();
     }
 
@@ -128,7 +130,7 @@ public:
 
     auto piano_tiles() -> void {
              for (int i = 0; i < 23; ++i) {
-                 draw_note({i, string_e::HIGH_E}, (i % 2 == 0) ? GREEN : BLACK);
+                 draw_note({i, string_e::LOW_E}, (i % 2 == 0) ? GREEN : BLACK);
              }
              for (int i = 0; i < 23; ++i) {
                  draw_note({i, string_e::A}, (i % 2 == 1) ? GREEN : BLACK);
@@ -143,7 +145,7 @@ public:
                  draw_note({i, string_e::B}, (i % 2 == 0) ? GREEN : BLACK);
              }
              for (int i = 0; i < 23; ++i) {
-                 draw_note({i, string_e::LOW_E}, (i % 2 == 1) ? GREEN : BLACK);
+                 draw_note({i, string_e::HIGH_E}, (i % 2 == 1) ? GREEN : BLACK);
              }
     }
 
@@ -153,7 +155,13 @@ public:
      * @note Make sure state transition happens before call to interrupt
      */
     auto handle_uart_message() -> void {
-        if (m_uart_buf[0] != 0x01) return; // Header was not received correctly
+        if (m_uart_buf[0] != 0x01) {
+        	m_uart_buf[0] = 0;
+        	m_uart_buf[1] = 0;
+        	handle_uart_error();
+            rec_new_msg();
+        	return; // Header was not received correctly
+        }
         if (m_uart_state == uart_state::NEW_MSG) {
             uint8_t& message = m_uart_buf[1]; // Header is byte 0, msg is byte 1
             switch (static_cast<MessageType>(message)) {
@@ -314,9 +322,8 @@ public:
 
     auto handle_uart_error() -> void {
         // Clear all error flags
-        __HAL_UART_CLEAR_FLAG(m_huart, UART_CLEAR_FEF | UART_CLEAR_NEF | UART_CLEAR_OREF | UART_CLEAR_PEF);
-        rec_new_msg();
-        // send_ack();
+    	HAL_UART_AbortReceive_IT(m_huart);
+    	__HAL_UART_FLUSH_DRREGISTER(m_huart);
     }
 
 private:
