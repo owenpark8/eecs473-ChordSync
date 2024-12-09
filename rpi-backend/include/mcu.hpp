@@ -8,6 +8,7 @@
 
 #include "data.hpp"
 #include "messaging.hpp"
+#include "serial.hpp"
 
 namespace mcu {
     using song_id_t = std::uint8_t;
@@ -43,6 +44,8 @@ namespace mcu {
 
         [[nodiscard]] auto what() const noexcept -> char const* override { return m_message.c_str(); }
     };
+
+    extern Serial serial;
 
     auto send_reset() -> void;
     auto send_clear() -> void;

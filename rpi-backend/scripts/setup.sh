@@ -4,7 +4,7 @@ cd rpi-backend
 
 # CMake
 
-CMAKE_DIR="cmake-build"
+CMAKE_DIR="cmake-build-debug"
 if [ -d "$CMAKE_DIR" ]; then
   echo "CMake directory '$CMAKE_DIR' exists. Skipping creation of directory."
 else
@@ -13,7 +13,7 @@ else
 fi
 
 cd "$CMAKE_DIR"
-cmake .. -DCMAKE_BUILD_TYPE=Release
+cmake .. -DCMAKE_BUILD_TYPE=Debug -DENABLE_WEB_SERVER_SCRIPTS=ON
 make
 
 # Python
@@ -29,3 +29,13 @@ SERVICE_FILE="startup.service"
 sudo cp "$SERVICE_FILE" /etc/systemd/system/"$SERVICE_FILE"
 sudo systemctl daemon-reload
 sudo systemctl enable "$SERVICE_FILE"
+
+# Serial
+FW_CONFIG_PATH="/boot/firmware/config.txt"
+if ! grep -q "dtparam=uart0=on" "$FW_CONFIG_PATH"; then
+    echo "Enabling UART in $FW_CONFIG_PATH."
+    sudo sh -c "echo 'dtparam=uart0=on' >> $FW_CONFIG_PATH"
+else
+    echo "UART is already enabled in $FW_CONFIG_PATH."
+fi
+~

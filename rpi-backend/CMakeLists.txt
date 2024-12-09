@@ -16,7 +16,6 @@ target_sources(${RPI_BACKEND_TARGET} PRIVATE
     src/web.cpp
     src/data.cpp
     src/mcu.cpp
-    src/serial.cpp
     src/playerMode.cpp
 )
 

@@ -18,7 +18,6 @@
 #include "serial.hpp"
 #include "web.hpp"
 
-
 static std::condition_variable song_id_cv;
 static std::condition_variable playing_cv;
 
@@ -435,7 +434,7 @@ auto main(int argc, char* args[]) -> int {
         return 1;
     }
 
-    if (!serial::init()) {
+    if (!mcu::serial.init()) {
         return 1;
     }
 
