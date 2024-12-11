@@ -24,7 +24,7 @@ static std::condition_variable playing_cv;
 static std::string const play_button_html_data = fmt::format(web::get_source_file(web::source_files_e::BUTTON_HTML), "/play-song", "Play song!");
 static std::string const stop_button_html_data = fmt::format(web::get_source_file(web::source_files_e::BUTTON_HTML), "/stop-song", "Stop song!");
 
-// WaitUntilThread wait_playing_song_thread{};
+ChordAnalyzer chord_analyzer;
 
 void web_server() {
     using httplib::Request, httplib::Response;
@@ -355,8 +355,6 @@ void web_server() {
         std::cout << "Chord select form submitted with chord: " << chord << "\n";
 #endif
 
-        ChordAnalyzer chord_analyzer;
-
         {
             std::unique_lock<std::mutex> mcu_lock(mcu::mut);
 
@@ -366,44 +364,50 @@ void web_server() {
                 playing_cv.notify_all();
             }
 
+            data::songs::SongInfo chord_to_play;
+
             switch (chord) {
                 case 'A': {
                     mcu::hold_major_chord(MessageType::HoldAMajorChord);
-                    chord_analyzer = ChordAnalyzer{data::songs::chords::a_major_chord};
+                    chord_to_play = data::songs::chords::a_major_chord;
                     break;
                 }
                 case 'C': {
                     mcu::hold_major_chord(MessageType::HoldCMajorChord);
-                    chord_analyzer = ChordAnalyzer{data::songs::chords::c_major_chord};
+                    chord_to_play = data::songs::chords::c_major_chord;
                     break;
                 }
                 case 'D': {
                     mcu::hold_major_chord(MessageType::HoldDMajorChord);
-                    chord_analyzer = ChordAnalyzer{data::songs::chords::d_major_chord};
+                    chord_to_play = data::songs::chords::d_major_chord;
                     break;
                 }
                 case 'E': {
                     mcu::hold_major_chord(MessageType::HoldEMajorChord);
-                    chord_analyzer = ChordAnalyzer{data::songs::chords::e_major_chord};
+                    chord_to_play = data::songs::chords::e_major_chord;
                     break;
                 }
                 case 'F': {
                     mcu::hold_major_chord(MessageType::HoldFMajorChord);
-                    chord_analyzer = ChordAnalyzer{data::songs::chords::f_major_chord};
+                    chord_to_play = data::songs::chords::f_major_chord;
                     break;
                 }
                 case 'G': {
                     mcu::hold_major_chord(MessageType::HoldGMajorChord);
-                    chord_analyzer = ChordAnalyzer{data::songs::chords::g_major_chord};
+                    chord_to_play = data::songs::chords::g_major_chord;
                     break;
                 }
                 default: {
-                    break;
+                    res.status = httplib::StatusCode::BadRequest_400;
+                    return;
                 }
             }
+            auto result_promise = chord_analyzer.record_chord(chord_to_play);
+
+            bool const correct = result_promise.get();
+
             mcu::send_clear();
 
-            bool const correct = chord_analyzer.get_result();
             if (correct) {
                 res.set_content("<p>Correct! Good job!</p>", web::html_type);
             } else {
