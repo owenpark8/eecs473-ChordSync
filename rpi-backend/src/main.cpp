@@ -406,8 +406,6 @@ void web_server() {
 
             bool const correct = result_promise.get();
 
-            mcu::send_clear();
-
             if (correct) {
                 res.set_content("<p>Correct! Good job!</p>", web::html_type);
             } else {

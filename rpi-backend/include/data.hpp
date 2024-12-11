@@ -239,7 +239,7 @@ namespace data {
             SongInfo const a_major_chord = {
                     .title = "A Major Chord",
                     .artist = "Chords",
-                    .length = std::chrono::seconds(10),
+                    .length = std::chrono::seconds(20),
                     .bpm = 120,
                     .notes =
                             {
@@ -274,7 +274,7 @@ namespace data {
             SongInfo const c_major_chord = {
                     .title = "C Major Chord",
                     .artist = "Chords",
-                    .length = std::chrono::seconds(10),
+                    .length = std::chrono::seconds(20),
                     .bpm = 120,
                     .notes =
                             {
@@ -309,7 +309,7 @@ namespace data {
             SongInfo const d_major_chord = {
                     .title = "D Major Chord",
                     .artist = "Chords",
-                    .length = std::chrono::seconds(10),
+                    .length = std::chrono::seconds(20),
                     .bpm = 120,
                     .notes =
                             {
@@ -339,7 +339,7 @@ namespace data {
             static SongInfo const e_major_chord = {
                     .title = "E Major Chord",
                     .artist = "Chords",
-                    .length = std::chrono::seconds(10),
+                    .length = std::chrono::seconds(20),
                     .bpm = 120,
                     .notes =
                             {
@@ -379,7 +379,7 @@ namespace data {
             static SongInfo const f_major_chord = {
                     .title = "F Major Chord",
                     .artist = "Chords",
-                    .length = std::chrono::seconds(10),
+                    .length = std::chrono::seconds(20),
                     .bpm = 120,
                     .notes =
                             {
@@ -409,7 +409,7 @@ namespace data {
             static SongInfo const g_major_chord = {
                     .title = "G Major Chord",
                     .artist = "Chords",
-                    .length = std::chrono::seconds(10),
+                    .length = std::chrono::seconds(20),
                     .bpm = 120,
                     .notes =
                             {
