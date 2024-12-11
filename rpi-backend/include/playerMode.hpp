@@ -1,91 +1,88 @@
-#ifndef PLAYERMODE_H
-#define PLAYERMODE_H
+#pragma once
 
-
-#include <cmath>
-#include <data.hpp>
-#include <map>
-#include <string>
-#include <unordered_map>
+#include <iostream>
+#include <stdexcept>
 #include <vector>
 
-class playerMode {
+#include <sys/wait.h>
+
+#include <pybind11/embed.h>
+#include <pybind11/stl.h>
+
+#include <data.hpp>
+
+namespace py = pybind11;
+
+class ChordAnalyzer {
 public:
-    playerMode() = default;
-    //do the recording here
-    //potential modes: reference create, record and convert song, record and convert note.
-    //can pass in note to convert.
-    playerMode(data::songs::SongInfo const& get_ref_song);
-    // EFFECTS returns player's name
+    ChordAnalyzer() = default;
+    ChordAnalyzer(data::songs::SongInfo reference_chord) : m_reference_chord(std::move(reference_chord)) {};
 
-    [[nodiscard]] auto get_bpm() const -> uint8_t;
+    ~ChordAnalyzer() = default;
 
-    //auto analysis() -> void;
-    //so need to have it so that they could either enter in song or
+    auto record_chord() -> void {
+        py::scoped_interpreter guard{};
+        py::module sys = py::module::import("sys");
+        sys.attr("path").attr("insert")(0, PY_VENV_PATH);
+        sys.attr("path").attr("insert")(0, PY_MODULE_PATH);
+        try {
+            py::module pybind_module = py::module::import("basic_pitch");
+            std::cout << "Module imported successfully!" << std::endl;
+        } catch (py::error_already_set const& e) {
+            std::cerr << "Error: " << e.what() << std::endl;
+        }
 
-    //call the user
 
-    auto analyzeChord() -> bool;
+        std::string command = "arecord --duration=" + std::to_string(m_reference_chord.length.count()) + " --rate=88200 --format=S16_LE " +
+                              std::to_string(m_reference_chord.id) + "_rec.wav";
+        int result = system(command.c_str());
 
-    auto analysis(std::vector<data::songs::Note>& ref) -> std::vector<bool>;
-    auto analysis() -> std::vector<bool>;
+        if (result != 0) {
+            std::cerr << "Error executing command: " << command << std::endl;
+            throw std::runtime_error("Could not record song!");
+        } else {
+            std::cout << "Recording completed successfully." << std::endl;
+        }
 
-    //this is analysis for note mode.
-    auto analysis(std::string const& note) -> bool;
 
-    //change this to note or overloaded.
-    //auto dataParseRef(std::string const& filename) -> std::vector<std::vector<int>>;
+        auto get_record_convert_module = py::module_::import("record_convert");
+        py::object get_prediction = get_record_convert_module.attr("prediction");
+        get_prediction(m_reference_chord.id, 120);
 
-    //function that apploads midi to database.
-    //auto dataParseUpload(std::string const& filename, uint8_t song_id, std::string const& title, std::string const& artist, uint8_t duration, uint8_t bpm) -> void;
+        py::object get_record_convert = get_record_convert_module.attr("record_convert_offset");
+        auto numbers = get_record_convert(m_reference_chord.id).cast<std::vector<std::vector<int>>>();
 
-    std::vector<std::vector<int>> recording_numbers;
-    std::vector<std::vector<int>> reference_numbers;
-    // Needed to avoid some compiler errors
-    ~playerMode();
+        py::object get_remove_files = get_record_convert_module.attr("remove_files");
+        get_remove_files(m_reference_chord.id);
+
+        for (auto& number: numbers) {
+            data::songs::Note entry{};
+            entry.midi_note = static_cast<uint8_t>(number[0]);
+            entry.start_timestamp_ms = static_cast<uint32_t>(number[1]);
+            entry.length_ms = static_cast<uint16_t>(number[2] - entry.start_timestamp_ms);
+            m_recorded_chord.push_back(entry);
+        }
+    }
+
+    auto get_result() -> bool {
+        int count = 0;
+        for (auto ref_note: m_reference_chord.notes) {
+            for (auto note: m_recorded_chord) {
+                if (note.midi_note == ref_note.midi_note) {
+                    count++;
+                    break;
+                }
+            }
+        }
+
+        if (count == m_reference_chord.notes.size() && count != 0) {
+            return true;
+        }
+
+        return false;
+    }
 
 private:
-    //song struct has information about song, etc.
-    data::songs::SongInfo m_rec_song;
-
-    data::songs::SongInfo m_ref_song;
-
-    //map to help me convert between note to number.
-    std::unordered_map<std::string, uint8_t> semitoneOffsets = {{"C", 0},  {"C#", 1}, {"Db", 1},  {"D", 2},   {"D#", 3}, {"Eb", 3},
-                                                                {"E", 4},  {"F", 5},  {"F#", 6},  {"Gb", 6},  {"G", 7},  {"G#", 8},
-                                                                {"Ab", 8}, {"A", 9},  {"A#", 10}, {"Bb", 10}, {"B", 11}};
-    //used to convert Note
-    auto m_noteToInt(std::string const& note) -> uint8_t;
-    //this is analysis for song mode.
-
-    auto m_recordtoMIDI(uint8_t song_id, uint16_t duration, uint8_t bpm) -> std::vector<std::vector<int>>;
-
-    auto m_basic_pitch_prediction_run(uint8_t song_id, uint8_t bpm) -> void;
-    auto m_delete_generated_files(uint8_t song_id) -> void;
-
-    struct m_noteEntry {
-        uint32_t start_time;
-        uint16_t duration;
-        uint16_t orig_pos;
-        bool seen;
-    };
-
-    std::uint32_t m_ref_size = 0;
-
-    //ref data.
-    std::map<std::uint8_t, std::vector<m_noteEntry>> m_ref_data;
-
-    auto m_organizeRef() -> void;
-
-    //checks seen
-    auto m_checkNote(data::songs::Note& ref_note) -> void;
-
-    auto m_checkSong() -> void;
-
-    //youtube
-    static auto m_compareByStartTime(m_noteEntry const& entry, std::uint32_t target) -> bool;
-
-    // Comparator for reverse comparison, useful for certain cases
-    static auto m_compareByStartTimeReverse(std::uint32_t target, m_noteEntry const& entry) -> bool;
+    data::songs::SongInfo m_reference_chord;
+    std::vector<data::songs::Note> m_recorded_chord;
 };
-#endif

@@ -16,7 +16,6 @@ target_sources(${RPI_BACKEND_TARGET} PRIVATE
     src/web.cpp
     src/data.cpp
     src/mcu.cpp
-    src/playerMode.cpp
 )
 
 set(INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/include)
