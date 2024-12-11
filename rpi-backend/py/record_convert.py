@@ -57,6 +57,26 @@ def record_convert_no_offset(id):
     return notes
 
 
+def midi_to_note_name(midi_number):
+    """
+    Convert a MIDI note number to its corresponding note name.
+    
+    :param midi_number: MIDI note number (integer, 0-127)
+    :return: Note name (string) and octave (integer)
+    """
+    if not (0 <= midi_number <= 127):
+        raise ValueError("MIDI number must be between 0 and 127.")
+    
+    # List of note names
+    note_names = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B']
+    
+    # Calculate note name and octave
+    note_index = midi_number % 12
+    octave = (midi_number // 12) - 1  # MIDI starts at octave -1
+    note_name = note_names[note_index]
+    
+    return f"{note_name}{octave}"
+
 def record_convert_offset(id):
     print("Running")
         
@@ -76,6 +96,11 @@ def record_convert_offset(id):
     notes = getMessagesCutOutNoise(mid_basic)
     print(notes)
     print(len(notes))
+
+    converted_data = [[midi_to_note_name(note[0]), note[1], note[2]] for note in notes]
+
+    # Print the converted list
+    print(converted_data)
 
     #remove
     return notes
