@@ -110,8 +110,6 @@ private:
                         }
                     }
 
-                    std::cout << "match count: " << match_count << "\n";
-                    std::cout << "reference chord: " << reference_chord.notes.size() << "\n";
                     result = (match_count == reference_chord.notes.size() && match_count > 0);
                 } catch (py::error_already_set const& e) {
                     std::cerr << "Python error: " << e.what() << std::endl;
