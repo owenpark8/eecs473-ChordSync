@@ -77,9 +77,7 @@ private:
                 try {
                     std::string command = "arecord --duration=" + std::to_string(reference_chord.length.count()) + " --rate=88200 --format=S16_LE " +
                                           std::to_string(reference_chord.id) + "_rec.wav";
-                    int result = system(command.c_str());
-
-                    if (result != 0) {
+                    if (system(command.c_str()) != 0) {
                         std::cerr << "Error executing command: " << command << std::endl;
                         throw std::runtime_error("Could not record song!");
                     }
@@ -112,7 +110,9 @@ private:
                         }
                     }
 
-                    result = match_count == reference_chord.notes.size() && match_count > 0;
+                    std::cout << "match count: " << match_count << "\n";
+                    std::cout << "reference chord: " << reference_chord.notes.size() << "\n";
+                    result = (match_count == reference_chord.notes.size() && match_count > 0);
                 } catch (py::error_already_set const& e) {
                     std::cerr << "Python error: " << e.what() << std::endl;
                     throw;

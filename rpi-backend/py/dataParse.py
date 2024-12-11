@@ -95,7 +95,8 @@ def getMessagesCutOutNoise(midi):
     # Iterate over the messages in the file
     for msg in mid:
         if msg.type == 'note_on' and (msg.velocity > 0 or time == -1):
-            if msg.note < 52:
+            #if msg.note < 52:
+            if msg.note < 40:
                 # Add time to offset for ignored notes
                 time_offset += msg.time
             else:
@@ -117,7 +118,8 @@ def getMessagesCutOutNoise(midi):
                 time_offset = 0
 
         elif msg.type == 'note_off' or (msg.type == 'note_on' and msg.velocity == 0):
-            if msg.note < 52:
+            #if msg.note < 52:
+            if msg.note < 40:
                 # Add time to offset for ignored notes
                 time_offset += msg.time
             else:
