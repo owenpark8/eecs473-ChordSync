@@ -10,10 +10,10 @@
 #include <fmt/format.h>
 #include <httplib.h>
 
+#include "analyze.hpp"
 #include "data.hpp"
 #include "mcu.hpp"
 #include "messaging.hpp"
-#include "playerMode.hpp"
 #include "process_gp4.hpp"
 #include "serial.hpp"
 #include "web.hpp"
