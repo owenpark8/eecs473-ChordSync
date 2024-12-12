@@ -9,7 +9,7 @@ sudo apt install cmake npm
 ```
 
 ```sh
-git clone https://github.com/owenpark8/eecs473-VSGuitar.git ~/.local/src/eecs473-ChordSync
+git clone https://github.com/owenpark8/eecs473-ChordSync.git ~/.local/src/eecs473-ChordSync
 cd ~/.local/src/eecs473-ChordSync
 git submodule init
 git submodule update
