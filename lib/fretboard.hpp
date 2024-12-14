@@ -228,7 +228,7 @@ public:
                     	if(note_location.fret == 0) {
                     		draw_string(note_location.string, GREEN);
                     	} else {
-                            draw_note(note_location, GREEN);
+                            draw_note({note_location.fret-1, note_location.string}, GREEN);
                     	}                    }
                     return;
                 case MessageType::HoldCMajorChord:
@@ -239,7 +239,7 @@ public:
                     	if(note_location.fret == 0) {
                     		draw_string(note_location.string, GREEN);
                     	} else {
-                            draw_note(note_location, GREEN);
+                            draw_note({note_location.fret-1, note_location.string}, GREEN);
                     	}
                     }
                     return;
@@ -251,7 +251,7 @@ public:
                     	if(note_location.fret == 0) {
                     		draw_string(note_location.string, GREEN);
                     	} else {
-                            draw_note(note_location, GREEN);
+                            draw_note({note_location.fret-1, note_location.string}, GREEN);
                     	}                    }
                     return;
                 case MessageType::HoldEMajorChord:
@@ -262,7 +262,7 @@ public:
                     	if(note_location.fret == 0) {
                     		draw_string(note_location.string, GREEN);
                     	} else {
-                            draw_note(note_location, GREEN);
+                            draw_note({note_location.fret-1, note_location.string}, GREEN);
                     	}                    }
                     return;
                 case MessageType::HoldFMajorChord:
@@ -273,7 +273,7 @@ public:
                     	if(note_location.fret == 0) {
                     		draw_string(note_location.string, GREEN);
                     	} else {
-                            draw_note(note_location, GREEN);
+                            draw_note({note_location.fret-1, note_location.string}, GREEN);
                     	}                    }
                     return;
                 case MessageType::HoldGMajorChord:
@@ -284,7 +284,7 @@ public:
                     	if(note_location.fret == 0) {
                     		draw_string(note_location.string, GREEN);
                     	} else {
-                            draw_note(note_location, GREEN);
+                            draw_note({note_location.fret-1, note_location.string}, GREEN);
                     	}                    }
                     return;
                 default:
